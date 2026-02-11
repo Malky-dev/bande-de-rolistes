@@ -3,10 +3,11 @@ import './App.css'
 import AuthForms from './components/AuthForms'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
+import AdminPanel from './components/AdminPanel'
 import type { SessionInfo } from './authApi'
 import { apiSession } from './authApi'
 
-type View = 'home' | 'login' | 'signup'
+type View = 'home' | 'login' | 'signup' | 'admin'
 
 function App() {
   const [view, setView] = useState<View>('home')
@@ -164,6 +165,29 @@ function App() {
             onSwitchView={setView}
             onLoginSuccess={handleLoginSuccess}
           />
+        )}
+
+        {view === 'admin' && session?.role === 'admin' && <AdminPanel />}
+
+        {view === 'admin' && session?.role !== 'admin' && (
+          <div style={{ padding: '2rem', textAlign: 'center' }}>
+            <h2>Accès refusé</h2>
+            <p>Vous devez être administrateur pour accéder à cette page.</p>
+            <button
+              onClick={() => setView('home')}
+              style={{
+                marginTop: '1rem',
+                padding: '0.5rem 1rem',
+                backgroundColor: '#007bff',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+              }}
+            >
+              Retour à l'accueil
+            </button>
+          </div>
         )}
       </main>
       <Footer />

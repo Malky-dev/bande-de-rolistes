@@ -1,7 +1,7 @@
 import type { SessionInfo } from '../authApi'
 import logoBDR from '../assets/img/LogoBDR_creme-removebg.png'
 
-type View = 'home' | 'login' | 'signup'
+type View = 'home' | 'login' | 'signup' | 'admin'
 
 type NavbarProps = {
   view: View
@@ -58,6 +58,16 @@ function Navbar({ view, checkingSession, session, onChangeView, onLogout }: Navb
 
         {session && (
           <>
+            {session.role === 'admin' && (
+              <button
+                className={`navbar-link navbar-link-button ${
+                  view === 'admin' ? 'navbar-link-active' : ''
+                }`}
+                onClick={() => onChangeView('admin')}
+              >
+                Administration
+              </button>
+            )}
             <span className="navbar-link">
               {session.nickname} · {session.role}
             </span>

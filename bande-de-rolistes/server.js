@@ -14,6 +14,10 @@ const signinController = require('./controllers/signin')
 const loginController = require('./controllers/login')
 const sessionController = require('./controllers/session')
 const discordController = require('./controllers/discord')
+const requireAdmin = require('./middleware/authAdmin')
+const adminUsersController = require('./controllers/admin/users')
+const adminUpdateRoleController = require('./controllers/admin/updateRole')
+const adminRolesController = require('./controllers/admin/roles')
 
 const PORT = process.env.PORT || 3000
 const app = express()
@@ -54,6 +58,11 @@ app.get('/api/session/:token', sessionController)
 // Discord OAuth
 app.get('/api/discord/init', discordController.init)
 app.get('/api/discord/callback', discordController.callback)
+
+// Routes admin (protégées par requireAdmin)
+app.get('/api/admin/users', requireAdmin, adminUsersController)
+app.get('/api/admin/roles', requireAdmin, adminRolesController)
+app.put('/api/admin/users/:userID/role', requireAdmin, adminUpdateRoleController)
 
 initDatabase().then(() => {
   app.listen(PORT, () => {
