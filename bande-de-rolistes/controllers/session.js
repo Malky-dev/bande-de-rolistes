@@ -5,7 +5,7 @@ module.exports = async function controllerSession(req, res) {
     const { token } = req.params
 
     if (typeof token !== 'string') {
-      throw new TypeError('token type error')
+      throw new TypeError('le token doit être une chaîne de caractères')
     }
 
     const session = await Session.findOne({
@@ -21,7 +21,7 @@ module.exports = async function controllerSession(req, res) {
     })
 
     if (!session || !session.User) {
-      return res.status(404).json({ code: 'NOT_FOUND', message: 'Token not available' })
+      return res.status(404).json({ code: 'NOT_FOUND', message: 'Token de session non disponible' })
     }
 
     const user = session.User

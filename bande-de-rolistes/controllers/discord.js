@@ -1,7 +1,7 @@
 const DiscordOAuth2 = require('discord-oauth2')
 const DeviceDetector = require('device-detector-js')
 
-const { encryptSHA256, formatDate } = require('../global')
+const { hashPassword, encryptSHA256, formatDate } = require('../global')
 const { User, Session } = require('../models')
 
 // Configuration Discord OAuth2 depuis les variables d'environnement
@@ -93,12 +93,13 @@ module.exports.callback = async function controllerDiscordCallback(req, res) {
       // Utiliser le username Discord comme nickname par défaut
       const nickname = discordUser.username || `Discord_${discordUser.id.slice(0, 8)}`
       // Générer un mot de passe aléatoire (l'utilisateur ne l'utilisera jamais)
-      const randomPassword = encryptSHA256(Math.random().toString(36) + Date.now().toString())
+      const randomPassword = Math.random().toString(36) + Date.now().toString()
+      const hashedPassword = await hashPassword(randomPassword)
 
       user = await User.create({
         nickname,
         email: discordUser.email || `${discordUser.id}@discord.local`,
-        password: randomPassword, // Mot de passe factice pour les comptes Discord
+        password: hashedPassword, // Mot de passe factice pour les comptes Discord
         roleID: 5, // guest par défaut
         discordId: discordUser.id,
         isVerified: discordUser.verified || false,

@@ -14,6 +14,7 @@ function AuthForms({ view, onSwitchView, onLoginSuccess }: AuthFormsProps) {
   const [nickname, setNickname] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [passwordCheck, setPasswordCheck] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -23,6 +24,12 @@ function AuthForms({ view, onSwitchView, onLoginSuccess }: AuthFormsProps) {
     e.preventDefault()
     setError(null)
     setLoading(true)
+
+    if (password !== passwordCheck) {
+      setError('Les mots de passe ne correspondent pas')
+      setLoading(false)
+      return
+    }
 
     try {
       if (isLogin) {
@@ -88,6 +95,16 @@ function AuthForms({ view, onSwitchView, onLoginSuccess }: AuthFormsProps) {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="auth-field">
+            <label>Vérification du Mot de passe</label>
+            <input
+              type="password"
+              value={passwordCheck}
+              onChange={(e) => setPasswordCheck(e.target.value)}
               required
             />
           </div>
