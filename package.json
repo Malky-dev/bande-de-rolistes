@@ -11,6 +11,7 @@
     "db:migrate:discord": "node scripts/add-discord-column.js",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "unit-tests": "echo 'Unit tests not implemented yet'",
     "preview": "vite preview"
   },
   "dependencies": {
