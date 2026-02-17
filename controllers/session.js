@@ -2,10 +2,10 @@ const { Session, User, Role } = require('../models')
 
 module.exports = async function controllerSession(req, res) {
   try {
-    const { token } = req.params
+    const token = req.cookies?.bande_de_rolistes
 
-    if (typeof token !== 'string') {
-      throw new TypeError('le token doit être une chaîne de caractères')
+    if (!token || typeof token !== 'string') {
+      return res.status(401).json({ code: 'UNAUTHORIZED', message: 'Session non trouvée' })
     }
 
     const session = await Session.findOne({

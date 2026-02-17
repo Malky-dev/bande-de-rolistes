@@ -47,6 +47,8 @@ module.exports = async function controllerLogin(req, res) {
     res.cookie('bande_de_rolistes', token, {
       maxAge: 1000 * 60 * 60 * 24 * 30,
       httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
     })
     res.json(token)
   } catch (error) {

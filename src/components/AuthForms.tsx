@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import type { SessionInfo } from '../authApi'
-import { apiDiscordInit, apiLogin, apiSession, apiSignin } from '../authApi'
+import { apiLogin, apiSession, apiSignin } from '../authApi'
 
 type View = 'home' | 'login' | 'signup'
 
 type AuthFormsProps = {
   view: View
   onSwitchView: (view: View) => void
-  onLoginSuccess: (token: string, session: SessionInfo) => void
+  onLoginSuccess: (session: SessionInfo) => void
 }
 
 function AuthForms({ view, onSwitchView, onLoginSuccess }: AuthFormsProps) {
@@ -25,7 +25,7 @@ function AuthForms({ view, onSwitchView, onLoginSuccess }: AuthFormsProps) {
     setError(null)
     setLoading(true)
 
-    if (password !== passwordCheck) {
+    if (!isLogin && password !== passwordCheck) {
       setError('Les mots de passe ne correspondent pas')
       setLoading(false)
       return
@@ -33,17 +33,15 @@ function AuthForms({ view, onSwitchView, onLoginSuccess }: AuthFormsProps) {
 
     try {
       if (isLogin) {
-        const token = await apiLogin(email, password)
-        localStorage.setItem('bdr_token', token)
-        const session = await apiSession(token)
-        onLoginSuccess(token, session)
+        await apiLogin(email, password)
       } else {
-        await apiSignin(nickname, email, password)
-        const token = await apiLogin(email, password)
-        localStorage.setItem('bdr_token', token)
-        const session = await apiSession(token)
-        onLoginSuccess(token, session)
+        await apiSignin(nickname, email, password, passwordCheck)
+        await apiLogin(email, password)
       }
+
+      const session = await apiSession()
+      onLoginSuccess(session)
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue')
     } finally {
@@ -99,15 +97,17 @@ function AuthForms({ view, onSwitchView, onLoginSuccess }: AuthFormsProps) {
             />
           </div>
 
-          <div className="auth-field">
-            <label>Vérification du Mot de passe</label>
-            <input
-              type="password"
-              value={passwordCheck}
-              onChange={(e) => setPasswordCheck(e.target.value)}
-              required
-            />
-          </div>
+          {!isLogin && (
+            <div className="auth-field">
+              <label>Vérification du Mot de passe</label>
+              <input
+                type="password"
+                value={passwordCheck}
+                onChange={(e) => setPasswordCheck(e.target.value)}
+                required
+              />
+            </div>
+          )}
 
           {error && <p className="auth-error">{error}</p>}
 
@@ -136,7 +136,7 @@ function AuthForms({ view, onSwitchView, onLoginSuccess }: AuthFormsProps) {
           <button
             className="btn-discord"
             type="button"
-            onClick={apiDiscordInit}
+            onClick={() => window.location.href = '/api/discord/init'}
             disabled={loading}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -193,4 +193,3 @@ function AuthForms({ view, onSwitchView, onLoginSuccess }: AuthFormsProps) {
 }
 
 export default AuthForms
-

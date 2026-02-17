@@ -10,7 +10,7 @@
     "db:init": "node scripts/init-db.js",
     "db:migrate:discord": "node scripts/add-discord-column.js",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
+    "lint": "npx eslint .",
     "unit-tests": "echo 'Unit tests not implemented yet'",
     "preview": "vite preview"
   },
@@ -30,7 +30,7 @@
     "sequelize": "^6.37.7"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.1",
+    "@eslint/js": "^9.39.2",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
@@ -46,8 +46,8 @@
   },
   "husky": {
     "hooks": {
-        "pre-commit": "npm run lint",
-        "pre-push": "npm run unit-tests"
+      "pre-commit": "npm run lint",
+      "pre-push": "npm run unit-tests"
     }
   }
 }

@@ -15,60 +15,46 @@ function App() {
   const [checkingSession, setCheckingSession] = useState(true)
 
   useEffect(() => {
-    // Gérer le callback Discord OAuth
     const urlParams = new URLSearchParams(window.location.search)
-    const discordToken = urlParams.get('token')
     const discordError = urlParams.get('error')
-
-    if (discordToken) {
-      // Token reçu depuis Discord OAuth
-      localStorage.setItem('bdr_token', discordToken)
-      apiSession(discordToken)
-        .then((s) => {
-          setSession(s)
-          setView('home')
-          // Nettoyer l'URL
-          window.history.replaceState({}, document.title, window.location.pathname)
-        })
-        .catch(() => {
-          localStorage.removeItem('bdr_token')
-        })
-        .finally(() => setCheckingSession(false))
-      return
-    }
-
+  
     if (discordError) {
       console.error('Erreur Discord OAuth:', discordError)
-      setCheckingSession(false)
-      // Nettoyer l'URL
-      window.history.replaceState({}, document.title, window.location.pathname)
-      return
+  
+      window.history.replaceState(
+        {},
+        document.title,
+        window.location.pathname
+      )
     }
-
-    // Vérification de session normale
-    const token = localStorage.getItem('bdr_token')
-    if (!token) {
-      setCheckingSession(false)
-      return
+  
+    async function checkSession() {
+      try {
+        const session = await apiSession() // pas de token en paramètre
+        setSession(session)
+        setView('home')
+      } catch {
+        setSession(null)
+      } finally {
+        setCheckingSession(false)
+      }
     }
-
-    apiSession(token)
-      .then((s) => {
-        setSession(s)
-      })
-      .catch(() => {
-        localStorage.removeItem('bdr_token')
-      })
-      .finally(() => setCheckingSession(false))
+  
+    checkSession()
   }, [])
 
-  const handleLogout = () => {
-    localStorage.removeItem('bdr_token')
+  const handleLogout = async () => {
+    await fetch('/api/logout', {
+      method: 'POST',
+      credentials: 'include',
+    })
+  
     setSession(null)
     setView('home')
   }
+  
 
-  const handleLoginSuccess = (_token: string, s: SessionInfo) => {
+  const handleLoginSuccess = (s: SessionInfo) => {
     setSession(s)
     setView('home')
   }

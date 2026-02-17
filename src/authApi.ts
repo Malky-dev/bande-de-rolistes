@@ -6,13 +6,14 @@ export type SessionInfo = {
 
 const API_BASE = 'http://localhost:3000/api'
 
-export async function apiSignin(nickname: string, email: string, password: string) {
-  const res = await fetch(`${API_BASE}/signin`, {
+export async function apiSignin(nickname: string, email: string, password: string, passwordCheck: string) {
+  const res = await fetch('/api/signin', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ nickname, email, password }),
+    credentials: 'include',
+    body: JSON.stringify({ nickname, email, password, passwordCheck }),
   })
 
   if (!res.ok) {
@@ -21,39 +22,37 @@ export async function apiSignin(nickname: string, email: string, password: strin
   }
 }
 
-export async function apiLogin(email: string, password: string): Promise<string> {
-  const res = await fetch(`${API_BASE}/login`, {
+export async function apiLogin(email: string, password: string) {
+  const res = await fetch('/api/login', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include', // important
     body: JSON.stringify({ email, password }),
   })
 
   if (!res.ok) {
     const data = await res.json().catch(() => ({}))
-    throw new Error(data.message || 'Identifiants invalides')
+    throw new Error(data.message || 'Erreur lors de la connexion')
   }
-
-  const token = await res.json()
-  if (typeof token !== 'string') {
-    throw new Error('Réponse serveur inattendue')
-  }
-  return token
 }
 
-export async function apiSession(token: string): Promise<SessionInfo> {
-  const res = await fetch(`${API_BASE}/session/${token}`)
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}))
-    throw new Error(data.message || 'Session invalide')
-  }
+
+export async function apiSession() {
+  const res = await fetch('/api/session', {
+    credentials: 'include',
+  })
+
+  if (!res.ok) throw new Error('Not authenticated')
   return res.json()
 }
 
-export function apiDiscordInit() {
-  // Redirige vers l'endpoint d'initiation Discord OAuth
-  window.location.href = `${API_BASE}/discord/init`
+export async function apiLogout() {
+  const res = await fetch('/api/logout', {
+    method: 'POST',
+    credentials: 'include',
+  })
+  if (!res.ok) throw new Error('Logout failed')
+  return res.json()
 }
 
 export type Quote = {
@@ -85,24 +84,11 @@ export type Role = {
   roleLabel: string
 }
 
-function getAuthHeaders(): HeadersInit {
-  const token = localStorage.getItem('bdr_token')
-  return {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  }
-}
-
 export async function apiAdminUsers(): Promise<User[]> {
-  const token = localStorage.getItem('bdr_token')
-  if (!token) {
-    throw new Error('Token manquant. Veuillez vous reconnecter.')
-  }
-  
-  // Encoder le token pour l'URL
-  const encodedToken = encodeURIComponent(token)
-  const res = await fetch(`${API_BASE}/admin/users?token=${encodedToken}`, {
-    headers: getAuthHeaders(),
+  const res = await fetch('/api/admin/users', {
+    headers: {
+      'Content-Type': 'application/json',
+    },
     credentials: 'include',
   })
   
@@ -116,14 +102,10 @@ export async function apiAdminUsers(): Promise<User[]> {
 }
 
 export async function apiAdminRoles(): Promise<Role[]> {
-  const token = localStorage.getItem('bdr_token')
-  if (!token) {
-    throw new Error('Token manquant. Veuillez vous reconnecter.')
-  }
-  
-  const encodedToken = encodeURIComponent(token)
-  const res = await fetch(`${API_BASE}/admin/roles?token=${encodedToken}`, {
-    headers: getAuthHeaders(),
+  const res = await fetch('/api/admin/roles', {
+    headers: {
+      'Content-Type': 'application/json',
+    },
     credentials: 'include',
   })
   if (!res.ok) {
@@ -136,17 +118,13 @@ export async function apiAdminRoles(): Promise<Role[]> {
 }
 
 export async function apiAdminUpdateRole(userID: number, roleID: number): Promise<User> {
-  const token = localStorage.getItem('bdr_token')
-  if (!token) {
-    throw new Error('Token manquant. Veuillez vous reconnecter.')
-  }
-  
-  const encodedToken = encodeURIComponent(token)
-  const res = await fetch(`${API_BASE}/admin/users/${userID}/role?token=${encodedToken}`, {
+  const res = await fetch(`/api/admin/users/${userID}/role`, {
     method: 'PUT',
-    headers: getAuthHeaders(),
-    body: JSON.stringify({ roleID }),
+    headers: {
+      'Content-Type': 'application/json',
+    },
     credentials: 'include',
+    body: JSON.stringify({ roleID }),
   })
   if (!res.ok) {
     const data = await res.json().catch(() => ({}))

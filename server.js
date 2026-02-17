@@ -53,7 +53,7 @@ app.post('/api/signin', signinController)
 app.post('/api/login', loginController)
 
 // Récupération de session
-app.get('/api/session/:token', sessionController)
+app.get('/api/session', sessionController)
 
 // Discord OAuth
 app.get('/api/discord/init', discordController.init)
@@ -63,6 +63,18 @@ app.get('/api/discord/callback', discordController.callback)
 app.get('/api/admin/users', requireAdmin, adminUsersController)
 app.get('/api/admin/roles', requireAdmin, adminRolesController)
 app.put('/api/admin/users/:userID/role', requireAdmin, adminUpdateRoleController)
+
+// Déconnexion
+app.post('/api/logout', (req, res) => {
+  res.clearCookie('bande_de_rolistes', {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+  })
+
+  res.json({ success: true })
+})
+
 
 initDatabase().then(() => {
   app.listen(PORT, () => {

@@ -14,9 +14,6 @@ module.exports = async function controllerSignin(req, res) {
     if (typeof password !== 'string') {
       throw new TypeError('le mot de passe doit être une chaîne de caractères')
     }
-    if (typeof passwordCheck !== 'string') {
-      throw new TypeError('la vérification du mot de passe doit être une chaîne de caractères')
-    } 
     if (password !== passwordCheck) {
       return res.status(400).json({ code: 'BAD_REQUEST', message: 'Les mots de passe ne correspondent pas' })
     }
@@ -36,10 +33,31 @@ module.exports = async function controllerSignin(req, res) {
       roleID: 5, // guest par défaut
     })
 
-    res.status(201).json('L\'utilisateur a été créé avec succès')
+    res.status(201).json({ code: 'SUCCESS', message: 'L\'utilisateur a été créé avec succès' })
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ code: 'ERROR', message: error.message })
+    console.error('Erreur lors de la création de l\'utilisateur:', error)
+    
+    // Gestion spécifique des erreurs Sequelize
+    if (error.name === 'SequelizeValidationError') {
+      return res.status(400).json({ 
+        code: 'VALIDATION_ERROR', 
+        message: error.errors.map(e => e.message).join(', ') 
+      })
+    }
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      return res.status(409).json({ 
+        code: 'DUPLICATE', 
+        message: 'Cet email ou ce pseudo est déjà utilisé' 
+      })
+    }
+    if (error.name === 'SequelizeForeignKeyConstraintError') {
+      return res.status(400).json({ 
+        code: 'FOREIGN_KEY_ERROR', 
+        message: 'Le rôle spécifié n\'existe pas. Veuillez contacter l\'administrateur.' 
+      })
+    }
+    
+    res.status(500).json({ code: 'ERROR', message: error.message || 'Une erreur est survenue lors de la création du compte' })
   }
 }
 

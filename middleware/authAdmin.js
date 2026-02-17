@@ -7,18 +7,14 @@ const { Op } = require('sequelize')
  */
 async function requireAdmin(req, res, next) {
   try {
-    // Récupérer le token depuis les cookies ou le header Authorization
+    // Récupérer le token depuis les cookies (httpOnly) ou le header Authorization
     const token = req.cookies?.bande_de_rolistes || 
-                  req.headers.authorization?.replace('Bearer ', '') ||
-                  req.query?.token ||
-                  req.body?.token
+                  req.headers.authorization?.replace('Bearer ', '')
 
     if (!token || typeof token !== 'string') {
       console.log('❌ Admin middleware: Token manquant', {
         cookies: req.cookies,
         authHeader: req.headers.authorization,
-        queryToken: req.query?.token,
-        bodyToken: req.body?.token,
       })
       return res.status(401).json({ code: 'UNAUTHORIZED', message: 'Token required' })
     }

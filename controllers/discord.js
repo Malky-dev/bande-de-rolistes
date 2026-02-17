@@ -125,10 +125,13 @@ module.exports.callback = async function controllerDiscordCallback(req, res) {
     res.cookie('bande_de_rolistes', token, {
       maxAge: 1000 * 60 * 60 * 24 * 30,
       httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax', // 'none' si cross-domain
+      path: '/',
     })
-
-    // Rediriger vers le frontend avec le token
-    res.redirect(`${FRONTEND_URL}/auth/discord?token=${token}`)
+    
+    res.redirect(`${FRONTEND_URL}`)
+    
   } catch (error) {
     console.error('Erreur lors du callback Discord:', error)
     res.redirect(`${FRONTEND_URL}/auth/discord?error=${encodeURIComponent(error.message)}`)

@@ -1,6 +1,9 @@
 // db.js - configuration Sequelize pour bande_de_rolistes
 // pour lancer le script : npm run db:init
 
+// Charger les variables d'environnement en premier
+require('dotenv').config()
+
 const { Sequelize } = require('sequelize')
 
 const sequelize = new Sequelize(
