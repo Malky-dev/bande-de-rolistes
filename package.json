@@ -19,6 +19,7 @@
     "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
+    "csrf": "^3.1.0",
     "csrf-csrf": "^4.0.3",
     "device-detector-js": "^3.0.3",
     "discord-oauth2": "^2.0.0",
@@ -29,7 +30,8 @@
     "mysql2": "^3.16.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "sequelize": "^6.37.7"
+    "sequelize": "^6.37.7",
+    "uninstall": "^0.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",

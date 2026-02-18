@@ -24,21 +24,13 @@ async function comparePassword(password, hash) {
 }
 
 /**
- * Génère un token aléatoire
- * @returns {string} Un token aléatoire de 32 caractères
+ * Génère un token de session aléatoire et sécurisé
+ * Utilisé pour identifier la session de l'utilisateur (différent du token CSRF)
+ * @returns {string} Un token de session aléatoire
  */
-function generateToken() {
-  const crypto = require('crypto');
-  return crypto.randomBytes(32).toString('hex');
+function generateSessionToken() {
+  const crypto = require('crypto')
+  return crypto.randomBytes(32).toString('hex')
 }
 
-function formatDate (date) {
-  return String(date.getFullYear()).padStart(4, "0") + "-" +
-    String(date.getMonth() + 1).padStart(2, "0") + "-" +
-    String(date.getDate()).padStart(2, "0") + " " +
-    String(date.getHours()).padStart(2, "0") + ":" +
-    String(date.getMinutes()).padStart(2, "0") + ":" +
-    String(date.getSeconds()).padStart(2, "0");
-}
-
-module.exports = { hashPassword, comparePassword, generateToken, formatDate }
+module.exports = { hashPassword, comparePassword, generateSessionToken }

@@ -8,8 +8,6 @@ const cors = require('cors')
 const cookieParser = require('cookie-parser')
 const helmet = require('helmet')
 const compression = require('compression')
-const rateLimit = require('express-rate-limit');
-const { doubleCsrf } = require('csrf-csrf')
 
 const { sequelize } = require('./models')
 const signinController = require('./controllers/signin')
@@ -17,6 +15,8 @@ const loginController = require('./controllers/login')
 const sessionController = require('./controllers/session')
 const discordController = require('./controllers/discord')
 const requireAdmin = require('./middleware/authAdmin')
+const { verifyCsrf, generateCsrfToken } = require('./middleware/csrf')
+const { requestLimiter, authLimiter } = require('./middleware/rateLimit')
 const adminUsersController = require('./controllers/admin/users')
 const adminUpdateRoleController = require('./controllers/admin/updateRole')
 const adminRolesController = require('./controllers/admin/roles')
@@ -24,6 +24,11 @@ const adminRolesController = require('./controllers/admin/roles')
 const PORT = process.env.PORT || 3000
 const app = express()
 
+// -------------------
+// Middlewares globaux
+// -------------------
+
+// CORS
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
   credentials: true,
@@ -33,35 +38,77 @@ app.use(cookieParser())
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }))
 app.use(compression())
 
-// Limiter le nombre de tentatives de connexion
-const requestLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 tentatives max
-  message: 'Trop de tentatives de connexion, réessayez plus tard.',
-  standardHeaders: true,
-  legacyHeaders: false,
-  skipSuccessfulRequests: true, // Ne pas compter les requêtes réussies
-});
 
-// Protection CSRF
-if (!process.env.CSRF_SECRET) {
-  throw new Error('CSRF_SECRET is not defined in environment variables')
-}
+// -------------------
+// Routes CSRF
+// -------------------
 
-const {
-  generateToken,
-  doubleCsrfProtection,
-} = doubleCsrf({
-  getSecret: () => process.env.CSRF_SECRET,
-  cookieName: 'csrf-token',
-  cookieOptions: {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-  },
-  size: 64,
-  ignoredMethods: ['GET', 'HEAD', 'OPTIONS'],
+// Route pour récupérer un token CSRF
+app.get('/api/csrf-token', async (req, res) => {
+  try {
+    // Empêcher le cache du navigateur pour garantir un token frais à chaque requête
+    res.set({
+      'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    })
+    
+    const token = await generateCsrfToken(req, res)
+    
+    // Validation : s'assurer que le token est bien une chaîne
+    if (typeof token !== 'string' || !token) {
+      throw new Error('Le token CSRF généré n\'est pas valide')
+    }
+    
+    res.json({ csrfToken: token })
+  } catch (error) {
+    console.error('Erreur génération token CSRF:', error)
+    res.status(500).json({ code: 'ERROR', message: error.message })
+  }
 })
+
+// -------------------
+// Routes Auth
+// -------------------
+
+app.post('/api/signin', authLimiter, verifyCsrf, signinController)
+app.post('/api/login', authLimiter, verifyCsrf, loginController)
+app.post('/api/logout', requestLimiter, verifyCsrf, (req, res) => {
+  res.clearCookie('bande_de_rolistes')
+  res.clearCookie('csrf-secret')
+  res.json({ success: true })
+})
+
+// -------------------
+// Session
+// -------------------
+
+app.get('/api/session', requestLimiter, sessionController)
+
+// -------------------
+// Discord OAuth
+// -------------------
+
+app.get('/api/discord/init', requestLimiter, discordController.init)
+app.get('/api/discord/callback', requestLimiter, discordController.callback)
+
+// -------------------
+// Routes Admin
+// -------------------
+
+app.get('/api/admin/users', requestLimiter, requireAdmin, adminUsersController)
+app.get('/api/admin/roles', requestLimiter, requireAdmin, adminRolesController)
+app.put(
+  '/api/admin/users/:userID/role',
+  requestLimiter,
+  verifyCsrf,
+  requireAdmin,
+  adminUpdateRoleController
+)
+
+// -------------------
+// Base de données & lancement serveur
+// -------------------
 
 // Vérifier / synchroniser la base au démarrage
 async function initDatabase() {
@@ -76,47 +123,8 @@ async function initDatabase() {
   }
 }
 
-// Routes d'API
-
-// Inscription
-app.post('/api/signin', requestLimiter, doubleCsrfProtection, signinController)
-
-// Connexion
-app.post('/api/login', requestLimiter, doubleCsrfProtection, loginController)
-
-// Récupération de session
-app.get('/api/session', requestLimiter, sessionController)
-
-// Discord OAuth
-app.get('/api/discord/init', requestLimiter, discordController.init)
-app.get('/api/discord/callback', requestLimiter, discordController.callback)
-
-// Routes admin (protégées par requireAdmin)
-app.get('/api/admin/users', requestLimiter, requireAdmin, adminUsersController)
-app.get('/api/admin/roles', requestLimiter, requireAdmin, adminRolesController)
-app.put('/api/admin/users/:userID/role', requestLimiter, doubleCsrfProtection, requireAdmin, adminUpdateRoleController)
-
-// Déconnexion
-app.post('/api/logout', requestLimiter, doubleCsrfProtection, (req, res) => {
-  res.clearCookie('bande_de_rolistes', {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-  })
-
-  res.json({ success: true })
-})
-
-// Récupération du token CSRF
-app.get('/api/csrf-token', (req, res) => {
-  const token = generateToken(req, res)
-  res.json({ csrfToken: token })
-})
-
-
 initDatabase().then(() => {
   app.listen(PORT, () => {
     console.log(`🚀 API Bande de Rôlistes lancée sur http://localhost:${PORT}`)
   })
 })
-

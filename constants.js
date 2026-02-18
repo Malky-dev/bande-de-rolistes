@@ -1,0 +1,7 @@
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const MIN_PASSWORD_LENGTH = 12
+const MAX_PASSWORD_LENGTH = 128
+const RATELIMIT = 500
+const WINDOWMS = 15 * 60 * 1000
+
+module.exports = { EMAIL_REGEX, MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH, RATELIMIT, WINDOWMS }

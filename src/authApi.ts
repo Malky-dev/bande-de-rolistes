@@ -7,15 +7,15 @@ export type SessionInfo = {
 const API_BASE = 'http://localhost:3000/api'
 
 // Fonction utilitaire pour récupérer le token CSRF
-let csrfTokenCache: string | null = null
-
+// Ne pas mettre en cache car chaque token est unique et lié au secret dans le cookie
 async function getCsrfToken(): Promise<string> {
-  if (csrfTokenCache) {
-    return csrfTokenCache
-  }
-  
   const res = await fetch('/api/csrf-token', {
     credentials: 'include',
+    method: 'GET',
+    cache: 'no-store', // Empêcher le cache du navigateur
+    headers: {
+      'Cache-Control': 'no-cache',
+    },
   })
   
   if (!res.ok) {
@@ -23,12 +23,26 @@ async function getCsrfToken(): Promise<string> {
   }
   
   const data = await res.json()
-  csrfTokenCache = data.csrfToken
-  return csrfTokenCache as string
+  const token = data.csrfToken
+  
+  // Validation : s'assurer que le token est une chaîne de caractères
+  if (typeof token !== 'string' || !token) {
+    console.error('Token CSRF invalide reçu:', token, typeof token)
+    throw new Error('Token CSRF invalide reçu du serveur')
+  }
+  
+  return token
 }
 
 export async function apiSignin(nickname: string, email: string, password: string, passwordCheck: string) {
   const csrfToken = await getCsrfToken()
+  
+  // S'assurer que le token est bien une chaîne avant de l'envoyer
+  if (typeof csrfToken !== 'string') {
+    console.error('Token CSRF n\'est pas une chaîne:', csrfToken, typeof csrfToken)
+    throw new Error('Token CSRF invalide')
+  }
+  
   const res = await fetch('/api/signin', {
     method: 'POST',
     headers: {

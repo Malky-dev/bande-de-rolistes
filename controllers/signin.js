@@ -1,5 +1,6 @@
 const { hashPassword } = require('../global')
 const { User } = require('../models')
+const { EMAIL_REGEX, MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH } = require('../constants')
 
 module.exports = async function controllerSignin(req, res) {
   try {
@@ -18,17 +19,40 @@ module.exports = async function controllerSignin(req, res) {
       return res.status(400).json({ code: 'BAD_REQUEST', message: 'Les mots de passe ne correspondent pas' })
     }
 
-    const existing = await User.findOne({ where: { email } })
+    const normalizedEmail = email.trim().toLowerCase()
+
+    if (!EMAIL_REGEX.test(normalizedEmail)) {
+      return res.status(400).json({ code: 'BAD_REQUEST', message: 'L\'email n\'est pas valide' })
+    }
+    
+    if (password.length < MIN_PASSWORD_LENGTH) {
+      return res.status(400).json({ code: 'BAD_REQUEST', message: 'Le mot de passe doit contenir au moins 12 caractères' })
+    }
+  
+    if (password.length > MAX_PASSWORD_LENGTH) {
+      return res.status(400).json({ code: 'BAD_REQUEST', message: 'Le mot de passe est trop long' })
+    }
+  
+    if (password.toLowerCase() === email.toLowerCase()) {
+      return res.status(400).json({ code: 'BAD_REQUEST', message: 'Le mot de passe ne peut pas être identique à l\'email' })
+    }
+
+    // Vérifier si le mot de passe est trop simple / répétitions absurdes (aaaaaaaaaaaa)
+    if (/^(.)\1+$/.test(password)) {
+      return res.status(400).json({ code: 'BAD_REQUEST', message: 'Mot de passe trop simple' })
+    }
+    
+    const existing = await User.findOne({ where: { email: normalizedEmail } })
 
     if (existing) {
-      return res.status(500).json({ code: 'DUPLICATE', message: 'L\'utilisateur existe déjà' })
+      return res.status(409).json({ code: 'DUPLICATE', message: 'L\'utilisateur existe déjà' })
     }
 
     const hashedPassword = await hashPassword(password)
 
     await User.create({
       nickname,
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
       roleID: 5, // guest par défaut
     })
