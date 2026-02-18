@@ -1,7 +1,7 @@
 const DiscordOAuth2 = require('discord-oauth2')
 const DeviceDetector = require('device-detector-js')
 
-const { hashPassword, encryptSHA256, formatDate } = require('../global')
+const { hashPassword, generateToken, formatDate } = require('../global')
 const { User, Session } = require('../models')
 
 // Configuration Discord OAuth2 depuis les variables d'environnement
@@ -107,7 +107,7 @@ module.exports.callback = async function controllerDiscordCallback(req, res) {
     }
 
     // Créer une session
-    const token = encryptSHA256(user.email + formatDate(new Date()))
+    const token = generateToken()
 
     const deviceDetector = new DeviceDetector()
     const userAgent = req.get('User-Agent') || ''

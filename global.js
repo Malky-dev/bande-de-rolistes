@@ -1,6 +1,5 @@
 "use strict";
 
-const { createHash } = require('node:crypto')
 const bcrypt = require('bcrypt')
 
 const SALT_ROUNDS = 12
@@ -25,12 +24,12 @@ async function comparePassword(password, hash) {
 }
 
 /**
- * Hache une chaîne avec SHA-256 (pour les tokens, pas pour les mots de passe)
- * @param {string} params - La chaîne à hacher
- * @returns {string} Le hash SHA-256
+ * Génère un token aléatoire
+ * @returns {string} Un token aléatoire de 32 caractères
  */
-function encryptSHA256(params) {
-  return createHash('sha256').update(params).digest('hex')
+function generateToken() {
+  const crypto = require('crypto');
+  return crypto.randomBytes(32).toString('hex');
 }
 
 function formatDate (date) {
@@ -42,4 +41,4 @@ function formatDate (date) {
     String(date.getSeconds()).padStart(2, "0");
 }
 
-module.exports = { hashPassword, comparePassword, encryptSHA256, formatDate }
+module.exports = { hashPassword, comparePassword, generateToken, formatDate }

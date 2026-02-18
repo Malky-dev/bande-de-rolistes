@@ -1,6 +1,6 @@
 const DeviceDetector = require('device-detector-js')
 
-const { comparePassword, encryptSHA256, formatDate } = require('../global')
+const { comparePassword, generateToken, formatDate } = require('../global')
 const { User, Session } = require('../models')
 
 module.exports = async function controllerLogin(req, res) {
@@ -30,7 +30,7 @@ module.exports = async function controllerLogin(req, res) {
       return res.status(404).json({ code: 'NOT_FOUND', message: 'Le mot de passe est incorrect' })
     }
 
-    const token = encryptSHA256(email + formatDate(new Date()))
+    const token = generateToken()
 
     const deviceDetector = new DeviceDetector()
     const userAgent = req.get('User-Agent') || ''
