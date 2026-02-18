@@ -19,6 +19,7 @@
     "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
+    "csrf-csrf": "^4.0.3",
     "device-detector-js": "^3.0.3",
     "discord-oauth2": "^2.0.0",
     "dotenv": "^16.4.5",

@@ -6,11 +6,34 @@ export type SessionInfo = {
 
 const API_BASE = 'http://localhost:3000/api'
 
+// Fonction utilitaire pour récupérer le token CSRF
+let csrfTokenCache: string | null = null
+
+async function getCsrfToken(): Promise<string> {
+  if (csrfTokenCache) {
+    return csrfTokenCache
+  }
+  
+  const res = await fetch('/api/csrf-token', {
+    credentials: 'include',
+  })
+  
+  if (!res.ok) {
+    throw new Error('Impossible de récupérer le token CSRF')
+  }
+  
+  const data = await res.json()
+  csrfTokenCache = data.csrfToken
+  return csrfTokenCache as string
+}
+
 export async function apiSignin(nickname: string, email: string, password: string, passwordCheck: string) {
+  const csrfToken = await getCsrfToken()
   const res = await fetch('/api/signin', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'x-csrf-token': csrfToken,
     },
     credentials: 'include',
     body: JSON.stringify({ nickname, email, password, passwordCheck }),
@@ -23,9 +46,13 @@ export async function apiSignin(nickname: string, email: string, password: strin
 }
 
 export async function apiLogin(email: string, password: string) {
+  const csrfToken = await getCsrfToken()
   const res = await fetch('/api/login', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      'x-csrf-token': csrfToken,
+    },
     credentials: 'include', // important
     body: JSON.stringify({ email, password }),
   })
@@ -47,8 +74,12 @@ export async function apiSession() {
 }
 
 export async function apiLogout() {
+  const csrfToken = await getCsrfToken()
   const res = await fetch('/api/logout', {
     method: 'POST',
+    headers: {
+      'x-csrf-token': csrfToken,
+    },
     credentials: 'include',
   })
   if (!res.ok) throw new Error('Logout failed')
@@ -118,10 +149,12 @@ export async function apiAdminRoles(): Promise<Role[]> {
 }
 
 export async function apiAdminUpdateRole(userID: number, roleID: number): Promise<User> {
+  const csrfToken = await getCsrfToken()
   const res = await fetch(`/api/admin/users/${userID}/role`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
+      'x-csrf-token': csrfToken,
     },
     credentials: 'include',
     body: JSON.stringify({ roleID }),

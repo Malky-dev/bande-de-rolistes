@@ -9,6 +9,7 @@ const cookieParser = require('cookie-parser')
 const helmet = require('helmet')
 const compression = require('compression')
 const rateLimit = require('express-rate-limit');
+const { doubleCsrf } = require('csrf-csrf')
 
 const { sequelize } = require('./models')
 const signinController = require('./controllers/signin')
@@ -29,7 +30,7 @@ app.use(cors({
 }))
 app.use(express.json())
 app.use(cookieParser())
-app.use(helmet())
+app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }))
 app.use(compression())
 
 // Limiter le nombre de tentatives de connexion
@@ -41,6 +42,26 @@ const requestLimiter = rateLimit({
   legacyHeaders: false,
   skipSuccessfulRequests: true, // Ne pas compter les requêtes réussies
 });
+
+// Protection CSRF
+if (!process.env.CSRF_SECRET) {
+  throw new Error('CSRF_SECRET is not defined in environment variables')
+}
+
+const {
+  generateToken,
+  doubleCsrfProtection,
+} = doubleCsrf({
+  getSecret: () => process.env.CSRF_SECRET,
+  cookieName: 'csrf-token',
+  cookieOptions: {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+  },
+  size: 64,
+  ignoredMethods: ['GET', 'HEAD', 'OPTIONS'],
+})
 
 // Vérifier / synchroniser la base au démarrage
 async function initDatabase() {
@@ -58,10 +79,10 @@ async function initDatabase() {
 // Routes d'API
 
 // Inscription
-app.post('/api/signin', requestLimiter, signinController)
+app.post('/api/signin', requestLimiter, doubleCsrfProtection, signinController)
 
 // Connexion
-app.post('/api/login', requestLimiter, loginController)
+app.post('/api/login', requestLimiter, doubleCsrfProtection, loginController)
 
 // Récupération de session
 app.get('/api/session', requestLimiter, sessionController)
@@ -73,10 +94,10 @@ app.get('/api/discord/callback', requestLimiter, discordController.callback)
 // Routes admin (protégées par requireAdmin)
 app.get('/api/admin/users', requestLimiter, requireAdmin, adminUsersController)
 app.get('/api/admin/roles', requestLimiter, requireAdmin, adminRolesController)
-app.put('/api/admin/users/:userID/role', requestLimiter, requireAdmin, adminUpdateRoleController)
+app.put('/api/admin/users/:userID/role', requestLimiter, doubleCsrfProtection, requireAdmin, adminUpdateRoleController)
 
 // Déconnexion
-app.post('/api/logout', requestLimiter, (req, res) => {
+app.post('/api/logout', requestLimiter, doubleCsrfProtection, (req, res) => {
   res.clearCookie('bande_de_rolistes', {
     httpOnly: true,
     sameSite: 'lax',
@@ -84,6 +105,12 @@ app.post('/api/logout', requestLimiter, (req, res) => {
   })
 
   res.json({ success: true })
+})
+
+// Récupération du token CSRF
+app.get('/api/csrf-token', (req, res) => {
+  const token = generateToken(req, res)
+  res.json({ csrfToken: token })
 })
 
 

@@ -44,10 +44,23 @@ function App() {
   }, [])
 
   const handleLogout = async () => {
-    await fetch('/api/logout', {
-      method: 'POST',
-      credentials: 'include',
-    })
+    try {
+      // Récupérer le token CSRF
+      const csrfRes = await fetch('/api/csrf-token', {
+        credentials: 'include',
+      })
+      const csrfData = await csrfRes.json()
+      
+      await fetch('/api/logout', {
+        method: 'POST',
+        headers: {
+          'x-csrf-token': csrfData.csrfToken,
+        },
+        credentials: 'include',
+      })
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error)
+    }
   
     setSession(null)
     setView('home')
