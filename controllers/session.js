@@ -1,3 +1,4 @@
+const { Op } = require('sequelize')
 const { Session, User, Role } = require('../models')
 
 module.exports = async function controllerSession(req, res) {
@@ -9,7 +10,12 @@ module.exports = async function controllerSession(req, res) {
     }
 
     const session = await Session.findOne({
-      where: { token },
+      where: { 
+        token,
+        expiration: {
+          [Op.gt]: new Date(), // Vérifier l'expiration
+        },
+      },
       include: {
         model: User,
         required: true,
@@ -21,7 +27,7 @@ module.exports = async function controllerSession(req, res) {
     })
 
     if (!session || !session.User) {
-      return res.status(404).json({ code: 'NOT_FOUND', message: 'Token de session non disponible' })
+      return res.status(401).json({ code: 'SESSION_EXPIRED', message: 'Session expirée ou invalide' })
     }
 
     const user = session.User

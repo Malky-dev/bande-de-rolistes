@@ -8,6 +8,7 @@ const cors = require('cors')
 const cookieParser = require('cookie-parser')
 const helmet = require('helmet')
 const compression = require('compression')
+const rateLimit = require('express-rate-limit');
 
 const { sequelize } = require('./models')
 const signinController = require('./controllers/signin')
@@ -31,6 +32,16 @@ app.use(cookieParser())
 app.use(helmet())
 app.use(compression())
 
+// Limiter le nombre de tentatives de connexion
+const requestLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 tentatives max
+  message: 'Trop de tentatives de connexion, réessayez plus tard.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true, // Ne pas compter les requêtes réussies
+});
+
 // Vérifier / synchroniser la base au démarrage
 async function initDatabase() {
   try {
@@ -47,25 +58,25 @@ async function initDatabase() {
 // Routes d'API
 
 // Inscription
-app.post('/api/signin', signinController)
+app.post('/api/signin', requestLimiter, signinController)
 
 // Connexion
-app.post('/api/login', loginController)
+app.post('/api/login', requestLimiter, loginController)
 
 // Récupération de session
-app.get('/api/session', sessionController)
+app.get('/api/session', requestLimiter, sessionController)
 
 // Discord OAuth
-app.get('/api/discord/init', discordController.init)
-app.get('/api/discord/callback', discordController.callback)
+app.get('/api/discord/init', requestLimiter, discordController.init)
+app.get('/api/discord/callback', requestLimiter, discordController.callback)
 
 // Routes admin (protégées par requireAdmin)
-app.get('/api/admin/users', requireAdmin, adminUsersController)
-app.get('/api/admin/roles', requireAdmin, adminRolesController)
-app.put('/api/admin/users/:userID/role', requireAdmin, adminUpdateRoleController)
+app.get('/api/admin/users', requestLimiter, requireAdmin, adminUsersController)
+app.get('/api/admin/roles', requestLimiter, requireAdmin, adminRolesController)
+app.put('/api/admin/users/:userID/role', requestLimiter, requireAdmin, adminUpdateRoleController)
 
 // Déconnexion
-app.post('/api/logout', (req, res) => {
+app.post('/api/logout', requestLimiter, (req, res) => {
   res.clearCookie('bande_de_rolistes', {
     httpOnly: true,
     sameSite: 'lax',
