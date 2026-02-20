@@ -39,7 +39,7 @@ type DeviceParseResult = {
 // ---------------------------
 // Helpers
 // ---------------------------
-function invariant(condition: unknown, message: string): asserts condition {
+function invariant(condition: string | undefined, message: string): asserts condition is string {
   if (!condition) {
     throw new Error(message)
   }

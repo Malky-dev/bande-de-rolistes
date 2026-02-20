@@ -1,35 +1,64 @@
-import type { Request, Response } from 'express'
+import type { RequestHandler } from 'express'
 
 import { hashPassword } from '../global'
 import { User } from '../models'
 import { EMAIL_REGEX, MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH } from '../constants'
+import type { ApiError } from '../../types/api/errors'
 
-// ---------------------------
-// Typage du body de l'inscription
-// ---------------------------
-interface SigninBody {
+type SigninBody = {
   nickname: string
   email: string
   password: string
   passwordCheck: string
 }
 
+type SigninSuccess = {
+  code: 'SUCCESS'
+  message: string
+}
+
+type SigninResponse = SigninSuccess | ApiError
+
+type SequelizeValidationErrorShape = Error & {
+  errors?: Array<{ message?: string }>
+}
+
 // ---------------------------
 // Contrôleur Signin
 // ---------------------------
-export default async function controllerSignin(
-  req: Request<Record<string, never>, unknown, SigninBody>,
-  res: Response
-): Promise<void> {
+const controllerSignin: RequestHandler<
+  Record<string, never>,
+  SigninResponse,
+  SigninBody
+> = async (req, res): Promise<void> => {
   try {
     const { nickname, email, password, passwordCheck } = req.body
 
     // ---------------------------
-    // Vérification des types
+    // Validation types
     // ---------------------------
-    if (typeof nickname !== 'string') throw new TypeError('Le pseudo doit être une chaîne de caractères')
-    if (typeof email !== 'string') throw new TypeError("L'email doit être une chaîne de caractères")
-    if (typeof password !== 'string') throw new TypeError('Le mot de passe doit être une chaîne de caractères')
+    if (typeof nickname !== 'string') {
+      res.status(400).json({ code: 'BAD_REQUEST', message: 'Le pseudo doit être une chaîne de caractères' })
+      return
+    }
+
+    if (typeof email !== 'string') {
+      res.status(400).json({ code: 'BAD_REQUEST', message: "L'email doit être une chaîne de caractères" })
+      return
+    }
+
+    if (typeof password !== 'string') {
+      res.status(400).json({ code: 'BAD_REQUEST', message: 'Le mot de passe doit être une chaîne de caractères' })
+      return
+    }
+
+    if (typeof passwordCheck !== 'string') {
+      res.status(400).json({
+        code: 'BAD_REQUEST',
+        message: 'La confirmation du mot de passe doit être une chaîne de caractères',
+      })
+      return
+    }
 
     if (password !== passwordCheck) {
       res.status(400).json({ code: 'BAD_REQUEST', message: 'Les mots de passe ne correspondent pas' })
@@ -50,7 +79,10 @@ export default async function controllerSignin(
     // Vérification du mot de passe
     // ---------------------------
     if (password.length < MIN_PASSWORD_LENGTH) {
-      res.status(400).json({ code: 'BAD_REQUEST', message: `Le mot de passe doit contenir au moins ${MIN_PASSWORD_LENGTH} caractères` })
+      res.status(400).json({
+        code: 'BAD_REQUEST',
+        message: `Le mot de passe doit contenir au moins ${MIN_PASSWORD_LENGTH} caractères`,
+      })
       return
     }
 
@@ -70,7 +102,7 @@ export default async function controllerSignin(
     }
 
     // ---------------------------
-    // Vérification de l'existence de l'utilisateur
+    // Vérification user existant
     // ---------------------------
     const existing = await User.findOne({ where: { email: normalizedEmail } })
     if (existing) {
@@ -79,7 +111,7 @@ export default async function controllerSignin(
     }
 
     // ---------------------------
-    // Hash du mot de passe et création de l'utilisateur
+    // Création utilisateur
     // ---------------------------
     const hashedPassword = await hashPassword(password)
 
@@ -90,30 +122,34 @@ export default async function controllerSignin(
       roleID: 5, // guest par défaut
     })
 
-    // ---------------------------
-    // Retour succès
-    // ---------------------------
     res.status(201).json({ code: 'SUCCESS', message: "L'utilisateur a été créé avec succès" })
   } catch (error) {
     console.error(error)
-  
-    const err = error as { name?: string; errors?: Array<{ message?: string }>; message?: string }
-  
+
+    const err = error instanceof Error ? error : new Error('Erreur serveur')
+
     if (err.name === 'SequelizeValidationError') {
+      const validation = err as SequelizeValidationErrorShape
+      const details =
+        Array.isArray(validation.errors)
+          ? validation.errors
+              .map((e) => (typeof e.message === 'string' ? e.message : ''))
+              .filter((m) => m.length > 0)
+              .join(', ')
+          : ''
+
       res.status(400).json({
         code: 'VALIDATION_ERROR',
-        message: Array.isArray(err.errors)
-          ? err.errors.map(e => e.message ?? '').filter(Boolean).join(', ')
-          : 'Validation error',
+        message: details.length > 0 ? details : 'Validation error',
       })
       return
     }
-  
+
     if (err.name === 'SequelizeUniqueConstraintError') {
       res.status(409).json({ code: 'DUPLICATE', message: 'Cet email ou ce pseudo est déjà utilisé' })
       return
     }
-  
+
     if (err.name === 'SequelizeForeignKeyConstraintError') {
       res.status(400).json({
         code: 'FOREIGN_KEY_ERROR',
@@ -121,10 +157,12 @@ export default async function controllerSignin(
       })
       return
     }
-  
+
     res.status(500).json({
       code: 'ERROR',
-      message: err.message || 'Une erreur est survenue lors de la création du compte',
+      message: err.message.length > 0 ? err.message : 'Erreur serveur',
     })
   }
 }
+
+export default controllerSignin

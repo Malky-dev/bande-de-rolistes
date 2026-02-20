@@ -1,44 +1,19 @@
 // ---------------------------
-// auth.ts - Routes Authentification
+// auth.ts - Routes Auth
 // ---------------------------
 
 import { Router } from 'express'
+import type { LoginBody } from '../../types/api/auth'
 
 import signinController from '../controllers/signin'
 import loginController from '../controllers/login'
-
 import { verifyCsrf } from '../middleware/csrf'
-import { requestLimiter, authLimiter } from '../middleware/rateLimit'
+import { requestLimiter } from '../middleware/rateLimit'
 
 const router = Router()
 
-// ---------------------------
-// Routes Auth
-// ---------------------------
+router.post('/auth/signin', requestLimiter, verifyCsrf(), signinController)
 
-router.post(
-  '/signin',
-  authLimiter,
-  verifyCsrf,
-  signinController
-)
-
-router.post(
-  '/login',
-  authLimiter,
-  verifyCsrf,
-  loginController
-)
-
-router.post(
-  '/logout',
-  requestLimiter,
-  verifyCsrf,
-  (req, res) => {
-    res.clearCookie('bande_de_rolistes')
-    res.clearCookie('csrf-secret')
-    res.json({ success: true })
-  }
-)
+router.post('/auth/login', requestLimiter, verifyCsrf<Record<string, string>, LoginBody>(), loginController)
 
 export default router

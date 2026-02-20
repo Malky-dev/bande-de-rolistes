@@ -1,7 +1,6 @@
 import type { RequestHandler } from 'express'
 import Tokens from 'csrf'
 import type { ApiError } from '../../types/api/errors'
-import type { JsonObject } from '../../types/api/json'
 import { getCookieValue } from '../utils/cookies'
 
 // ---------------------------
@@ -30,47 +29,58 @@ type ResWithCookieSetter = {
   cookie: CookieSetter
 }
 
+type ParamsAny = Record<string, string>
+
+function csrfTokenFromBody(body: object): string | undefined {
+  if (!('csrfToken' in body)) return undefined
+
+  const token = (body as { csrfToken?: string }).csrfToken
+  return typeof token === 'string' ? token : undefined
+}
+
 // ---------------------------
-// Middleware de vérification CSRF
+// Middleware CSRF (factory typée sur le body)
 // ---------------------------
-export const verifyCsrf: RequestHandler<Record<string, string>, ApiError, JsonObject> = (req, res, next) => {
-  try {
-    const secret = getCookieValue(req.headers.cookie, 'csrf-secret')
+export function verifyCsrf<P extends ParamsAny = ParamsAny, B extends object = object>(): RequestHandler<P, ApiError, B> {
+  return (req, res, next) => {
+    try {
+      const secret = getCookieValue(req.headers.cookie, 'csrf-secret')
 
-    const headerToken = req.headers['x-csrf-token']
-    const tokenFromHeader = Array.isArray(headerToken) ? headerToken[0] : headerToken
+      const headerToken = req.headers['x-csrf-token']
+      const tokenFromHeader = Array.isArray(headerToken) ? headerToken[0] : headerToken
 
-    const bodyToken = req.body.csrfToken
-    const tokenFromBody = typeof bodyToken === 'string' ? bodyToken : undefined
+      const tokenFromBody =
+        typeof req.body === 'object' && req.body !== null ? csrfTokenFromBody(req.body) : undefined
 
-    const token = tokenFromHeader || tokenFromBody
+      const token = tokenFromHeader || tokenFromBody
 
-    if (!secret) {
-      res.status(403).json({
-        code: 'FORBIDDEN',
-        message: "Secret CSRF manquant. Veuillez récupérer un token CSRF d'abord.",
-      })
-      return
+      if (!secret) {
+        res.status(403).json({
+          code: 'FORBIDDEN',
+          message: "Secret CSRF manquant. Veuillez récupérer un token CSRF d'abord.",
+        })
+        return
+      }
+
+      if (!token || typeof token !== 'string') {
+        res.status(403).json({
+          code: 'FORBIDDEN',
+          message: 'Token CSRF manquant (header x-csrf-token ou body csrfToken).',
+        })
+        return
+      }
+
+      if (!tokens.verify(secret, token)) {
+        res.status(403).json({ code: 'FORBIDDEN', message: 'Token CSRF invalide' })
+        return
+      }
+
+      next()
+    } catch (error) {
+      console.error(error)
+      const message = error instanceof Error ? error.message : 'Erreur serveur'
+      res.status(500).json({ code: 'ERROR', message })
     }
-
-    if (!token || typeof token !== 'string') {
-      res.status(403).json({
-        code: 'FORBIDDEN',
-        message: 'Token CSRF manquant (header x-csrf-token ou body csrfToken).',
-      })
-      return
-    }
-
-    if (!tokens.verify(secret, token)) {
-      res.status(403).json({ code: 'FORBIDDEN', message: 'Token CSRF invalide' })
-      return
-    }
-
-    next()
-  } catch (error) {
-    console.error(error)
-    const message = error instanceof Error ? error.message : 'Erreur serveur'
-    res.status(500).json({ code: 'ERROR', message })
   }
 }
 

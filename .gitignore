@@ -27,6 +27,7 @@ dist-ssr
 *.sln
 *.sw?
 *.md
+package-lock.json
 
 # Environment variables
 .env
