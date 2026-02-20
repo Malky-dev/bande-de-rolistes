@@ -14,9 +14,11 @@ dist-ssr
 
 # Editor directories and files
 .cursor/
+.cursor/*
 .vscode/
+.vscode/*
 .vite/
-.husky/
+.vite/*
 .idea
 .DS_Store
 *.suo
