@@ -14,25 +14,19 @@ import { requestLimiter } from '../middleware/rateLimit'
 
 const router = Router()
 
+type UpdateRoleParams = {
+  userID: string
+}
+
 // ---------------------------
 // Routes Admin
 // ---------------------------
 
-router.get(
-  '/admin/users',
-  requestLimiter,
-  requireAdmin,
-  adminUsersController
-)
+router.get('/admin/users', requestLimiter, requireAdmin, adminUsersController)
 
-router.get(
-  '/admin/roles',
-  requestLimiter,
-  requireAdmin,
-  adminRolesController
-)
+router.get('/admin/roles', requestLimiter, requireAdmin, adminRolesController)
 
-router.put(
+router.put<UpdateRoleParams>(
   '/admin/users/:userID/role',
   requestLimiter,
   verifyCsrf,

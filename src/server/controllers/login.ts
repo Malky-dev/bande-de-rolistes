@@ -5,6 +5,11 @@ import { User, Session, Role } from '../models'
 import type { LoginBody, LoginResponse, LoginSuccess } from '../../types/api/auth'
 import type { ApiError } from '../../types/api/errors'
 
+type DeviceParseResult = {
+  device?: { type?: string }
+  client?: { name?: string }
+}
+
 function isUserWithPassword(value: object): value is { userID: number; password: string } {
   return (
     'userID' in value &&
@@ -66,7 +71,7 @@ const controllerLogin: RequestHandler<Record<string, never>, LoginResponse, Logi
     const token = generateSessionToken()
 
     const userAgent = req.get('User-Agent') ?? ''
-    const deviceInfo = new DeviceDetector().parse(userAgent)
+    const deviceInfo = new DeviceDetector().parse(userAgent) as DeviceParseResult
 
     await Session.create({
       userID: userRaw.userID,

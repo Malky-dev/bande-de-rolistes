@@ -1,6 +1,8 @@
-import type { Request, Response } from 'express'
+import type { RequestHandler } from 'express'
 import { Op, type IncludeOptions, type Model } from 'sequelize'
 import { Session, User, Role } from '../models'
+import { getCookieValue } from '../utils/cookies'
+import type { ApiError } from '../../types/api/errors'
 
 // ---------------------------
 // Typage Sequelize pour Role
@@ -37,39 +39,28 @@ interface SessionAttributes {
 
 type SessionInstance = Model<SessionAttributes> & SessionAttributes
 
-function getCookieValue(cookieHeader: string, name: string): string | undefined {
-  const parts = cookieHeader.split(';')
-
-  for (const part of parts) {
-    const trimmed = part.trim()
-    if (!trimmed) continue
-
-    const eqIndex = trimmed.indexOf('=')
-    if (eqIndex === -1) continue
-
-    const key = trimmed.slice(0, eqIndex)
-    const rawValue = trimmed.slice(eqIndex + 1)
-
-    if (key === name) {
-      return decodeURIComponent(rawValue)
-    }
-  }
-
-  return undefined
+type SessionSuccess = {
+  nickname: string
+  role: string
+  isVerified: boolean
 }
+
+type SessionResponse = SessionSuccess | ApiError
 
 // ---------------------------
 // Contrôleur session
 // ---------------------------
-export default async function controllerSession(req: Request, res: Response): Promise<void> {
+const controllerSession: RequestHandler<
+  Record<string, never>,
+  SessionResponse,
+  Record<string, never>
+> = async (req, res): Promise<void> => {
   try {
-    const cookieHeader = req.get('Cookie')
+    const cookieHeader = req.get('Cookie') ?? undefined
     const token =
-      typeof cookieHeader === 'string'
-        ? getCookieValue(cookieHeader, 'bande_de_rolistes')
-        : undefined
+      typeof cookieHeader === 'string' ? getCookieValue(cookieHeader, 'bande_de_rolistes') : undefined
 
-    if (!token || typeof token !== 'string') {
+    if (!token) {
       res.status(401).json({ code: 'UNAUTHORIZED', message: 'Session non trouvée' })
       return
     }
@@ -100,24 +91,26 @@ export default async function controllerSession(req: Request, res: Response): Pr
     })) as SessionInstance | null
 
     if (!session || !session.User) {
-      res.status(401).json({ code: 'SESSION_EXPIRED', message: 'Session expirée ou invalide' })
+      res.status(401).json({ code: 'UNAUTHORIZED', message: 'Session expirée ou invalide' })
       return
     }
 
     const user = session.User
     const role = user.Role
 
-    // ---------------------------
-    // Retour des informations utilisateur
-    // ---------------------------
-    res.json({
+    const payload: SessionSuccess = {
       nickname: user.nickname,
-      role: role?.roleLabel || 'member',
-      isVerified: !!user.isVerified,
-    })
+      role: role?.roleLabel ?? 'member',
+      isVerified: Boolean(user.isVerified),
+    }
+
+    res.json(payload)
   } catch (error) {
     console.error(error)
-    const message = error instanceof Error ? error.message : 'Erreur inconnue'
-    res.status(500).json({ code: 'ERROR', message })
+    const message = error instanceof Error ? error.message : 'Erreur serveur'
+    const payload: ApiError = { code: 'ERROR', message }
+    res.status(500).json(payload)
   }
 }
+
+export default controllerSession

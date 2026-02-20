@@ -1,10 +1,33 @@
-import type { Request, Response } from 'express'
+import type { RequestHandler } from 'express'
 import { User, Role, type UserWithRole } from '../../models'
+import type { ApiError } from '../../../types/api/errors'
+
+// ---------------------------
+// Types
+// ---------------------------
+type Params = {
+  userID: string
+}
+
+type Body = {
+  roleID?: string | number
+}
+
+type UpdateRoleResponse =
+  | {
+      userID: number
+      nickname: string
+      email: string
+      roleID: number
+      roleLabel: string
+      isVerified: boolean
+    }
+  | ApiError
 
 // ---------------------------
 // Helpers
 // ---------------------------
-function firstParam(v: unknown): string | undefined {
+function firstParam(v: string | string[] | undefined): string | undefined {
   if (typeof v === 'string') return v
   if (Array.isArray(v) && typeof v[0] === 'string') return v[0]
   return undefined
@@ -16,16 +39,21 @@ function toInt(v: string | undefined): number | undefined {
   return Number.isFinite(n) ? n : undefined
 }
 
+function roleIdToString(roleID: Body['roleID']): string | undefined {
+  if (typeof roleID === 'number') return String(roleID)
+  return firstParam(roleID)
+}
+
 // ---------------------------
 // Contrôleur updateRole
 // ---------------------------
-export default async function controllerAdminUpdateRole(req: Request, res: Response): Promise<void> {
+const controllerAdminUpdateRole: RequestHandler<Params, UpdateRoleResponse, Body> = async (
+  req,
+  res
+): Promise<void> => {
   try {
     const userIdRaw = firstParam(req.params.userID)
-    const roleIdRaw =
-      typeof (req.body as { roleID?: unknown }).roleID === 'number'
-        ? String((req.body as { roleID?: number }).roleID)
-        : firstParam((req.body as { roleID?: unknown }).roleID)
+    const roleIdRaw = roleIdToString(req.body.roleID)
 
     const userID = toInt(userIdRaw)
     const roleID = toInt(roleIdRaw)
@@ -55,26 +83,30 @@ export default async function controllerAdminUpdateRole(req: Request, res: Respo
 
     await user.update({ roleID })
 
-    const updatedUser = (await User.findByPk(userID, {
+    const updatedUser = await User.findByPk(userID, {
       include: { model: Role, required: true },
-    })) as UserWithRole | null
+    })
 
     if (!updatedUser) {
       res.status(404).json({ code: 'NOT_FOUND', message: 'User not found' })
       return
     }
 
+    const typedUpdatedUser = updatedUser as UserWithRole
+
     res.json({
-      userID: updatedUser.userID,
-      nickname: updatedUser.nickname,
-      email: updatedUser.email,
-      roleID: updatedUser.roleID,
-      roleLabel: updatedUser.role?.roleLabel || 'guest',
-      isVerified: updatedUser.isVerified,
+      userID: typedUpdatedUser.userID,
+      nickname: typedUpdatedUser.nickname,
+      email: typedUpdatedUser.email,
+      roleID: typedUpdatedUser.roleID,
+      roleLabel: typedUpdatedUser.role?.roleLabel ?? 'guest',
+      isVerified: typedUpdatedUser.isVerified,
     })
   } catch (error) {
     console.error(error)
-    const message = error instanceof Error ? error.message : 'Unknown error'
+    const message = error instanceof Error ? error.message : 'Erreur serveur'
     res.status(500).json({ code: 'ERROR', message })
   }
 }
+
+export default controllerAdminUpdateRole

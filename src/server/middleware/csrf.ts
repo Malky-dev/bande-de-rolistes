@@ -1,6 +1,7 @@
 import type { RequestHandler } from 'express'
 import Tokens from 'csrf'
 import type { ApiError } from '../../types/api/errors'
+import type { JsonObject } from '../../types/api/json'
 import { getCookieValue } from '../utils/cookies'
 
 // ---------------------------
@@ -32,17 +33,16 @@ type ResWithCookieSetter = {
 // ---------------------------
 // Middleware de vérification CSRF
 // ---------------------------
-export const verifyCsrf: RequestHandler<
-  Record<string, never>,
-  ApiError,
-  { csrfToken?: string }
-> = (req, res, next) => {
+export const verifyCsrf: RequestHandler<Record<string, string>, ApiError, JsonObject> = (req, res, next) => {
   try {
     const secret = getCookieValue(req.headers.cookie, 'csrf-secret')
 
     const headerToken = req.headers['x-csrf-token']
     const tokenFromHeader = Array.isArray(headerToken) ? headerToken[0] : headerToken
-    const tokenFromBody = typeof req.body.csrfToken === 'string' ? req.body.csrfToken : undefined
+
+    const bodyToken = req.body.csrfToken
+    const tokenFromBody = typeof bodyToken === 'string' ? bodyToken : undefined
+
     const token = tokenFromHeader || tokenFromBody
 
     if (!secret) {

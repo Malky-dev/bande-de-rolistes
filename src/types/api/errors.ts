@@ -4,6 +4,7 @@ export type ApiErrorCode =
   | 'ERROR'
   | 'UNAUTHORIZED'
   | 'FORBIDDEN'
+  | 'SESSION_EXPIRED'
 
 export interface ApiError {
   code: ApiErrorCode

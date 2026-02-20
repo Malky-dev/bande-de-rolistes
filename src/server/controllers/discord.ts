@@ -1,9 +1,10 @@
-import type { Request, Response } from 'express'
+import type { RequestHandler } from 'express'
 import DiscordOAuth2, { type TokenRequestResult } from 'discord-oauth2'
 import DeviceDetector from 'device-detector-js'
 import { hashPassword, generateSessionToken } from '../global'
 import { User, Session } from '../models'
 import { Model } from 'sequelize'
+import type { ApiError } from '../../types/api/errors'
 
 // ---------------------------
 // Typage Sequelize pour User
@@ -21,6 +22,30 @@ interface UserAttributes {
 type UserInstance = Model<UserAttributes> & UserAttributes
 
 // ---------------------------
+// Types minimaux (libs externes)
+// ---------------------------
+type DiscordUser = {
+  id?: string
+  email?: string
+  username?: string
+  verified?: boolean
+}
+
+type DeviceParseResult = {
+  device?: { type?: string }
+  client?: { name?: string }
+}
+
+// ---------------------------
+// Helpers
+// ---------------------------
+function invariant(condition: unknown, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message)
+  }
+}
+
+// ---------------------------
 // Configuration Discord OAuth2
 // ---------------------------
 const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID
@@ -28,10 +53,10 @@ const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET
 const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI
 const FRONTEND_URL = process.env.FRONTEND_URL
 
-if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET || !DISCORD_REDIRECT_URI || !FRONTEND_URL) {
-  console.error('❌ Variables d\'environnement Discord manquantes !')
-  process.exit(1)
-}
+invariant(DISCORD_CLIENT_ID, "Variables d'environnement Discord manquantes (DISCORD_CLIENT_ID)")
+invariant(DISCORD_CLIENT_SECRET, "Variables d'environnement Discord manquantes (DISCORD_CLIENT_SECRET)")
+invariant(DISCORD_REDIRECT_URI, "Variables d'environnement Discord manquantes (DISCORD_REDIRECT_URI)")
+invariant(FRONTEND_URL, "Variables d'environnement Discord manquantes (FRONTEND_URL)")
 
 const oauth = new DiscordOAuth2({
   clientId: DISCORD_CLIENT_ID,
@@ -42,24 +67,28 @@ const oauth = new DiscordOAuth2({
 // ---------------------------
 // Init OAuth - redirige vers Discord
 // ---------------------------
-export function controllerDiscordInit(req: Request, res: Response): void {
+export const controllerDiscordInit: RequestHandler = (req, res): void => {
   try {
+    const state = typeof req.query.state === 'string' ? req.query.state : 'default'
+
     const url = oauth.generateAuthUrl({
       scope: ['identify', 'email'],
-      state: typeof req.query.state === 'string' ? req.query.state : 'default',
+      state,
     })
+
     res.redirect(url)
-  } catch (error: unknown) {
+  } catch (error) {
     console.error("Erreur lors de l'initiation Discord OAuth:", error)
-    const message = error instanceof Error ? error.message : 'Erreur inconnue'
-    res.status(500).json({ code: 'ERROR', message })
+    const message = error instanceof Error ? error.message : 'Erreur serveur'
+    const payload: ApiError = { code: 'ERROR', message }
+    res.status(500).json(payload)
   }
 }
 
 // ---------------------------
 // Callback OAuth - traitement retour Discord
 // ---------------------------
-export async function controllerDiscordCallback(req: Request, res: Response): Promise<void> {
+export const controllerDiscordCallback: RequestHandler = async (req, res): Promise<void> => {
   try {
     const code = typeof req.query.code === 'string' ? req.query.code : undefined
 
@@ -77,10 +106,10 @@ export async function controllerDiscordCallback(req: Request, res: Response): Pr
 
     const accessToken = tokenResponse.access_token
 
-    // Récupérer les infos utilisateur Discord
-    const discordUser = await oauth.getUser(accessToken)
+    // Récupérer les infos utilisateur Discord (shape minimale)
+    const discordUser = (await oauth.getUser(accessToken)) as DiscordUser
 
-    if (!discordUser?.id) {
+    if (!discordUser.id) {
       res.status(400).json({ code: 'ERROR', message: 'Impossible de récupérer les informations Discord' })
       return
     }
@@ -88,12 +117,13 @@ export async function controllerDiscordCallback(req: Request, res: Response): Pr
     // ---------------------------
     // Recherche utilisateur existant
     // ---------------------------
-    let user = await User.findOne({ where: { discordId: discordUser.id } }) as UserInstance | null
+    let user = (await User.findOne({ where: { discordId: discordUser.id } })) as UserInstance | null
 
     if (!user && discordUser.email) {
-      user = await User.findOne({ where: { email: discordUser.email } }) as UserInstance | null
+      user = (await User.findOne({ where: { email: discordUser.email } })) as UserInstance | null
 
-      if (user) { // Mise à jour discordId si trouvé par email
+      if (user) {
+        // Mise à jour discordId si trouvé par email
         user.discordId = discordUser.id
         await user.save()
       }
@@ -103,18 +133,18 @@ export async function controllerDiscordCallback(req: Request, res: Response): Pr
     // Création de l'utilisateur si inexistant
     // ---------------------------
     if (!user) {
-      const nickname = discordUser.username || `Discord_${discordUser.id.slice(0, 8)}`
+      const nickname = discordUser.username ?? `Discord_${discordUser.id.slice(0, 8)}`
       const randomPassword = Math.random().toString(36) + Date.now().toString()
       const hashedPassword = await hashPassword(randomPassword)
 
-      user = await User.create({
+      user = (await User.create({
         nickname,
-        email: discordUser.email || `${discordUser.id}@discord.local`,
+        email: discordUser.email ?? `${discordUser.id}@discord.local`,
         password: hashedPassword,
         roleID: 5, // guest par défaut
         discordId: discordUser.id,
-        isVerified: discordUser.verified || false,
-      }) as UserInstance
+        isVerified: discordUser.verified ?? false,
+      })) as UserInstance
     }
 
     // ---------------------------
@@ -122,15 +152,15 @@ export async function controllerDiscordCallback(req: Request, res: Response): Pr
     // ---------------------------
     const token = generateSessionToken()
     const deviceDetector = new DeviceDetector()
-    const userAgent = req.get('User-Agent') || ''
-    const device = deviceDetector.parse(userAgent) || {}
+    const userAgent = req.get('User-Agent') ?? ''
+    const parsed = deviceDetector.parse(userAgent) as DeviceParseResult
 
     await Session.create({
       userID: user.userID,
       token,
       expiration: new Date(new Date().setDate(new Date().getDate() + 30)),
-      device: device.device?.type || null,
-      browser: device.client?.name || null,
+      device: parsed.device?.type ?? null,
+      browser: parsed.client?.name ?? null,
     })
 
     // ---------------------------
@@ -145,10 +175,11 @@ export async function controllerDiscordCallback(req: Request, res: Response): Pr
     })
 
     // Redirection frontend
-    res.redirect(FRONTEND_URL!)
+    res.redirect(FRONTEND_URL)
   } catch (error) {
     console.error(error)
-    const message = error instanceof Error ? (error).message : 'Erreur inconnue'
-    res.status(500).json({ code: 'ERROR', message: message })
+    const message = error instanceof Error ? error.message : 'Erreur serveur'
+    const payload: ApiError = { code: 'ERROR', message }
+    res.status(500).json(payload)
   }
 }
