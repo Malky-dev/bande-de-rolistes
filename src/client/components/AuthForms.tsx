@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { SessionInfo } from '../../api/authApi'
+import type { SessionInfo } from '../../types/api/session'
 import { apiLogin, apiSession, apiSignin } from '../../api/authApi'
 
 type View = 'home' | 'login' | 'signup'

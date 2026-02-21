@@ -3,15 +3,16 @@ import './App.css'
 import AuthForms from './components/AuthForms'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
-import type { SessionInfo } from '../api/authApi'
+import type { SessionInfo } from '../types/api/session'
 import { apiSession } from '../api/authApi'
 import { fetchCsrfToken } from '../api/securityApi'
 import HomeView from './views/HomeView'
 import AdminView from './views/AdminView'
+import RpgTablesView from './views/RpgTablesView'
 import AccountView from './views/AccountView'
 import ForbiddenView from './views/ForbiddenView'
 
-type View = 'home' | 'login' | 'signup' | 'admin' | 'account'
+type View = 'home' | 'login' | 'signup' | 'admin' | 'account' | 'rpg'
 
 function App() {
   const [view, setView] = useState<View>('home')
@@ -24,18 +25,13 @@ function App() {
 
     if (discordError) {
       console.error('Erreur Discord OAuth:', discordError)
-
-      window.history.replaceState(
-        {},
-        document.title,
-        window.location.pathname
-      )
+      window.history.replaceState({}, document.title, window.location.pathname)
     }
 
     async function checkSession(): Promise<void> {
       try {
-        const session = await apiSession() // pas de token en paramètre
-        setSession(session)
+        const s = await apiSession()
+        setSession(s)
         setView('home')
       } catch {
         setSession(null)
@@ -49,14 +45,10 @@ function App() {
 
   const handleLogout = async () => {
     try {
-      // Récupérer le token CSRF
       const csrfToken = await fetchCsrfToken()
-
       await fetch('/api/logout', {
         method: 'POST',
-        headers: {
-          'x-csrf-token': csrfToken,
-        },
+        headers: { 'x-csrf-token': csrfToken },
         credentials: 'include',
       })
     } catch (error) {
@@ -78,27 +70,25 @@ function App() {
         view={view}
         checkingSession={checkingSession}
         session={session}
-        onChangeView={(view) => setView(view)}
+        onChangeView={(v) => setView(v)}
         onLogout={() => void handleLogout()}
       />
 
       <main className="main">
         {view === 'home' && <HomeView />}
 
+        {view === 'rpg' && <RpgTablesView session={session} />}
+
         {(view === 'login' || view === 'signup') && (
-          <AuthForms
-            view={view}
-            onSwitchView={setView}
-            onLoginSuccess={handleLoginSuccess}
-          />
+          <AuthForms view={view} onSwitchView={setView} onLoginSuccess={handleLoginSuccess} />
         )}
 
         {view === 'admin' && (
           <AdminView session={session} onBackHome={() => setView('home')} />
         )}
 
-        {view === 'account' && (
-          session ? (
+        {view === 'account' &&
+          (session ? (
             <AccountView
               onBackHome={() => setView('home')}
               onSessionRefresh={(s) => setSession(s)}
@@ -109,9 +99,9 @@ function App() {
               message="Vous devez être connecté pour accéder à votre compte."
               onBackHome={() => setView('login')}
             />
-          )
-        )}
+          ))}
       </main>
+
       <Footer />
     </div>
   )

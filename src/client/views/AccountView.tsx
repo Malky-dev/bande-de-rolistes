@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import type { SessionInfo } from '../../api/authApi'
+import type { SessionInfo } from '../../types/api/session'
 import { apiSession } from '../../api/authApi'
 import { apiGetAccount, apiUpdateAccount } from '../../api/accountApi'
 
