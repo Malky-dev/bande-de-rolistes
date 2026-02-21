@@ -1,73 +1,151 @@
-# React + TypeScript + Vite
+<p align="center">
+  <img src="docs/banner.png" alt="Bande de Rôlistes" />
+</p>
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Application web développée pour l’association **Bande de Rôlistes**, dédiée à la gestion et à l’évolution d’une plateforme communautaire autour du jeu de rôle.
 
-Currently, two official plugins are available:
+Projet personnel conçu et maintenu par **Malky Dev**.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Le projet est actuellement en phase de développement et de stabilisation technique.
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🧭 Objectif du projet
 
-## Expanding the ESLint configuration
+Ce dépôt sert de base technique pour une application web moderne permettant :
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+* la gestion d’utilisateurs
+* l’authentification sécurisée
+* l’administration des rôles
+* l’intégration Discord
+* une architecture backend/frontend fortement typée
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+L’accent est mis sur la **maintenabilité long terme**, la **sécurité** et la **cohérence de typage** plutôt que sur une mise en production rapide.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+---
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 🧱 Stack Technique
+
+### Backend
+
+* Node.js
+* Express
+* Sequelize
+* Authentification par cookie de session
+* Protection CSRF
+* Middleware RBAC (auth / admin)
+
+### Frontend
+
+* React
+* Vite
+* Fetch API native
+
+### Typage & Qualité
+
+* TypeScript strict (`strict: true`)
+* ESLint type-aware
+* Architecture sans `any` ni `unknown`
+* Types API partagés backend/frontend
+
+---
+
+## 📁 Architecture Temporaire
+
+```text
+src/
+├── client/
+│   └── Application React (Vite)
+│
+├── server/
+│   ├── controllers/
+│   ├── middleware/
+│   ├── routes/
+│   ├── models/
+│   └── utils/
+│
+└── types/
+    └── api/
+        ├── auth.ts
+        ├── session.ts
+        ├── admin.ts
+        └── errors.ts
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+---
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 🧠 Architecture TypeScript
+
+Le projet suit une approche **API-first typée** :
+
+* les types API sont centralisés dans `src/types/api`
+* backend et frontend partagent exactement les mêmes contrats
+* aucune divergence de payload possible au runtime
+
+Exemple de pattern controller :
+
+```ts
+const controller: RequestHandler<
+  Params,
+  ResponseType,
+  BodyType
+> = async (req, res): Promise<void> => {
+  try {
+    res.json(payload)
+  } catch {
+    res.status(500).json(apiError)
+  }
+}
 ```
+
+Principes appliqués :
+
+* validation runtime minimale (`typeof`)
+* guards TypeScript simples
+* absence de validation runtime lourde
+* typage explicite des réponses API
+
+---
+
+## ⚙️ Philosophie technique
+
+Le projet privilégie :
+
+* stabilité du runtime
+* lisibilité du code
+* factorisation des types
+* contrôle explicite des entrées API
+* réduction maximale des zones non typées
+
+Choix assumés :
+
+* pas de validation schema runtime lourde
+* pas de sur-abstraction ORM
+* logique explicite plutôt que magique
+
+---
+
+## 📌 État du projet
+
+Projet en développement actif.
+
+L’architecture et le typage sont actuellement en phase de consolidation afin d’obtenir :
+
+* un backend entièrement compatible TypeScript strict
+* zéro accès unsafe
+* une base maintenable sur le long terme
+
+---
+
+## 👤 Auteur
+
+**Malky Dev** 
+
+[![LinkedIn](https://img.shields.io/badge/-LinkedIn-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/joseph-bensusan-12473b62/)
+
+[![Known Vulnerabilities](https://snyk.io/test/github/Malky-dev/bande-de-rolistes/badge.svg)](https://snyk.io/test/github/Malky-dev/bande-de-rolistes)
+
+
+
+Projet personnel développé pour l’association *Bande de Rôlistes*.
