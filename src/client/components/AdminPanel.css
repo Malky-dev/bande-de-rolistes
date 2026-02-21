@@ -1,0 +1,138 @@
+.admin {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.admin--loading {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.admin__loading {
+  opacity: 0.9;
+}
+
+.admin__header {
+  margin-bottom: 2rem;
+}
+
+.admin__title {
+  font-size: 2rem;
+  margin: 0 0 0.5rem;
+}
+
+.admin__subtitle {
+  margin: 0;
+  opacity: 0.85;
+}
+
+.admin__actions {
+  margin: 1rem 0;
+}
+
+.admin__alert {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border: 1px solid transparent;
+}
+
+.admin__alert--error {
+  background: rgba(255, 87, 87, 0.12);
+  border-color: rgba(255, 87, 87, 0.25);
+  color: #ffd1d1;
+}
+
+.admin__alert--success {
+  background: rgba(76, 175, 80, 0.12);
+  border-color: rgba(76, 175, 80, 0.25);
+  color: #d6ffdb;
+}
+
+.admin__tableWrap {
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+}
+
+.admin__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin__theadRow {
+  background: rgba(148, 163, 184, 0.12);
+}
+
+.admin__th {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  font-weight: 600;
+}
+
+.admin__tr {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.admin__tr:last-child {
+  border-bottom: none;
+}
+
+.admin__td {
+  padding: 1rem;
+  vertical-align: middle;
+}
+
+.admin__empty {
+  padding: 2rem;
+  text-align: center;
+  opacity: 0.85;
+}
+
+.admin__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  background: rgba(56, 189, 248, 0.15);
+  color: #bae6fd;
+  font-size: 0.85rem;
+}
+
+.admin__verified {
+  font-weight: 700;
+}
+
+.admin__verified--yes {
+  color: #4ade80;
+}
+
+.admin__verified--no {
+  color: rgba(229, 231, 235, 0.65);
+}
+
+.admin__select {
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(15, 23, 42, 0.75);
+  color: inherit;
+  cursor: pointer;
+}
+
+.admin__select:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.admin__updating {
+  margin-left: 0.5rem;
+  opacity: 0.85;
+}

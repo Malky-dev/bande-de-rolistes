@@ -360,12 +360,26 @@ body {
   font-size: 0.9rem;
 }
 
+.account-help {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.account-help--em {
+  text-decoration: underline;
+}
+
 .auth-form {
   margin-top: 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
   max-width: 26rem;
+}
+
+.auth-form--spaced {
+  margin-top: 1.5rem;
 }
 
 .auth-field {
@@ -392,6 +406,11 @@ body {
   outline: none;
   border-color: #facc15;
   box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.5);
+}
+
+.auth-success {
+  color: #bbf7d0;
+  font-size: 0.85rem;
 }
 
 .auth-error {
@@ -502,6 +521,35 @@ body {
 .footer-right {
   font-style: italic;
   text-align: right;
+}
+
+/* Generic panels (views like Forbidden, simple states, etc.) */
+.panel {
+  width: 100%;
+  max-width: 720px;
+  padding: 2rem;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(15, 23, 42, 0.75);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+}
+
+.panel--center {
+  text-align: center;
+}
+
+.panel__title {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.panel__subtitle {
+  margin: 0.75rem 0 0;
+  opacity: 0.9;
+}
+
+.panel__actions {
+  margin-top: 1.25rem;
 }
 
 @media (max-width: 900px) {

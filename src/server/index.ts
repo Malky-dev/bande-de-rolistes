@@ -19,6 +19,7 @@ import sessionRoutes from './routes/session'
 import csrfRoutes from './routes/csrf'
 import discordRoutes from './routes/discord'
 import adminRoutes from './routes/admin'
+import accountRoutes from './routes/account'
 
 // ---------------------------
 // Création application
@@ -50,6 +51,7 @@ app.use('/api', authRoutes)
 app.use('/api', sessionRoutes)
 app.use('/api', discordRoutes)
 app.use('/api', adminRoutes)
+app.use('/api', accountRoutes)
 
 // ---------------------------
 // Initialisation base

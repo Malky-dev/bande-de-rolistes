@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { apiAdminRoles, apiAdminUpdateRole, apiAdminUsers } from '../../api/authApi'
 import type { AdminRole, AdminUser } from '@/types/api/admin'
+import './AdminPanel.css'
 
 function AdminPanel() {
   const [users, setUsers] = useState<AdminUser[]>([])
@@ -78,144 +79,70 @@ function AdminPanel() {
 
   if (loading) {
     return (
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
-        <p>Chargement...</p>
+      <div className="admin admin--loading">
+        <p className="admin__loading">Chargement...</p>
       </div>
     )
   }
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Gestion des membres</h1>
-        <p style={{ color: '#666' }}>Modifiez le rôle de chaque membre de l'association</p>
-      </div>
+    <section className="admin">
+      <header className="admin__header">
+        <h1 className="admin__title">Gestion des membres</h1>
+        <p className="admin__subtitle">Modifiez le rôle de chaque membre de l'association</p>
+      </header>
 
-      {error && (
-        <div
-          style={{
-            padding: '1rem',
-            backgroundColor: '#fee',
-            color: '#c33',
-            borderRadius: '4px',
-            marginBottom: '1rem',
-          }}
-        >
-          {error}
-        </div>
-      )}
+      {error && <div className="admin__alert admin__alert--error">{error}</div>}
 
       {successMessage && (
-        <div
-          style={{
-            padding: '1rem',
-            backgroundColor: '#efe',
-            color: '#3c3',
-            borderRadius: '4px',
-            marginBottom: '1rem',
-          }}
-        >
-          {successMessage}
-        </div>
+        <div className="admin__alert admin__alert--success">{successMessage}</div>
       )}
 
-      <div style={{ marginBottom: '1rem' }}>
-        <button
-          onClick={() => void loadData()}
-          style={{
-            padding: '0.5rem 1rem',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-          }}
-        >
+      <div className="admin__actions">
+        <button className="btn-primary" type="button" onClick={() => void loadData()}>
           Actualiser
         </button>
       </div>
 
-      <div
-        style={{
-          backgroundColor: 'white',
-          borderRadius: '8px',
-          overflow: 'hidden',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        }}
-      >
-        <table
-          style={{
-            width: '100%',
-            borderCollapse: 'collapse',
-          }}
-        >
+      <div className="admin__tableWrap">
+        <table className="admin__table">
           <thead>
-            <tr style={{ backgroundColor: '#f5f5f5' }}>
-              <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '2px solid #ddd' }}>
-                Nom
-              </th>
-              <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '2px solid #ddd' }}>
-                Email
-              </th>
-              <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '2px solid #ddd' }}>
-                Rôle actuel
-              </th>
-              <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '2px solid #ddd' }}>
-                Vérifié
-              </th>
-              <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '2px solid #ddd' }}>
-                Nouveau rôle
-              </th>
+            <tr className="admin__theadRow">
+              <th className="admin__th">Nom</th>
+              <th className="admin__th">Email</th>
+              <th className="admin__th">Rôle actuel</th>
+              <th className="admin__th">Vérifié</th>
+              <th className="admin__th">Nouveau rôle</th>
             </tr>
           </thead>
           <tbody>
             {users.length === 0 ? (
               <tr>
-                <td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+                <td colSpan={5} className="admin__empty">
                   Aucun utilisateur trouvé
                 </td>
               </tr>
             ) : (
               users.map(user => (
-                <tr
-                  key={user.userID}
-                  style={{
-                    borderBottom: '1px solid #eee',
-                  }}
-                >
-                  <td style={{ padding: '1rem' }}>{user.nickname}</td>
-                  <td style={{ padding: '1rem' }}>{user.email}</td>
-                  <td style={{ padding: '1rem' }}>
-                    <span
-                      style={{
-                        padding: '0.25rem 0.5rem',
-                        backgroundColor: '#e3f2fd',
-                        color: '#1976d2',
-                        borderRadius: '4px',
-                        fontSize: '0.875rem',
-                      }}
-                    >
-                      {user.roleLabel}
-                    </span>
+                <tr key={user.userID} className="admin__tr">
+                  <td className="admin__td">{user.nickname}</td>
+                  <td className="admin__td">{user.email}</td>
+                  <td className="admin__td">
+                    <span className="admin__badge">{user.roleLabel}</span>
                   </td>
-                  <td style={{ padding: '1rem' }}>
+                  <td className="admin__td">
                     {user.isVerified ? (
-                      <span style={{ color: '#4caf50' }}>✓</span>
+                      <span className="admin__verified admin__verified--yes">✓</span>
                     ) : (
-                      <span style={{ color: '#999' }}>✗</span>
+                      <span className="admin__verified admin__verified--no">✗</span>
                     )}
                   </td>
-                  <td style={{ padding: '1rem' }}>
+                  <td className="admin__td">
                     <select
                       value={user.roleID}
                       onChange={e => void handleRoleChange(user.userID, Number(e.target.value))}
                       disabled={updating === user.userID}
-                      style={{
-                        padding: '0.5rem',
-                        borderRadius: '4px',
-                        border: '1px solid #ddd',
-                        cursor: updating === user.userID ? 'wait' : 'pointer',
-                      }}
+                      className="admin__select"
                     >
                       {roles.map(role => (
                         <option key={role.roleID} value={role.roleID}>
@@ -224,7 +151,7 @@ function AdminPanel() {
                       ))}
                     </select>
                     {updating === user.userID && (
-                      <span style={{ marginLeft: '0.5rem', color: '#666' }}>...</span>
+                      <span className="admin__updating">...</span>
                     )}
                   </td>
                 </tr>
@@ -233,7 +160,7 @@ function AdminPanel() {
           </tbody>
         </table>
       </div>
-    </div>
+    </section>
   )
 }
 

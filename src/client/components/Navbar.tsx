@@ -1,7 +1,7 @@
 import type { SessionInfo } from '../../api/authApi'
 import logoBDR from '../../assets/img/LogoBDR_creme-removebg.png'
 
-type View = 'home' | 'login' | 'signup' | 'admin'
+type View = 'home' | 'login' | 'signup' | 'admin' | 'account'
 
 type NavbarProps = {
   view: View
@@ -32,8 +32,8 @@ function Navbar({ view, checkingSession, session, onChangeView, onLogout }: Navb
         >
           Accueil
         </button>
-        <button className="navbar-link navbar-link-button">Campagnes</button>
-        <button className="navbar-link navbar-link-button">Équipe</button>
+        <button className="navbar-link navbar-link-button">Qui sommes-nous ?</button>
+        <button className="navbar-link navbar-link-button">Le jeu de rôle</button>
 
         {!checkingSession && !session && (
           <>
@@ -65,12 +65,17 @@ function Navbar({ view, checkingSession, session, onChangeView, onLogout }: Navb
                 }`}
                 onClick={() => onChangeView('admin')}
               >
-                Administration
+                Privilèges Admin
               </button>
             )}
-            <span className="navbar-link">
-              {session.nickname} · {session.role}
-            </span>
+            <button
+              className={`navbar-link navbar-link-button ${
+                view === 'account' ? 'navbar-link-active' : ''
+              }`}
+              onClick={() => onChangeView('account')}
+            >
+              Mon compte - {session.nickname}
+            </button>
             <button
               className="navbar-link navbar-link-button"
               onClick={onLogout}
