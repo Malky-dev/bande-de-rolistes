@@ -1,7 +1,7 @@
 import type { SessionInfo } from '../../types/api/session'
 import logoBDR from '../../assets/img/LogoBDR_creme-removebg.png'
 
-type View = 'home' | 'login' | 'signup' | 'admin' | 'account' | 'rpg'
+type View = 'home' | 'login' | 'signup' | 'admin' | 'account' | 'rpg' | 'rpg-create'
 
 type NavbarProps = {
   view: View

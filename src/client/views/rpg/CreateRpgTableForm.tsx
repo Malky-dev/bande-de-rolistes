@@ -1,5 +1,8 @@
 import type { FormEvent, ReactElement } from 'react'
 import { useState } from 'react'
+import DatePicker from 'react-datepicker'
+import { fr } from 'date-fns/locale'
+
 import { apiCreateRpgTable } from '../../../api/rpgApi'
 
 type Props = {
@@ -7,38 +10,37 @@ type Props = {
   onCreated: (eventID: number) => void
 }
 
-const CreateRpgTableForm = ({ canCreate, onCreated }: Props): ReactElement | null => {
-  const [eventDate, setEventDate] = useState<string>('')
-  const [location, setLocation] = useState<string>('')
-  const [game, setGame] = useState<string>('')
-  const [comments, setComments] = useState<string>('')
+const LOCATIONS: string[] = ['EVA de Maurepas', 'Salle Oxford']
 
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+const CreateRpgTableForm = ({ canCreate, onCreated }: Props): ReactElement | null => {
+  const [eventDate, setEventDate] = useState<Date | null>(null)
+  const [location, setLocation] = useState('')
+  const [game, setGame] = useState('')
+  const [maxPlayers, setMaxPlayers] = useState<number>(6)
+  const [comments, setComments] = useState('')
+
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  if (!canCreate) {
-    return null
-  }
+  if (!canCreate) return null
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError(null)
 
-    const trimmedLocation = location.trim()
     const trimmedGame = game.trim()
 
-    if (eventDate.trim().length === 0) {
+    if (!eventDate) {
       setError('La date/heure est requise')
       return
     }
 
-    const parsed = new Date(eventDate)
-    if (Number.isNaN(parsed.getTime())) {
+    if (Number.isNaN(eventDate.getTime())) {
       setError('Date/heure invalide')
       return
     }
 
-    if (trimmedLocation.length < 2) {
+    if (location.trim().length < 2) {
       setError('Lieu invalide')
       return
     }
@@ -48,22 +50,30 @@ const CreateRpgTableForm = ({ canCreate, onCreated }: Props): ReactElement | nul
       return
     }
 
+    // Aligné avec le backend : 1..10
+    if (!Number.isInteger(maxPlayers) || maxPlayers < 1 || maxPlayers > 10) {
+      setError('Nombre max de joueurs invalide (1 à 10)')
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
       const body = {
-        eventDate: parsed.toISOString(),
-        location: trimmedLocation,
+        eventDate: eventDate.toISOString(),
+        location: location.trim(),
         game: trimmedGame,
+        maxPlayers,
         comments: comments.trim().length > 0 ? comments.trim() : null,
       }
 
       const created = await apiCreateRpgTable(body)
       onCreated(created.eventID)
 
-      setEventDate('')
+      setEventDate(null)
       setLocation('')
       setGame('')
+      setMaxPlayers(4)
       setComments('')
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erreur'
@@ -72,10 +82,6 @@ const CreateRpgTableForm = ({ canCreate, onCreated }: Props): ReactElement | nul
       setIsSubmitting(false)
     }
   }
-  
-  const onSubmit = (e: FormEvent<HTMLFormElement>): void => {
-    void handleSubmit(e)
-  }
 
   return (
     <section className="rpg-create">
@@ -83,35 +89,75 @@ const CreateRpgTableForm = ({ canCreate, onCreated }: Props): ReactElement | nul
 
       {error ? <p className="auth-error">{error}</p> : null}
 
-      <form onSubmit={onSubmit} className="rpg-create__form">
-        <div className="formRow">
-          <label className="label" htmlFor="rpg-eventDate">
-            Date/heure
-          </label>
-          <input
-            id="rpg-eventDate"
-            className="input"
-            type="datetime-local"
-            value={eventDate}
-            onChange={(e) => setEventDate(e.target.value)}
-            disabled={isSubmitting}
-          />
+      <form onSubmit={(e) => void handleSubmit(e)} className="rpg-create__form">
+        {/* DatePicker + MaxPlayers sur la même ligne */}
+        <div className="formRow formRow--inline">
+          <div className="formField formField--grow">
+            <label className="label" htmlFor="rpg-eventDate">
+              Date / heure
+            </label>
+
+            <DatePicker
+              id="rpg-eventDate"
+              selected={eventDate}
+              onChange={(date: Date | null) => setEventDate(date)}
+              showTimeSelect
+              timeFormat="HH:mm"
+              timeIntervals={15}
+              dateFormat="dd/MM/yyyy HH:mm"
+              locale={fr}
+              placeholderText="Choisir une date et une heure"
+              className="input"
+              disabled={isSubmitting}
+            />
+          </div>
+
+          <div className="formField formField--small">
+            <label className="label" htmlFor="rpg-maxPlayers">
+              Joueurs max
+            </label>
+
+            <select
+              id="rpg-maxPlayers"
+              className="input"
+              value={String(maxPlayers)}
+              onChange={(e) => setMaxPlayers(Number(e.target.value))}
+              disabled={isSubmitting}
+              required
+            >
+            {[1,2,3,4,5,6,7,8,9,10].map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
+          </div>
         </div>
 
+        {/* Lieu en dropdown (2 options) */}
         <div className="formRow">
           <label className="label" htmlFor="rpg-location">
             Lieu
           </label>
-          <input
+
+          <select
             id="rpg-location"
             className="input"
-            type="text"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             disabled={isSubmitting}
-          />
+            required
+          >
+            <option value="">-- Choisir un lieu --</option>
+            {LOCATIONS.map((loc) => (
+              <option key={loc} value={loc}>
+                {loc}
+              </option>
+            ))}
+          </select>
         </div>
 
+        {/* Jeu */}
         <div className="formRow">
           <label className="label" htmlFor="rpg-game">
             Jeu
@@ -123,9 +169,11 @@ const CreateRpgTableForm = ({ canCreate, onCreated }: Props): ReactElement | nul
             value={game}
             onChange={(e) => setGame(e.target.value)}
             disabled={isSubmitting}
+            required
           />
         </div>
 
+        {/* Commentaires */}
         <div className="formRow">
           <label className="label" htmlFor="rpg-comments">
             Commentaires

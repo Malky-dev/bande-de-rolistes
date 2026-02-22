@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { SessionInfo } from '../../types/api/session'
-import CreateRpgTableForm from './rpg/CreateRpgTableForm'
 import {
   apiGetRpgTable,
   apiListRpgTables,
@@ -12,6 +11,7 @@ import {
 
 type Props = {
   session: SessionInfo | null
+  onCreateTable: () => void
 }
 
 type MySignupBucket = 'CONFIRMED' | 'WAITLIST' | null
@@ -34,30 +34,18 @@ function formatDate(iso: string): string {
 }
 
 function statusLabel(status: RpgTableListItem['status']): string {
-  if (status === 'OPEN') {
-    return 'Ouvert'
-  }
-
-  if (status === 'CLOSED') {
-    return 'Fermé'
-  }
-
+  if (status === 'OPEN') return 'Ouvert'
+  if (status === 'CLOSED') return 'Fermé'
   return 'Annulé'
 }
 
 function statusClass(status: RpgTableListItem['status']): string {
-  if (status === 'OPEN') {
-    return 'rpg-status rpg-status--open'
-  }
-
-  if (status === 'CLOSED') {
-    return 'rpg-status rpg-status--closed'
-  }
-
+  if (status === 'OPEN') return 'rpg-status rpg-status--open'
+  if (status === 'CLOSED') return 'rpg-status rpg-status--closed'
   return 'rpg-status rpg-status--cancelled'
 }
 
-function RpgTablesView({ session }: Props) {
+function RpgTablesView({ session, onCreateTable }: Props) {
   const [loading, setLoading] = useState(true)
   const [tables, setTables] = useState<RpgTableListItem[]>([])
   const [selectedID, setSelectedID] = useState<number | null>(null)
@@ -72,16 +60,12 @@ function RpgTablesView({ session }: Props) {
   const canAct = useMemo(() => session !== null, [session])
 
   const canCreate = useMemo(() => {
-    if (!session) {
-      return false
-    }
-  
+    if (!session) return false
     return session.roleID === 1 || session.roleID === 2 || session.roleID === 3
   }, [session])
 
   const refreshList = async (): Promise<void> => {
     const list = await apiListRpgTables()
-
     setTables(list)
 
     if (selectedID === null && list.length > 0) {
@@ -91,7 +75,6 @@ function RpgTablesView({ session }: Props) {
 
   const refreshDetails = async (eventID: number): Promise<void> => {
     setDetailsLoading(true)
-
     try {
       const d = await apiGetRpgTable(eventID)
       setDetails(d)
@@ -104,15 +87,12 @@ function RpgTablesView({ session }: Props) {
     let cancelled = false
 
     const safeSet = (fn: () => void): void => {
-      if (!cancelled) {
-        fn()
-      }
+      if (!cancelled) fn()
     }
 
     const load = async (): Promise<void> => {
       try {
         const list = await apiListRpgTables()
-
         safeSet(() => {
           setTables(list)
           setSelectedID(list.length > 0 ? list[0].eventID : null)
@@ -122,9 +102,7 @@ function RpgTablesView({ session }: Props) {
           setError(e instanceof Error ? e.message : 'Impossible de charger les tables')
         })
       } finally {
-        safeSet(() => {
-          setLoading(false)
-        })
+        safeSet(() => setLoading(false))
       }
     }
 
@@ -142,13 +120,10 @@ function RpgTablesView({ session }: Props) {
     }
 
     const eventID = selectedID
-
     let cancelled = false
 
     const safeSet = (fn: () => void): void => {
-      if (!cancelled) {
-        fn()
-      }
+      if (!cancelled) fn()
     }
 
     const loadDetails = async (): Promise<void> => {
@@ -160,19 +135,14 @@ function RpgTablesView({ session }: Props) {
 
       try {
         const d = await apiGetRpgTable(eventID)
-
-        safeSet(() => {
-          setDetails(d)
-        })
+        safeSet(() => setDetails(d))
       } catch (e: unknown) {
         safeSet(() => {
           setDetails(null)
           setError(e instanceof Error ? e.message : 'Impossible de charger la table')
         })
       } finally {
-        safeSet(() => {
-          setDetailsLoading(false)
-        })
+        safeSet(() => setDetailsLoading(false))
       }
     }
 
@@ -184,27 +154,19 @@ function RpgTablesView({ session }: Props) {
   }, [selectedID])
 
   const mySignupBucket: MySignupBucket = useMemo(() => {
-    if (!details || !session) {
-      return null
-    }
+    if (!details || !session) return null
 
     const inConfirmed = details.confirmed.some((p) => p.userID === session.userID)
-    if (inConfirmed) {
-      return 'CONFIRMED'
-    }
+    if (inConfirmed) return 'CONFIRMED'
 
     const inWaitlist = details.waitlist.some((p) => p.userID === session.userID)
-    if (inWaitlist) {
-      return 'WAITLIST'
-    }
+    if (inWaitlist) return 'WAITLIST'
 
     return null
   }, [details, session])
 
   const handleSignup = async (): Promise<void> => {
-    if (!details) {
-      return
-    }
+    if (!details) return
 
     setActionLoading(true)
     setError(null)
@@ -223,9 +185,7 @@ function RpgTablesView({ session }: Props) {
   }
 
   const handleUnsignup = async (): Promise<void> => {
-    if (!details) {
-      return
-    }
+    if (!details) return
 
     setActionLoading(true)
     setError(null)
@@ -257,18 +217,17 @@ function RpgTablesView({ session }: Props) {
       <h2 className="panel__title">Tables JDR</h2>
 
       <p className="panel__subtitle">
-        Inscris-toi sur une table. Les {details?.confirmedCap ?? 6} premiers sont confirmés, le reste est en liste d&apos;attente.
+        Inscris-toi sur une table. Les {details?.confirmedCap ?? 6} premiers sont confirmés, le reste
+        est en liste d&apos;attente.
       </p>
 
-      <CreateRpgTableForm
-        canCreate={canCreate}
-        onCreated={(eventID: number) => {
-          void refreshList().then(() => {
-            setSelectedID(eventID)
-            void refreshDetails(eventID)
-          })
-        }}
-      />
+      {canCreate && (
+        <div style={{ marginBottom: 16 }}>
+          <button className="btn-primary" type="button" onClick={onCreateTable}>
+            Créer une table
+          </button>
+        </div>
+      )}
 
       {error && <p className="auth-error">{error}</p>}
       {success && <p className="auth-success">{success}</p>}
@@ -330,74 +289,49 @@ function RpgTablesView({ session }: Props) {
 
                   {canAct && details.status === 'OPEN' && (
                     <div className="rpg-buttons">
-                      <button
-                        className="btn-primary"
-                        type="button"
-                        disabled={actionLoading || mySignupBucket !== null}
-                        onClick={() => void handleSignup()}
-                        title={mySignupBucket ? 'Tu es déjà inscrit.' : ''}
-                      >
-                        S&apos;inscrire
-                      </button>
+                      {mySignupBucket === null && (
+                        <button className="btn-primary" onClick={() => void handleSignup()} disabled={actionLoading}>
+                          S&apos;inscrire
+                        </button>
+                      )}
 
-                      <button
-                        className="btn-secondary"
-                        type="button"
-                        disabled={actionLoading || mySignupBucket === null}
-                        onClick={() => void handleUnsignup()}
-                        title={mySignupBucket ? 'Tu es inscrit, tu peux te retirer.' : 'Pas inscrit.'}
-                      >
-                        Se désinscrire
-                      </button>
-
-                      {mySignupBucket && (
-                        <span className="rpg-hint">
-                          Statut : {mySignupBucket === 'CONFIRMED' ? 'Confirmé' : 'Liste d’attente'}
-                        </span>
+                      {mySignupBucket !== null && (
+                        <button className="btn-secondary" onClick={() => void handleUnsignup()} disabled={actionLoading}>
+                          Se désinscrire
+                        </button>
                       )}
                     </div>
-                  )}
-
-                  {canAct && details.status !== 'OPEN' && (
-                    <span className="rpg-hint">Inscriptions indisponibles (table fermée/annulée).</span>
                   )}
                 </div>
               </div>
 
-              {details.comments && <p className="rpg-detail__comments">{details.comments}</p>}
+              <div className="rpg-detail__content">
+                <div className="rpg-block">
+                  <h4>Description</h4>
+                  <p>{details.comments || '—'}</p>
+                </div>
 
-              <div className="rpg-rosters">
-                <div className="rpg-roster">
-                  <h4 className="rpg-roster__title">
-                    Confirmés ({details.confirmed.length}/{details.confirmedCap})
-                  </h4>
-
+                <div className="rpg-block">
+                  <h4>Joueurs confirmés ({details.confirmed.length}/{details.confirmedCap})</h4>
                   {details.confirmed.length === 0 ? (
-                    <div className="rpg-empty">Aucun joueur confirmé.</div>
+                    <p>—</p>
                   ) : (
-                    <ul className="rpg-roster__list">
+                    <ul>
                       {details.confirmed.map((p) => (
-                        <li key={`${p.userID}-${p.created_at}`} className="rpg-roster__item">
-                          <span>{p.nickname}</span>
-                          <span className="rpg-roster__date">{formatDate(p.created_at)}</span>
-                        </li>
+                        <li key={p.userID}>{p.nickname}</li>
                       ))}
                     </ul>
                   )}
                 </div>
 
-                <div className="rpg-roster">
-                  <h4 className="rpg-roster__title">Liste d&apos;attente ({details.waitlist.length})</h4>
-
+                <div className="rpg-block">
+                  <h4>Liste d&apos;attente ({details.waitlist.length})</h4>
                   {details.waitlist.length === 0 ? (
-                    <div className="rpg-empty">Personne en attente.</div>
+                    <p>—</p>
                   ) : (
-                    <ul className="rpg-roster__list">
+                    <ul>
                       {details.waitlist.map((p) => (
-                        <li key={`${p.userID}-${p.created_at}`} className="rpg-roster__item">
-                          <span>{p.nickname}</span>
-                          <span className="rpg-roster__date">{formatDate(p.created_at)}</span>
-                        </li>
+                        <li key={p.userID}>{p.nickname}</li>
                       ))}
                     </ul>
                   )}

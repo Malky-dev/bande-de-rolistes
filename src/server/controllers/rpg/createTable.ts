@@ -89,7 +89,7 @@ const controllerCreateTable: RequestHandler<Record<string, never>, CreateRespons
     const roleID = roleIDUnknown
 
     let dmUserID: number
-    if (roleID === 3) {
+    if (roleID <= 3) {
       dmUserID = userID
     } else {
       if (typeof dungeonMasterUserID !== 'number') {
