@@ -12,14 +12,16 @@ import RpgTablesView from './views/RpgTablesView'
 import AccountView from './views/AccountView'
 import ForbiddenView from './views/ForbiddenView'
 import CreateRpgTableView from './views/rpg/CreateRpgTableView'
+import EditRpgTableView from './views/rpg/EditRpgTableView'
 import 'react-datepicker/dist/react-datepicker.css'
 
-type View = 'home' | 'login' | 'signup' | 'admin' | 'account' | 'rpg' | 'rpg-create'
+type View = 'home' | 'login' | 'signup' | 'admin' | 'account' | 'rpg' | 'rpg-create' | 'rpg-edit'
 
 function App() {
   const [view, setView] = useState<View>('home')
   const [session, setSession] = useState<SessionInfo | null>(null)
   const [checkingSession, setCheckingSession] = useState(true)
+  const [editingEventID, setEditingEventID] = useState<number | null>(null)
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
@@ -83,12 +85,24 @@ function App() {
           <RpgTablesView
             session={session}
             onCreateTable={() => setView('rpg-create')}
+            onEditTable={(eventID) => {
+              setEditingEventID(eventID)
+              setView('rpg-edit')
+            }}
           />
         )}
 
         {view === 'rpg-create' && (
           <CreateRpgTableView
             session={session}
+            onBack={() => setView('rpg')}
+          />
+        )}
+
+        {view === 'rpg-edit' && editingEventID !== null && (
+          <EditRpgTableView
+            session={session}
+            eventID={editingEventID}
             onBack={() => setView('rpg')}
           />
         )}

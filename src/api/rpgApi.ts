@@ -40,6 +40,14 @@ export type RpgCreateTableBody = {
   maxPlayers?: number
 }
 
+export type RpgUpdateTableBody = {
+  eventDate?: string
+  location?: string
+  game?: string
+  comments?: string | null
+  maxPlayers?: number
+}
+
 type ApiErrorPayload = { message?: string; code?: string }
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
@@ -334,4 +342,21 @@ export async function apiCreateRpgTable(body: RpgCreateTableBody): Promise<{ eve
   }
 
   return { eventID, message }
+}
+
+export async function apiUpdateRpgTable(eventID: number, body: RpgUpdateTableBody): Promise<void> {
+  const csrfToken = await fetchCsrfToken()
+  const res = await fetch(`/api/rpg/tables/${eventID}`, {
+    method: 'PUT',
+    headers: {
+      'content-type': 'application/json',
+      'x-csrf-token': csrfToken,
+    },
+    credentials: 'include',
+    body: JSON.stringify(body),
+  })
+
+  if (!res.ok) {
+    throw new Error(await readErrorMessage(res, 'Mise à jour impossible'))
+  }
 }

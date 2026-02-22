@@ -76,6 +76,11 @@
     cursor: pointer;
   }
   
+  .btn-secondary--small {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.85rem;
+  }
+  
   .auth-success {
     color: var(--success);
     font-size: 0.85rem;
@@ -550,9 +555,9 @@
   }
   
   .rpg-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+    max-height: min(420px, calc(100vh - 320px));
+    overflow-y: auto;
+    padding-right: 6px;
   }
   
   .rpg-list-item {
@@ -588,7 +593,11 @@
     margin-top: 0.25rem;
     flex-wrap: wrap;
   }
-  
+
+  .rpg-list-item__meta--with-action {
+    align-items: center;
+  }
+
   .rpg-detail {
     border: var(--border-soft);
     background: rgba(0, 0, 0, 0.12);
@@ -773,6 +782,11 @@
     margin-top: 0.25rem;
   }
   
+  .formActions--dual {
+    display: flex;
+    justify-content: space-between;
+  }
+
   /* =========================================================
      14) INLINE ROW (DatePicker + Joueurs max) - stable en GRID
      ========================================================= */

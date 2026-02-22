@@ -12,6 +12,7 @@ import {
 type Props = {
   session: SessionInfo | null
   onCreateTable: () => void
+  onEditTable: (eventID: number) => void
 }
 
 type MySignupBucket = 'CONFIRMED' | 'WAITLIST' | null
@@ -45,7 +46,7 @@ function statusClass(status: RpgTableListItem['status']): string {
   return 'rpg-status rpg-status--cancelled'
 }
 
-function RpgTablesView({ session, onCreateTable }: Props) {
+function RpgTablesView({ session, onCreateTable, onEditTable }: Props) {
   const [loading, setLoading] = useState(true)
   const [tables, setTables] = useState<RpgTableListItem[]>([])
   const [selectedID, setSelectedID] = useState<number | null>(null)
@@ -63,6 +64,14 @@ function RpgTablesView({ session, onCreateTable }: Props) {
     if (!session) return false
     return session.roleID === 1 || session.roleID === 2 || session.roleID === 3
   }, [session])
+
+  const canEditTable = (t: RpgTableListItem): boolean => {
+    if (!session) return false
+    const isAdminOrOrga = session.roleID === 1 || session.roleID === 2
+    // Le propriétaire de la table est le MJ (dungeonMaster)
+    const isOwnerDM = session.userID === t.dungeonMaster.userID
+    return isAdminOrOrga || isOwnerDM
+  }
 
   const refreshList = async (): Promise<void> => {
     const list = await apiListRpgTables()
@@ -237,11 +246,18 @@ function RpgTablesView({ session, onCreateTable }: Props) {
           {tables.length === 0 && <div className="rpg-empty">Aucune table à venir.</div>}
 
           {tables.map((t) => (
-            <button
+            <div
               key={t.eventID}
-              type="button"
+              role="button"
+              tabIndex={0}
               className={`rpg-list-item ${selectedID === t.eventID ? 'rpg-list-item--active' : ''}`}
               onClick={() => setSelectedID(t.eventID)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  setSelectedID(t.eventID)
+                }
+              }}
             >
               <div className="rpg-list-item__top">
                 <span className="rpg-list-item__title">{t.game}</span>
@@ -254,12 +270,25 @@ function RpgTablesView({ session, onCreateTable }: Props) {
                 <span>{t.location}</span>
               </div>
 
-              <div className="rpg-list-item__meta">
+              <div className="rpg-list-item__meta rpg-list-item__meta--with-action">
                 <span>MJ : {t.dungeonMaster.nickname}</span>
                 <span>•</span>
                 <span>{t.maxPlayers} places</span>
+
+                {canEditTable(t) && (
+                  <button
+                    type="button"
+                    className="btn-secondary btn-secondary--small"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onEditTable(t.eventID)
+                    }}
+                  >
+                    Modifier
+                  </button>
+                )}
               </div>
-            </button>
+            </div>
           ))}
         </aside>
 

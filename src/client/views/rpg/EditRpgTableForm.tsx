@@ -1,29 +1,43 @@
 import type { FormEvent, ReactElement } from 'react'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import DatePicker from 'react-datepicker'
 import { fr } from 'date-fns/locale'
 
-import { apiCreateRpgTable } from '../../../api/rpgApi'
+import { apiUpdateRpgTable, type RpgTableDetails } from '../../../api/rpgApi'
 
 type Props = {
-  canCreate: boolean
-  onCreated: (eventID: number) => void
+  table: RpgTableDetails
+  canEdit: boolean
+  onSaved: () => void
   onBack: () => void
 }
 
 const LOCATIONS: string[] = ['EVA de Maurepas', 'Salle Oxford', 'Autre (voir description)']
 
-const CreateRpgTableForm = ({ canCreate, onCreated, onBack }: Props): ReactElement | null => {
-  const [eventDate, setEventDate] = useState<Date | null>(null)
-  const [location, setLocation] = useState('')
-  const [game, setGame] = useState('')
-  const [maxPlayers, setMaxPlayers] = useState<number>(6)
-  const [comments, setComments] = useState('')
+export default function EditRpgTableForm({ table, canEdit, onSaved, onBack }: Props): ReactElement | null {
+  const initialDate = useMemo(() => {
+    const d = new Date(table.eventDate)
+    return Number.isNaN(d.getTime()) ? null : d
+  }, [table.eventDate])
+
+  const [eventDate, setEventDate] = useState<Date | null>(initialDate)
+  const [location, setLocation] = useState(table.location)
+  const [game, setGame] = useState(table.game)
+  const [maxPlayers, setMaxPlayers] = useState<number>(table.maxPlayers)
+  const [comments, setComments] = useState(table.comments ?? '')
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  if (!canCreate) return null
+  useEffect(() => {
+    setEventDate(initialDate)
+    setLocation(table.location)
+    setGame(table.game)
+    setMaxPlayers(table.maxPlayers)
+    setComments(table.comments ?? '')
+  }, [table, initialDate])
+
+  if (!canEdit) return null
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -51,7 +65,6 @@ const CreateRpgTableForm = ({ canCreate, onCreated, onBack }: Props): ReactEleme
       return
     }
 
-    // Aligné avec le backend : 1..10
     if (!Number.isInteger(maxPlayers) || maxPlayers < 1 || maxPlayers > 10) {
       setError('Nombre max de joueurs invalide (1 à 10)')
       return
@@ -60,22 +73,15 @@ const CreateRpgTableForm = ({ canCreate, onCreated, onBack }: Props): ReactEleme
     setIsSubmitting(true)
 
     try {
-      const body = {
+      await apiUpdateRpgTable(table.eventID, {
         eventDate: eventDate.toISOString(),
         location: location.trim(),
         game: trimmedGame,
         maxPlayers,
         comments: comments.trim().length > 0 ? comments.trim() : null,
-      }
+      })
 
-      const created = await apiCreateRpgTable(body)
-      onCreated(created.eventID)
-
-      setEventDate(null)
-      setLocation('')
-      setGame('')
-      setMaxPlayers(4)
-      setComments('')
+      onSaved()
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erreur'
       setError(message)
@@ -86,12 +92,11 @@ const CreateRpgTableForm = ({ canCreate, onCreated, onBack }: Props): ReactEleme
 
   return (
     <section className="rpg-create">
-      <h3 className="rpg-create__title">Créer une table</h3>
+      <h3 className="rpg-create__title">Modifier la table</h3>
 
       {error ? <p className="auth-error">{error}</p> : null}
 
       <form onSubmit={(e) => void handleSubmit(e)} className="rpg-create__form">
-        {/* DatePicker + MaxPlayers sur la même ligne */}
         <div className="formRow formRow--inline">
           <div className="formField formField--grow">
             <label className="label" htmlFor="rpg-eventDate">
@@ -126,16 +131,15 @@ const CreateRpgTableForm = ({ canCreate, onCreated, onBack }: Props): ReactEleme
               disabled={isSubmitting}
               required
             >
-            {[1,2,3,4,5,6,7,8,9,10].map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
-        {/* Lieu en dropdown (2 options) */}
         <div className="formRow">
           <label className="label" htmlFor="rpg-location">
             Lieu
@@ -158,7 +162,6 @@ const CreateRpgTableForm = ({ canCreate, onCreated, onBack }: Props): ReactEleme
           </select>
         </div>
 
-        {/* Jeu */}
         <div className="formRow">
           <label className="label" htmlFor="rpg-game">
             Jeu
@@ -174,7 +177,6 @@ const CreateRpgTableForm = ({ canCreate, onCreated, onBack }: Props): ReactEleme
           />
         </div>
 
-        {/* Commentaires */}
         <div className="formRow">
           <label className="label" htmlFor="rpg-comments">
             Commentaires
@@ -189,26 +191,15 @@ const CreateRpgTableForm = ({ canCreate, onCreated, onBack }: Props): ReactEleme
         </div>
 
         <div className="formActions formActions--dual">
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={onBack}
-            disabled={isSubmitting}
-          >
+          <button type="button" className="btn-secondary" onClick={onBack} disabled={isSubmitting}>
             Retour
           </button>
 
-          <button
-            className="btn-primary"
-            type="submit"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Création…' : 'Créer'}
+          <button type="submit" className="btn-primary" disabled={isSubmitting}>
+            Enregistrer
           </button>
         </div>
       </form>
     </section>
   )
 }
-
-export default CreateRpgTableForm

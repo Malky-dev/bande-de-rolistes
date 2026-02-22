@@ -90,7 +90,7 @@ function AuthForms({ view, onSwitchView, onLoginSuccess }: AuthFormsProps) {
           </div>
 
           <div className="auth-field">
-            <label>Mot de passe</label>
+            <label>Mot de passe - pour les tests : Jdlduensiokj12</label>
             <input
               type="password"
               value={password}

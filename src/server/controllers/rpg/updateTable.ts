@@ -41,7 +41,7 @@ const controllerUpdateTable: RequestHandler<Params, Response, Body> = async (req
     }
 
     const isAdminOrOrga = hasRole(req, ADMIN_OR_ORGA)
-    const isOwnerDM = roleID === 3 && table.dungeon_master === userID
+    const isOwnerDM = table.dungeon_master === userID
 
     if (!isAdminOrOrga && !isOwnerDM) {
       forbid(res, 'Accès refusé')
