@@ -89,6 +89,7 @@ function App() {
               setEditingEventID(eventID)
               setView('rpg-edit')
             }}
+            onLogin={() => setView('login')}
           />
         )}
 
@@ -108,11 +109,15 @@ function App() {
         )}
 
         {(view === 'login' || view === 'signup') && (
-          <AuthForms view={view} onSwitchView={setView} onLoginSuccess={handleLoginSuccess} />
+          <AuthForms view={view} 
+            onSwitchView={setView}
+            onLoginSuccess={handleLoginSuccess} />
         )}
 
         {view === 'admin' && (
-          <AdminView session={session} onBackHome={() => setView('home')} />
+          <AdminView 
+            session={session} 
+            onBackHome={() => setView('home')} />
         )}
 
         {view === 'account' &&

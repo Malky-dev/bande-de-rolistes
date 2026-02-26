@@ -81,6 +81,13 @@
     font-size: 0.85rem;
   }
   
+  .btn-secondary--xs {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.70rem;
+    line-height: 1;
+    border-radius: 999px;
+  }
+  
   .auth-success {
     color: var(--success);
     font-size: 0.85rem;
@@ -526,6 +533,17 @@
     box-shadow: var(--shadow-panel);
   }
   
+  .panel__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  
+  .panel__header .panel__title {
+    margin: 0;
+  }
+  
   .panel--center {
     text-align: center;
   }
@@ -561,12 +579,14 @@
   }
   
   .rpg-list-item {
-    border: var(--border-soft);
-    background: rgba(0, 0, 0, 0.18);
-    padding: 0.75rem;
-    border-radius: var(--radius-md);
-    text-align: left;
-    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .rpg-list-item__status {
+    margin-top: auto;        /* pousse en bas */
+    align-self: flex-start;  /* à gauche */
   }
   
   .rpg-list-item--active {
@@ -592,6 +612,23 @@
     font-size: 0.9rem;
     margin-top: 0.25rem;
     flex-wrap: wrap;
+  }
+  
+  .rpg-list-item--card {
+    text-align: center;
+    border-radius: var(--radius-lg); /* plus arrondi que md */
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+  }
+  
+  .rpg-list-item--card:hover {
+    border-color: rgba(255, 255, 255, 0.28);
+    background: rgba(0, 0, 0, 0.22);
+  }
+
+  .rpg-list-item .rpg-status {
+    font-size: 0.72rem;
+    padding: 0.1rem 0.35rem;
   }
 
   .rpg-list-item__meta--with-action {
@@ -633,10 +670,18 @@
     align-items: flex-end;
   }
   
+  .rpg-detail__actions .btn-discord {
+    width: auto;
+  }
+  
   .rpg-buttons {
     display: flex;
     gap: 0.5rem;
     flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  
+  .rpg-detail__actions .rpg-buttons {
     justify-content: flex-end;
   }
   
@@ -708,6 +753,17 @@
   .rpg-status--cancelled {
     opacity: 0.65;
   }
+
+  .rpg-list-item--card .rpg-list-item__top,
+  .rpg-list-item--card .rpg-list-item__meta {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .rpg-list-item--card .rpg-list-item__actions {
+    justify-content: space-between; /* garde status à gauche, bouton à droite */
+  }
   
   /* =========================================================
      12) RPG CREATE (formulaire)
@@ -776,6 +832,18 @@
     box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.5);
   }
   
+  .input--maxPlayers {
+    width: 160px;
+    max-width: 160px;
+    justify-self: end;
+  }
+  
+  .input--status {
+    width: 160px;
+    max-width: 160px;
+    justify-self: end;
+  }
+  
   .formActions {
     display: flex;
     justify-content: flex-end;
@@ -792,7 +860,7 @@
      ========================================================= */
   .formRow.formRow--inline {
     display: grid;
-    grid-template-columns: 1fr 160px;
+    grid-template-columns: 1fr 160px 140px; /* Date | Joueurs max | Statut */
     gap: 16px;
     align-items: end;
   }
@@ -861,5 +929,10 @@
   
     .navbar-links {
       gap: 1rem;
+    }
+
+    .panel__header {
+      flex-direction: column;
+      align-items: flex-start;
     }
   }

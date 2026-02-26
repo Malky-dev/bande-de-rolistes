@@ -3,7 +3,13 @@ import { useEffect, useMemo, useState } from 'react'
 import DatePicker from 'react-datepicker'
 import { fr } from 'date-fns/locale'
 
-import { apiUpdateRpgTable, type RpgTableDetails } from '../../../api/rpgApi'
+import {
+  apiUpdateRpgTable,
+  apiListRpgStatuses,
+  apiUpdateRpgTableStatus,
+  type RpgTableDetails,
+  type RpgTableStatus,
+} from '../../../api/rpgApi'
 
 type Props = {
   table: RpgTableDetails
@@ -13,6 +19,11 @@ type Props = {
 }
 
 const LOCATIONS: string[] = ['EVA de Maurepas', 'Salle Oxford', 'Autre (voir description)']
+const STATUS_LABELS: Record<RpgTableStatus, string> = {
+  OPEN: 'Ouvert à l\'inscription',
+  CLOSED: 'Fermée à l\'inscription',
+  CANCELLED: 'Annulée',
+}
 
 export default function EditRpgTableForm({ table, canEdit, onSaved, onBack }: Props): ReactElement | null {
   const initialDate = useMemo(() => {
@@ -25,7 +36,9 @@ export default function EditRpgTableForm({ table, canEdit, onSaved, onBack }: Pr
   const [game, setGame] = useState(table.game)
   const [maxPlayers, setMaxPlayers] = useState<number>(table.maxPlayers)
   const [comments, setComments] = useState(table.comments ?? '')
-
+  const [status, setStatus] = useState<RpgTableStatus>(table.status ?? 'OPEN')
+  const [availableStatuses, setAvailableStatuses] = useState<RpgTableStatus[]>([])
+  const [isLoadingStatuses, setIsLoadingStatuses] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -35,9 +48,32 @@ export default function EditRpgTableForm({ table, canEdit, onSaved, onBack }: Pr
     setGame(table.game)
     setMaxPlayers(table.maxPlayers)
     setComments(table.comments ?? '')
+    setStatus(table.status ?? 'OPEN')
   }, [table, initialDate])
-
-  if (!canEdit) return null
+  
+  useEffect(() => {
+    let mounted = true
+  
+    const run = async (): Promise<void> => {
+      try {
+        setIsLoadingStatuses(true)
+        const statuses = await apiListRpgStatuses()
+        if (!mounted) return
+        setAvailableStatuses(statuses)
+      } catch {
+        if (!mounted) return
+        setAvailableStatuses(['OPEN', 'CLOSED', 'CANCELLED'])
+      } finally {
+        if (mounted) setIsLoadingStatuses(false)
+      }
+    }
+  
+    void run()
+  
+    return () => {
+      mounted = false
+    }
+  }, [])
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -81,6 +117,10 @@ export default function EditRpgTableForm({ table, canEdit, onSaved, onBack }: Pr
         comments: comments.trim().length > 0 ? comments.trim() : null,
       })
 
+      if (status !== table.status) {
+        await apiUpdateRpgTableStatus(table.eventID, status)
+      }
+
       onSaved()
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erreur'
@@ -89,6 +129,8 @@ export default function EditRpgTableForm({ table, canEdit, onSaved, onBack }: Pr
       setIsSubmitting(false)
     }
   }
+
+  if (!canEdit) return null
 
   return (
     <section className="rpg-create">
@@ -125,7 +167,7 @@ export default function EditRpgTableForm({ table, canEdit, onSaved, onBack }: Pr
 
             <select
               id="rpg-maxPlayers"
-              className="input"
+        className="input input--maxPlayers"
               value={String(maxPlayers)}
               onChange={(e) => setMaxPlayers(Number(e.target.value))}
               disabled={isSubmitting}
@@ -147,7 +189,7 @@ export default function EditRpgTableForm({ table, canEdit, onSaved, onBack }: Pr
 
           <select
             id="rpg-location"
-            className="input"
+            className="input input--location"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             disabled={isSubmitting}
@@ -194,6 +236,21 @@ export default function EditRpgTableForm({ table, canEdit, onSaved, onBack }: Pr
           <button type="button" className="btn-secondary" onClick={onBack} disabled={isSubmitting}>
             Retour
           </button>
+
+          <select
+            id="rpg-status"
+            className="input input--status"
+            value={status}
+            onChange={(e) => setStatus(e.target.value as RpgTableStatus)}
+            disabled={isSubmitting || isLoadingStatuses}
+            required
+          >
+            {(availableStatuses.length > 0 ? availableStatuses : (['OPEN', 'CLOSED', 'CANCELLED'] as RpgTableStatus[])).map((s) => (
+              <option key={s} value={s}>
+                {STATUS_LABELS[s] ?? s}
+              </option>
+            ))}
+          </select>
 
           <button type="submit" className="btn-primary" disabled={isSubmitting}>
             Enregistrer

@@ -48,6 +48,8 @@ export type RpgUpdateTableBody = {
   maxPlayers?: number
 }
 
+export type RpgTableStatus = 'OPEN' | 'CLOSED' | 'CANCELLED'
+
 type ApiErrorPayload = { message?: string; code?: string }
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
@@ -359,4 +361,43 @@ export async function apiUpdateRpgTable(eventID: number, body: RpgUpdateTableBod
   if (!res.ok) {
     throw new Error(await readErrorMessage(res, 'Mise à jour impossible'))
   }
+}
+
+export async function apiUpdateRpgTableStatus(eventID: number, status: RpgTableStatus): Promise<void> {
+  const csrfToken = await fetchCsrfToken()
+  const res = await fetch(`/api/rpg/tables/${eventID}/status`, {
+    method: 'PUT',
+    headers: {
+      'content-type': 'application/json',
+      'x-csrf-token': csrfToken,
+    },
+    credentials: 'include',
+    body: JSON.stringify({ status }),
+  })
+
+  if (!res.ok) {
+    throw new Error(await readErrorMessage(res, 'Mise à jour du statut impossible'))
+  }
+}
+
+function isRpgTableStatus(value: unknown): value is RpgTableStatus {
+  return value === 'OPEN' || value === 'CLOSED' || value === 'CANCELLED'
+}
+
+function isRpgTableStatusList(value: unknown): value is RpgTableStatus[] {
+  return Array.isArray(value) && value.every(isRpgTableStatus)
+}
+
+export async function apiListRpgStatuses(): Promise<RpgTableStatus[]> {
+  const res = await fetch('/api/rpg/tables/statuses', { credentials: 'include' })
+  if (!res.ok) {
+    throw new Error(await readErrorMessage(res, 'Impossible de charger les statuts'))
+  }
+
+  const value: unknown = await readJsonUnknown(res)
+  if (!isRpgTableStatusList(value)) {
+    throw new Error('Invalid statuses payload')
+  }
+
+  return value
 }
