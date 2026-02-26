@@ -1,55 +1,16 @@
 import type { RequestHandler } from 'express'
-import { Op, type IncludeOptions, type Model } from 'sequelize'
+import { Op, type IncludeOptions } from 'sequelize'
 import { Session, User, Role } from '../models'
 import { getCookieValue } from '../utils/cookies'
 import type { ApiError } from '../../types/api/errors'
+import type { SessionInfo } from '../../types/api/session'
 
-// ---------------------------
-// Typage Sequelize pour Role
-// ---------------------------
-interface RoleAttributes {
-  roleID: number
-  roleLabel: string
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === 'object' && value !== null
 }
 
-type RoleInstance = Model<RoleAttributes> & RoleAttributes
+type SessionResponse = SessionInfo | ApiError
 
-// ---------------------------
-// Typage Sequelize pour User
-// ---------------------------
-interface UserAttributes {
-  userID: number
-  nickname: string
-  isVerified: boolean
-  Role?: RoleInstance
-}
-
-type UserInstance = Model<UserAttributes> & UserAttributes
-
-// ---------------------------
-// Typage Sequelize pour Session
-// ---------------------------
-interface SessionAttributes {
-  sessionID: number
-  userID: number
-  token: string
-  expiration: Date
-  User?: UserInstance
-}
-
-type SessionInstance = Model<SessionAttributes> & SessionAttributes
-
-type SessionSuccess = {
-  nickname: string
-  role: string
-  isVerified: boolean
-}
-
-type SessionResponse = SessionSuccess | ApiError
-
-// ---------------------------
-// Contrôleur session
-// ---------------------------
 const controllerSession: RequestHandler<
   Record<string, never>,
   SessionResponse,
@@ -65,43 +26,80 @@ const controllerSession: RequestHandler<
       return
     }
 
-    // ---------------------------
-    // Définition de l'include pour l'utilisateur et son rôle
-    // ---------------------------
     const includeUser: IncludeOptions = {
       model: User,
       required: true,
       include: [
         {
           model: Role,
-          required: false, // Role optionnel
+          required: false,
         },
       ],
     }
 
-    // ---------------------------
-    // Recherche de la session active (non expirée)
-    // ---------------------------
-    const session = (await Session.findOne({
+    const session = await Session.findOne({
       where: {
         token,
-        expiration: { [Op.gt]: new Date() }, // Vérifie l'expiration
+        expiration: { [Op.gt]: new Date() },
       },
-      include: [includeUser], // Must be array pour TypeScript
-    })) as SessionInstance | null
+      include: [includeUser],
+    })
 
-    if (!session || !session.User) {
+    if (!session) {
       res.status(401).json({ code: 'UNAUTHORIZED', message: 'Session expirée ou invalide' })
       return
     }
 
-    const user = session.User
-    const role = user.Role
+    const sessionJsonUnknown: unknown = session.toJSON()
 
-    const payload: SessionSuccess = {
-      nickname: user.nickname,
-      role: role?.roleLabel ?? 'member',
-      isVerified: Boolean(user.isVerified),
+    if (!isRecord(sessionJsonUnknown)) {
+      res.status(500).json({ code: 'ERROR', message: 'Session invalide' })
+      return
+    }
+
+    const userUnknown = sessionJsonUnknown['User']
+
+    if (!isRecord(userUnknown)) {
+      res.status(401).json({ code: 'UNAUTHORIZED', message: 'Session expirée ou invalide' })
+      return
+    }
+
+    const userIDUnknown = userUnknown['userID']
+    const nicknameUnknown = userUnknown['nickname']
+    const isVerifiedUnknown = userUnknown['isVerified']
+
+    if (typeof userIDUnknown !== 'number') {
+      res.status(500).json({ code: 'ERROR', message: 'Session invalide' })
+      return
+    }
+
+    if (typeof nicknameUnknown !== 'string') {
+      res.status(500).json({ code: 'ERROR', message: 'Session invalide' })
+      return
+    }
+
+    const roleUnknown = userUnknown['Role']
+    let roleLabel = 'member'
+    let roleID = 5
+    
+    if (isRecord(roleUnknown)) {
+      const roleLabelUnknown = roleUnknown['roleLabel']
+      if (typeof roleLabelUnknown === 'string') {
+        roleLabel = roleLabelUnknown
+      }
+    
+      const roleIDUnknown = roleUnknown['roleID']
+      if (typeof roleIDUnknown === 'number') {
+        roleID = roleIDUnknown
+      }
+    }
+    
+    const payload: SessionInfo = {
+      userID: userIDUnknown,
+      nickname: nicknameUnknown,
+      roleID,
+      role: roleLabel,
+      isVerified: Boolean(isVerifiedUnknown),
     }
 
     res.json(payload)

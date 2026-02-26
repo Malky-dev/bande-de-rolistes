@@ -3,20 +3,25 @@ import './App.css'
 import AuthForms from './components/AuthForms'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
-import type { SessionInfo } from '../api/authApi'
+import type { SessionInfo } from '../types/api/session'
 import { apiSession } from '../api/authApi'
 import { fetchCsrfToken } from '../api/securityApi'
 import HomeView from './views/HomeView'
 import AdminView from './views/AdminView'
+import RpgTablesView from './views/RpgTablesView'
 import AccountView from './views/AccountView'
 import ForbiddenView from './views/ForbiddenView'
+import CreateRpgTableView from './views/rpg/CreateRpgTableView'
+import EditRpgTableView from './views/rpg/EditRpgTableView'
+import 'react-datepicker/dist/react-datepicker.css'
 
-type View = 'home' | 'login' | 'signup' | 'admin' | 'account'
+type View = 'home' | 'login' | 'signup' | 'admin' | 'account' | 'rpg' | 'rpg-create' | 'rpg-edit'
 
 function App() {
   const [view, setView] = useState<View>('home')
   const [session, setSession] = useState<SessionInfo | null>(null)
   const [checkingSession, setCheckingSession] = useState(true)
+  const [editingEventID, setEditingEventID] = useState<number | null>(null)
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
@@ -24,18 +29,13 @@ function App() {
 
     if (discordError) {
       console.error('Erreur Discord OAuth:', discordError)
-
-      window.history.replaceState(
-        {},
-        document.title,
-        window.location.pathname
-      )
+      window.history.replaceState({}, document.title, window.location.pathname)
     }
 
     async function checkSession(): Promise<void> {
       try {
-        const session = await apiSession() // pas de token en paramètre
-        setSession(session)
+        const s = await apiSession()
+        setSession(s)
         setView('home')
       } catch {
         setSession(null)
@@ -49,14 +49,10 @@ function App() {
 
   const handleLogout = async () => {
     try {
-      // Récupérer le token CSRF
       const csrfToken = await fetchCsrfToken()
-
       await fetch('/api/logout', {
         method: 'POST',
-        headers: {
-          'x-csrf-token': csrfToken,
-        },
+        headers: { 'x-csrf-token': csrfToken },
         credentials: 'include',
       })
     } catch (error) {
@@ -78,27 +74,54 @@ function App() {
         view={view}
         checkingSession={checkingSession}
         session={session}
-        onChangeView={(view) => setView(view)}
+        onChangeView={(v) => setView(v)}
         onLogout={() => void handleLogout()}
       />
 
       <main className="main">
         {view === 'home' && <HomeView />}
 
-        {(view === 'login' || view === 'signup') && (
-          <AuthForms
-            view={view}
-            onSwitchView={setView}
-            onLoginSuccess={handleLoginSuccess}
+        {view === 'rpg' && (
+          <RpgTablesView
+            session={session}
+            onCreateTable={() => setView('rpg-create')}
+            onEditTable={(eventID) => {
+              setEditingEventID(eventID)
+              setView('rpg-edit')
+            }}
+            onLogin={() => setView('login')}
           />
         )}
 
-        {view === 'admin' && (
-          <AdminView session={session} onBackHome={() => setView('home')} />
+        {view === 'rpg-create' && (
+          <CreateRpgTableView
+            session={session}
+            onBack={() => setView('rpg')}
+          />
         )}
 
-        {view === 'account' && (
-          session ? (
+        {view === 'rpg-edit' && editingEventID !== null && (
+          <EditRpgTableView
+            session={session}
+            eventID={editingEventID}
+            onBack={() => setView('rpg')}
+          />
+        )}
+
+        {(view === 'login' || view === 'signup') && (
+          <AuthForms view={view} 
+            onSwitchView={setView}
+            onLoginSuccess={handleLoginSuccess} />
+        )}
+
+        {view === 'admin' && (
+          <AdminView 
+            session={session} 
+            onBackHome={() => setView('home')} />
+        )}
+
+        {view === 'account' &&
+          (session ? (
             <AccountView
               onBackHome={() => setView('home')}
               onSessionRefresh={(s) => setSession(s)}
@@ -109,9 +132,9 @@ function App() {
               message="Vous devez être connecté pour accéder à votre compte."
               onBackHome={() => setView('login')}
             />
-          )
-        )}
+          ))}
       </main>
+
       <Footer />
     </div>
   )

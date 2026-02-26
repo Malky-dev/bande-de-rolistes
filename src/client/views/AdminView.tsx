@@ -1,4 +1,4 @@
-import type { SessionInfo } from '@/api/authApi'
+import type { SessionInfo } from '../../types/api/session'
 import AdminPanel from '@/client/components/AdminPanel'
 import ForbiddenView from './ForbiddenView'
 
