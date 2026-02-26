@@ -1,7 +1,7 @@
-import type { SessionInfo } from '../../api/authApi'
+import type { SessionInfo } from '../../types/api/session'
 import logoBDR from '../../assets/img/LogoBDR_creme-removebg.png'
 
-type View = 'home' | 'login' | 'signup' | 'admin' | 'account'
+type View = 'home' | 'login' | 'signup' | 'admin' | 'account' | 'rpg' | 'rpg-create' | 'rpg-edit'
 
 type NavbarProps = {
   view: View
@@ -32,6 +32,16 @@ function Navbar({ view, checkingSession, session, onChangeView, onLogout }: Navb
         >
           Accueil
         </button>
+
+        <button
+          className={`navbar-link navbar-link-button ${
+            view === 'rpg' ? 'navbar-link-active' : ''
+          }`}
+          onClick={() => onChangeView('rpg')}
+        >
+          Tables JDR
+        </button>
+
         <button className="navbar-link navbar-link-button">Qui sommes-nous ?</button>
         <button className="navbar-link navbar-link-button">Le jeu de rôle</button>
 

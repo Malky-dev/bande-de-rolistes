@@ -1,10 +1,6 @@
 // src/api/authApi.ts
 
-export type SessionInfo = {
-  nickname: string
-  role: string
-  isVerified: boolean
-}
+import type { SessionInfo } from '../types/api/session'
 
 export type Quote = {
   content: string
@@ -100,8 +96,12 @@ async function getCsrfToken(): Promise<string> {
 
 function isSessionInfo(value: object): value is SessionInfo {
   return (
+    'userID' in value &&
+    typeof value.userID === 'number' &&
     'nickname' in value &&
     typeof value.nickname === 'string' &&
+    'roleID' in value &&
+    typeof value.roleID === 'number' &&
     'role' in value &&
     typeof value.role === 'string' &&
     'isVerified' in value &&
