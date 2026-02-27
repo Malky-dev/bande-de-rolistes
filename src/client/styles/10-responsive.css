@@ -1,0 +1,23 @@
+/* =========================================================
+   10) RESPONSIVE GLOBAL
+========================================================= */
+
+@media (max-width: 900px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rpg-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .inline-row {
+    grid-template-columns: 1fr;
+  }
+}

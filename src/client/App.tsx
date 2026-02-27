@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import './App.css'
 import AuthForms from './components/AuthForms'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
@@ -14,7 +13,6 @@ import ForbiddenView from './views/ForbiddenView'
 import CreateRpgTableView from './views/rpg/CreateRpgTableView'
 import EditRpgTableView from './views/rpg/EditRpgTableView'
 import QuotesView from './views/QuoteView'
-import 'react-datepicker/dist/react-datepicker.css'
 
 type View = 'home' | 'login' | 'signup' | 'admin' | 'account' | 'rpg' | 'rpg-create' | 'rpg-edit' | 'quotes'
 
