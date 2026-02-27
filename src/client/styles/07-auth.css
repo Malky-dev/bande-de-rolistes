@@ -1,0 +1,130 @@
+/* =========================================================
+   07) AUTH / ACCOUNT
+   - Auth screen (login/signup)
+   - AccountView helpers
+========================================================= */
+
+.auth-wrap {
+  padding: 22px;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.auth-panel {
+  padding: 22px;
+}
+
+.auth-title {
+  margin: 0 0 10px;
+  font-size: 22px;
+}
+
+.auth-subtitle {
+  margin: 0 0 16px;
+  color: rgba(229, 231, 235, 0.8);
+}
+
+.auth-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.auth-block {
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(2, 6, 23, 0.35);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.auth-block h4 {
+  margin: 0 0 12px;
+}
+
+.auth-hero {
+  padding: 56px 22px 40px;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.auth-hero-left {
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.auth-hero-pill,
+.auth-hero-title,
+.auth-hero-subtitle {
+  text-align: center;
+}
+
+.auth-form {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 32rem;
+  align-items: center;
+}
+
+.auth-form--spaced {
+  margin-top: 1.5rem;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.auth-field label {
+  font-size: 0.85rem;
+  color: rgba(229, 231, 235, 0.9);
+  font-weight: 800;
+}
+
+.auth-field input {
+  padding: 0.6rem 0.7rem;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(2, 6, 23, 0.4);
+  color: var(--text);
+}
+
+.auth-field input:focus {
+  outline: none;
+  border-color: rgba(250, 204, 21, 0.7);
+  box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.35);
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 6px 0;
+  opacity: 0.9;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  height: 1px;
+  flex: 1;
+  background: rgba(148, 163, 184, 0.25);
+}
+
+.auth-divider span {
+  font-weight: 800;
+  color: rgba(229, 231, 235, 0.75);
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.account-help {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.account-help--em {
+  text-decoration: underline;
+}

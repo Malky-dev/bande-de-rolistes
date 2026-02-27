@@ -1,0 +1,23 @@
+/* =========================================================
+   00) TOKENS / THEME (variables globales)
+========================================================= */
+
+:root {
+  --bg: #0f172a;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --panel: rgba(15, 23, 42, 0.75);
+  --panel-border: rgba(148, 163, 184, 0.2);
+
+  --accent: #facc15;
+  --accent-2: #f97316;
+
+  --succ: #22c55e;
+  --err: #ef4444;
+
+  --radius: 16px;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+
+  --font-title: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  --font-body: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+}

@@ -1,0 +1,77 @@
+/* =========================================================
+   06) HOME / HERO
+========================================================= */
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 28px;
+  padding: 56px 22px 40px;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.hero-left h1 {
+  font-family: var(--font-title);
+  font-size: clamp(34px, 4.6vw, 56px);
+  margin: 0 0 10px;
+  line-height: 1.05;
+}
+
+.hero-left p {
+  margin: 0 0 18px;
+  color: rgba(229, 231, 235, 0.85);
+  font-size: 16px;
+  line-height: 1.6;
+  max-width: 56ch;
+}
+
+.dots-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 10px 0 18px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.35);
+}
+
+.dot.hot {
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.08);
+}
+
+.hero-card {
+  padding: 18px;
+  border-radius: var(--radius);
+}
+
+.hero-card h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+}
+
+.hero-card p {
+  margin: 0;
+  color: rgba(229, 231, 235, 0.8);
+  line-height: 1.6;
+}
+
+.hero-left {
+  min-width: 0;
+}
+
+.hero-right {
+  min-width: 0;
+}
+
+.hero-card.panel {
+  border: 1px solid var(--panel-border);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+}

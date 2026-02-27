@@ -6,8 +6,6 @@ import {
   apiQuotesUpdate,
   type QuoteAdmin,
 } from '../../api/authApi'
-import './AdminPanel.css'
-import './QuotesAdminPanel.css'
 
 const PAGE_SIZE = 10
 

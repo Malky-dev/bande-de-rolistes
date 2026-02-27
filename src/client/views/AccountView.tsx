@@ -90,7 +90,7 @@ function AccountView({ onBackHome, onSessionRefresh }: AccountViewProps) {
   }
 
   return (
-    <section className="panel">
+    <section className="panel panel--center">
       <h2 className="panel__title">Mon compte</h2>
 
       <div className="auth-field">
