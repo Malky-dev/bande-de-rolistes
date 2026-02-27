@@ -1,6 +1,7 @@
 import type { RequestHandler } from 'express'
 import { Op, type IncludeOptions, type Model } from 'sequelize'
 import { Role, Session, User } from '../models'
+import { getCookieValue } from '../utils/cookies'
 
 /* =====================================================
    Typage Sequelize minimal (relations incluses)
@@ -28,27 +29,6 @@ interface SessionAttributes {
 }
 
 type SessionInstance = Model<SessionAttributes> & SessionAttributes
-
-function getCookieValue(cookieHeader: string, name: string): string | undefined {
-  const parts = cookieHeader.split(';')
-
-  for (const part of parts) {
-    const trimmed = part.trim()
-    if (!trimmed) continue
-
-    const eqIndex = trimmed.indexOf('=')
-    if (eqIndex === -1) continue
-
-    const key = trimmed.slice(0, eqIndex)
-    const rawValue = trimmed.slice(eqIndex + 1)
-
-    if (key === name) {
-      return decodeURIComponent(rawValue)
-    }
-  }
-
-  return undefined
-}
 
 /* =====================================================
    Middleware requireAdmin
