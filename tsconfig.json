@@ -1,0 +1,35 @@
+{
+  "extends": "./tsconfig.app.json",
+
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "noEmit": true,
+
+    /* qualité TS */
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* résolution Vite */
+    "moduleResolution": "Bundler",
+
+    /* alias partagé */
+    "paths": {
+      "@/*": ["./*"]
+    },
+
+    /* types globaux accessibles */
+    "types": ["vite/client"]
+  },
+
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/types/**/*.d.ts"
+  ],
+
+  "exclude": [
+    "src/server",
+    "dist",
+    "node_modules"
+  ]
+}

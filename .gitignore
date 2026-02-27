@@ -1,5 +1,49 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
 # Editor directories and files
 .cursor/
+.cursor/*
 .vscode/
+.vscode/*
+.vite/
+.vite/*
 .idea
 .DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.md
+package-lock.json
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Code review
+CODE_REVIEW.md
+CODE_REVIEW.spec.md
+package-lock.json
+package.json
+src/client/App.css
+src/client/App.tsx
+src/client/main.tsx
+src/client/components/Navbar.tsx
+src/client/views/RpgTablesView.tsx
+src/client/views/rpg/CreateRpgTableForm.tsx
+src/client/views/rpg/CreateRpgTableView.tsx
+src/server/controllers/rpg/createTable.ts
