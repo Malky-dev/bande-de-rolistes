@@ -50,6 +50,26 @@ router.get('/quotes', requireUser, requireStaff, async (req, res) => {
     }
 })
 
+router.post('/quotes', requireUser, requireStaff, verifyCsrf(), async (req, res) => {
+  try {
+    const { content, author } = req.body as { content?: string; author?: string }
+
+    if (typeof content !== 'string' || content.trim().length < 3) {
+      res.status(400).json({ code: 'BAD_REQUEST', message: 'Contenu invalide' })
+      return
+    }
+
+    const quote = await Quote.create({
+      content: content.trim(),
+      author: typeof author === 'string' && author.trim() ? author.trim() : 'Anonyme',
+    })
+
+    res.status(201).json(quote)
+  } catch {
+    res.status(500).json({ code: 'ERROR', message: "Erreur lors de l'ajout de la citation" })
+  }
+})
+
 router.put('/quotes/:quoteID', requireUser, requireStaff, verifyCsrf(), async (req, res) => {
     try {
         const quoteID = Number(req.params.quoteID)
