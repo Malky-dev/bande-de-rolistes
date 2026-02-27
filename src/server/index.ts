@@ -21,6 +21,8 @@ import discordRoutes from './routes/discord'
 import adminRoutes from './routes/admin'
 import accountRoutes from './routes/account'
 import rpgRoutes from './routes/rpg'
+import quoteRoutes from './routes/quote'
+import quotesRoutes from './routes/quotes'
 
 // ---------------------------
 // Création application
@@ -54,6 +56,8 @@ app.use('/api', discordRoutes)
 app.use('/api', adminRoutes)
 app.use('/api', accountRoutes)
 app.use('/api', rpgRoutes)
+app.use('/api', quoteRoutes)
+app.use('/api', quotesRoutes)
 
 // ---------------------------
 // Initialisation base
