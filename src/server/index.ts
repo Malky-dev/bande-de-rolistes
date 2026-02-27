@@ -7,7 +7,6 @@ dotenv.config()
 
 import express from 'express'
 import cors from 'cors'
-import cookieParser from 'cookie-parser'
 import helmet from 'helmet'
 import compression from 'compression'
 
@@ -41,7 +40,6 @@ app.use(cors({
 }))
 
 app.use(express.json())
-app.use(cookieParser())
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }))
 app.use(compression())
 
