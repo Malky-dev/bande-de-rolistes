@@ -1,7 +1,7 @@
 import type { SessionInfo } from '../../types/api/session'
 import logoBDR from '../../assets/img/LogoBDR_creme-removebg.png'
 
-type View = 'home' | 'login' | 'signup' | 'admin' | 'account' | 'rpg' | 'rpg-create' | 'rpg-edit'
+type View = 'home' | 'login' | 'signup' | 'admin' | 'account' | 'rpg' | 'rpg-create' | 'rpg-edit' | 'quotes'
 
 type NavbarProps = {
   view: View
@@ -64,6 +64,17 @@ function Navbar({ view, checkingSession, session, onChangeView, onLogout }: Navb
               Inscription
             </button>
           </>
+        )}
+
+        {session && (session.role === 'admin' || session.role === 'organisator') && (
+          <button
+            className={`navbar-link navbar-link-button ${
+              view === 'quotes' ? 'navbar-link-active' : ''
+            }`}
+            onClick={() => onChangeView('quotes')}
+          >
+            Citations
+          </button>
         )}
 
         {session && (

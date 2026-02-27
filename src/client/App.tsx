@@ -13,9 +13,10 @@ import AccountView from './views/AccountView'
 import ForbiddenView from './views/ForbiddenView'
 import CreateRpgTableView from './views/rpg/CreateRpgTableView'
 import EditRpgTableView from './views/rpg/EditRpgTableView'
+import QuotesView from './views/QuoteView'
 import 'react-datepicker/dist/react-datepicker.css'
 
-type View = 'home' | 'login' | 'signup' | 'admin' | 'account' | 'rpg' | 'rpg-create' | 'rpg-edit'
+type View = 'home' | 'login' | 'signup' | 'admin' | 'account' | 'rpg' | 'rpg-create' | 'rpg-edit' | 'quotes'
 
 function App() {
   const [view, setView] = useState<View>('home')
@@ -108,16 +109,25 @@ function App() {
           />
         )}
 
+        {view === 'quotes' && (
+          <QuotesView 
+            session={session} 
+            onBackHome={() => setView('home')}
+          />
+        )}
+
         {(view === 'login' || view === 'signup') && (
           <AuthForms view={view} 
             onSwitchView={setView}
-            onLoginSuccess={handleLoginSuccess} />
+            onLoginSuccess={handleLoginSuccess}
+          />
         )}
 
         {view === 'admin' && (
           <AdminView 
             session={session} 
-            onBackHome={() => setView('home')} />
+            onBackHome={() => setView('home')}
+          />
         )}
 
         {view === 'account' &&

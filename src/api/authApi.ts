@@ -7,6 +7,21 @@ export type Quote = {
   author: string
 }
 
+export type QuoteAdmin = {
+  quoteID: number
+  content: string
+  author: string
+  created_at?: string
+}
+
+export type Paginated<T> = {
+  items: T[]
+  page: number
+  limit: number
+  totalItems: number
+  totalPages: number
+}
+
 export type AdminUser = {
   userID: number
   nickname: string
@@ -170,7 +185,7 @@ export async function apiSignin(
 ): Promise<void> {
   const csrfToken = await getCsrfToken()
 
-  const res = await fetch('/api/signin', {
+  const res = await fetch('/api/auth/signin', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -188,7 +203,7 @@ export async function apiSignin(
 export async function apiLogin(email: string, password: string): Promise<void> {
   const csrfToken = await getCsrfToken()
 
-  const res = await fetch('/api/login', {
+  const res = await fetch('/api/auth/login', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -253,6 +268,120 @@ export async function apiQuote(): Promise<Quote> {
     throw new Error('Invalid quote payload')
   }
   return obj
+}
+
+function isQuoteAdminArray(value: unknown): value is QuoteAdmin[] {
+  if (!Array.isArray(value)) return false
+  return value.every((v) => {
+    if (typeof v !== 'object' || v === null) return false
+    const o = v as Record<string, unknown>
+    return (
+      typeof o.quoteID === 'number' &&
+      typeof o.content === 'string' &&
+      typeof o.author === 'string'
+    )
+  })
+}
+
+function isQuoteAdmin(value: object): value is QuoteAdmin {
+  return (
+    'quoteID' in value &&
+    typeof value.quoteID === 'number' &&
+    'content' in value &&
+    typeof value.content === 'string' &&
+    'author' in value &&
+    typeof value.author === 'string' &&
+    (!('created_at' in value) || typeof (value as Record<string, unknown>).created_at === 'string')
+  )
+}
+
+function isPaginatedQuoteAdmin(value: object): value is Paginated<QuoteAdmin> {
+  return (
+    'items' in value &&
+    Array.isArray((value as Record<string, unknown>).items) &&
+    isQuoteAdminArray((value as Record<string, unknown>).items) &&
+    'page' in value &&
+    typeof (value as Record<string, unknown>).page === 'number' &&
+    'limit' in value &&
+    typeof (value as Record<string, unknown>).limit === 'number' &&
+    'totalItems' in value &&
+    typeof (value as Record<string, unknown>).totalItems === 'number' &&
+    'totalPages' in value &&
+    typeof (value as Record<string, unknown>).totalPages === 'number'
+  )
+}
+
+export async function apiQuotesList(page = 1, limit = 10, q = ''): Promise<Paginated<QuoteAdmin>> {
+  const params = new URLSearchParams()
+  params.set('page', String(page))
+  params.set('limit', String(limit))
+  if (q.trim().length > 0) params.set('q', q.trim())
+
+  const res = await fetch(`/api/quotes?${params.toString()}`, { credentials: 'include' })
+  if (!res.ok) throw new Error(await readErrorMessage(res, 'Erreur lors du chargement des citations'))
+
+  const obj = await readJsonObject(res)
+  if (!isPaginatedQuoteAdmin(obj)) {
+    throw new Error('Invalid quotes payload')
+  }
+
+  return obj
+}
+
+export async function apiQuotesCreate(payload: { content: string; author?: string }): Promise<QuoteAdmin> {
+  const csrfToken = await getCsrfToken()
+
+  const res = await fetch('/api/quotes', {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-csrf-token': csrfToken,
+    },
+    body: JSON.stringify(payload),
+  })
+
+  if (!res.ok) {
+    throw new Error(await readErrorMessage(res, "Erreur lors de l'ajout de la citation"))
+  }
+
+  const obj = await readJsonObject(res)
+  if (!isQuoteAdmin(obj)) {
+    throw new Error('Invalid quote payload')
+  }
+  return obj
+}
+
+export async function apiQuotesUpdate(
+  quoteID: number,
+  payload: { content: string; author?: string }
+): Promise<QuoteAdmin> {
+  const csrfToken = await getCsrfToken()
+
+  const res = await fetch(`/api/quotes/${quoteID}`, {
+    method: 'PUT',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
+    body: JSON.stringify(payload),
+  })
+
+  if (!res.ok) throw new Error(await readErrorMessage(res, 'Erreur lors de la mise à jour'))
+
+  const obj = await readJsonObject(res)
+  if (!isQuoteAdmin(obj)) {
+    throw new Error('Invalid quote payload')
+  }
+  return obj
+}
+
+export async function apiQuotesDelete(quoteID: number): Promise<void> {
+  const csrfToken = await getCsrfToken()
+  const res = await fetch(`/api/quotes/${quoteID}`, {
+    method: 'DELETE',
+    credentials: 'include',
+    headers: { 'x-csrf-token': csrfToken },
+  })
+  if (!res.ok) throw new Error(await readErrorMessage(res, 'Erreur lors de la suppression'))
 }
 
 // ----------------------------------
