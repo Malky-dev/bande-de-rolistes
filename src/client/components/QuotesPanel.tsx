@@ -1,3 +1,4 @@
+import { QUOTES_PAGE_SIZE } from '../../shared/constants'
 import { useEffect, useMemo, useState } from 'react'
 import {
   apiQuotesCreate,
@@ -6,8 +7,6 @@ import {
   apiQuotesUpdate,
   type QuoteAdmin,
 } from '../../api/authApi'
-
-const PAGE_SIZE = 10
 
 function QuotesPanel() {
   const [page, setPage] = useState(1)
@@ -38,7 +37,7 @@ function QuotesPanel() {
     try {
       setLoading(true)
       setError(null)
-      const data = await apiQuotesList(targetPage, PAGE_SIZE, q)
+      const data = await apiQuotesList(targetPage, QUOTES_PAGE_SIZE, q)
       setItems(data.items)
       setPage(data.page)
       setTotalPages(data.totalPages)
@@ -69,8 +68,8 @@ function QuotesPanel() {
   }
 
   const rangeLabel = useMemo(() => {
-    const from = totalItems === 0 ? 0 : (page - 1) * PAGE_SIZE + 1
-    const to = Math.min(totalItems, page * PAGE_SIZE)
+    const from = totalItems === 0 ? 0 : (page - 1) * QUOTES_PAGE_SIZE + 1
+    const to = Math.min(totalItems, page * QUOTES_PAGE_SIZE)
     return `${from}-${to} / ${totalItems}`
   }, [page, totalItems])
 

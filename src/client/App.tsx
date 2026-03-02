@@ -10,8 +10,7 @@ import AdminView from './views/AdminView'
 import RpgTablesView from './views/RpgTablesView'
 import AccountView from './views/AccountView'
 import ForbiddenView from './views/ForbiddenView'
-import CreateRpgTableView from './views/rpg/CreateRpgTableView'
-import EditRpgTableView from './views/rpg/EditRpgTableView'
+import UpsertRpgTableView from './views/rpg/UpsertRpgTableView'
 import QuotesView from './views/QuoteView'
 
 type View = 'home' | 'login' | 'signup' | 'admin' | 'account' | 'rpg' | 'rpg-create' | 'rpg-edit' | 'quotes'
@@ -93,14 +92,14 @@ function App() {
         )}
 
         {view === 'rpg-create' && (
-          <CreateRpgTableView
+          <UpsertRpgTableView
             session={session}
             onBack={() => setView('rpg')}
           />
         )}
 
         {view === 'rpg-edit' && editingEventID !== null && (
-          <EditRpgTableView
+          <UpsertRpgTableView
             session={session}
             eventID={editingEventID}
             onBack={() => setView('rpg')}
