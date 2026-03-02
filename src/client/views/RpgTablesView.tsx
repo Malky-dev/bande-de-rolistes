@@ -5,9 +5,13 @@ import {
   apiListRpgTables,
   apiSignupRpg,
   apiUnsignupRpg,
-  type RpgTableDetails,
-  type RpgTableListItem,
 } from '../../api/rpgApi'
+
+import type { 
+  RpgTableDetails, 
+  RpgTableListItem, 
+  RpgSignupItem
+} from '../../types/api/rpg'
 
 type Props = {
   session: SessionInfo | null
@@ -166,10 +170,10 @@ function RpgTablesView({ session, onCreateTable, onEditTable, onLogin }: Props) 
   const mySignupBucket: MySignupBucket = useMemo(() => {
     if (!details || !session) return null
 
-    const inConfirmed = details.confirmed.some((p) => p.userID === session.userID)
+    const inConfirmed = details.confirmed.some((p: RpgSignupItem) => p.userID === session.userID)
     if (inConfirmed) return 'CONFIRMED'
 
-    const inWaitlist = details.waitlist.some((p) => p.userID === session.userID)
+    const inWaitlist = details.waitlist.some((p: RpgSignupItem) => p.userID === session.userID)
     if (inWaitlist) return 'WAITLIST'
 
     return null
@@ -251,7 +255,7 @@ function RpgTablesView({ session, onCreateTable, onEditTable, onLogin }: Props) 
         <aside className="rpg-list">
           {tables.length === 0 && <div className="rpg-empty">Aucune table à venir.</div>}
 
-          {tables.map((t) => (
+          {tables.map((t: RpgTableListItem) => (
             <div
               key={t.eventID}
               role="button"
@@ -374,7 +378,7 @@ function RpgTablesView({ session, onCreateTable, onEditTable, onLogin }: Props) 
                     <p>—</p>
                   ) : (
                     <ul>
-                      {details.confirmed.map((p) => (
+                      {details.confirmed.map((p: RpgSignupItem) => (
                         <li key={p.userID}>{p.nickname}</li>
                       ))}
                     </ul>
@@ -387,7 +391,7 @@ function RpgTablesView({ session, onCreateTable, onEditTable, onLogin }: Props) 
                     <p>—</p>
                   ) : (
                     <ul>
-                      {details.waitlist.map((p) => (
+                      {details.waitlist.map((p: RpgSignupItem) => (
                         <li key={p.userID}>{p.nickname}</li>
                       ))}
                     </ul>

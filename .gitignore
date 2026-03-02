@@ -39,11 +39,3 @@ CODE_REVIEW.md
 CODE_REVIEW.spec.md
 package-lock.json
 package.json
-src/client/App.css
-src/client/App.tsx
-src/client/main.tsx
-src/client/components/Navbar.tsx
-src/client/views/RpgTablesView.tsx
-src/client/views/rpg/CreateRpgTableForm.tsx
-src/client/views/rpg/CreateRpgTableView.tsx
-src/server/controllers/rpg/createTable.ts

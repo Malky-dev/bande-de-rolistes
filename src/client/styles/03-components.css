@@ -98,9 +98,39 @@
   outline: none;
 }
 
+.form select {
+  appearance: auto;
+}
+
 .form textarea {
   min-height: 120px;
   resize: vertical;
+}
+
+.radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 18px; /* row / column */
+  align-items: center;
+}
+
+.radio-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+
+.radio-row span {
+  white-space: nowrap;
+}
+
+.form-actions {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .formField--grow {
@@ -112,14 +142,34 @@
   max-width: 200px;
 }
 
+.form .react-datepicker-wrapper,
+.form .react-datepicker__input-container {
+  width: 100%;
+}
+
+.form .react-datepicker-wrapper input {
+  width: 100%;
+}
+
 .input--location {
   width: 100%;
 }
 
 .inline-row {
   display: grid;
-  grid-template-columns: 1fr 200px;
+  grid-template-columns: 1fr 1fr;
   gap: 12px;
+}
+
+.inline-row--2 {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.inline-row--2 > div {
+  min-width: 0;
 }
 
 .hero-actions {
