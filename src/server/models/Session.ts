@@ -4,25 +4,27 @@ import {
   type InferAttributes,
   type InferCreationAttributes,
   type CreationOptional,
-} from 'sequelize'
+  type NonAttribute,
+} from "sequelize";
 
-import sequelize from '../db'
-import User from './User'
+import sequelize from "../db";
+import type User from "./User";
 
 class Session extends Model<
-  InferAttributes<Session, { omit: 'created_at' | 'updated_at' }>,
-  InferCreationAttributes<Session, { omit: 'created_at' | 'updated_at' }>
+  InferAttributes<Session, { omit: "created_at" | "updated_at" | "user" }>,
+  InferCreationAttributes<Session, { omit: "created_at" | "updated_at" }>
 > {
-  declare sessionID: CreationOptional<number>
-  declare userID: number
-  declare token: string
-  declare expiration: Date
-  declare device: string | null
-  declare browser: string | null
+  declare sessionID: CreationOptional<number>;
+  declare userID: number;
+  declare token: string;
+  declare expiration: Date;
+  declare device: string | null;
+  declare browser: string | null;
 
-  // timestamps
-  declare created_at: CreationOptional<Date>
-  declare updated_at: CreationOptional<Date>
+  declare user?: NonAttribute<User>;
+
+  declare created_at: CreationOptional<Date>;
+  declare updated_at: CreationOptional<Date>;
 }
 
 Session.init(
@@ -31,12 +33,12 @@ Session.init(
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
-      field: 'sessionID',
+      field: "sessionID",
     },
     userID: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      field: 'userID',
+      field: "userID",
     },
     token: {
       type: DataTypes.STRING(255),
@@ -58,16 +60,10 @@ Session.init(
   },
   {
     sequelize,
-    tableName: 'Session',
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
-  }
-)
+    tableName: "Session",
+    createdAt: "created_at",
+    updatedAt: "updated_at",
+  },
+);
 
-// ---------------------------
-// Associations
-// ---------------------------
-Session.belongsTo(User, { foreignKey: 'userID' })
-User.hasMany(Session, { foreignKey: 'userID' })
-
-export default Session
+export default Session;

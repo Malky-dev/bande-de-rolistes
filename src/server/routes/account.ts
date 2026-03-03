@@ -1,19 +1,18 @@
-// ---------------------------
-// account.ts - Gestion compte utilisateur
-// ---------------------------
+import { Router } from "express";
 
-import { Router } from 'express'
+import controllerGetAccount from "../controllers/account/getAccount";
+import controllerUpdateAccount from "../controllers/account/updateAccount";
+import { requireAuth, verifyCsrf, requestLimiter } from "../middleware";
 
-import controllerGetAccount from '../controllers/account/getAccount'
-import controllerUpdateAccount from '../controllers/account/updateAccount'
-import requireUser from '../middleware/authUser'
-import { verifyCsrf } from '../middleware/csrf'
-import { requestLimiter } from '../middleware/rateLimit'
+const router = Router();
 
-const router = Router()
+router.get("/account", requestLimiter, requireAuth, controllerGetAccount);
+router.put(
+  "/account",
+  requestLimiter,
+  verifyCsrf(),
+  requireAuth,
+  controllerUpdateAccount,
+);
 
-router.get('/account', requestLimiter, requireUser, controllerGetAccount)
-
-router.put('/account', requestLimiter, verifyCsrf(), requireUser, controllerUpdateAccount)
-
-export default router
+export default router;
