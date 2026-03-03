@@ -9,6 +9,8 @@
     "dev:server": "tsx watch src/server/index.ts",
     "build": "tsc -b && vite build",
     "lint": "eslint src --max-warnings=0",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
     "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.server.json",
     "unit-tests": "echo \"Unit tests not implemented yet\"",
     "preview": "vite preview",
@@ -55,6 +57,7 @@
     "globals": "^16.5.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
+    "prettier": "3.8.1",
     "ts-node-dev": "^2.0.0",
     "tsx": "^4.21.0",
     "typescript": "~5.9.3",
@@ -62,7 +65,8 @@
     "vite": "^7.2.4"
   },
   "lint-staged": {
-    "src/**/*.{ts,tsx,js,jsx}": [
+    "src/**/*.{ts,tsx,js,jsx,json,css,md}": [
+      "prettier --write",
       "eslint --fix"
     ]
   }
