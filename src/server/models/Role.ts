@@ -1,16 +1,26 @@
-import { DataTypes, type InferAttributes, type InferCreationAttributes, type CreationOptional, Model } from 'sequelize'
-import sequelize from '../db'
+import {
+  DataTypes,
+  Model,
+  type InferAttributes,
+  type InferCreationAttributes,
+  type CreationOptional,
+  type NonAttribute,
+} from "sequelize";
+import sequelize from "../db";
+import type User from "./User";
 
 class Role extends Model<
-  InferAttributes<Role, { omit: 'created_at' | 'updated_at' }>,
-  InferCreationAttributes<Role, { omit: 'created_at' | 'updated_at' }>
+  InferAttributes<Role, { omit: "created_at" | "updated_at" | "users" }>,
+  InferCreationAttributes<Role, { omit: "created_at" | "updated_at" }>
 > {
-  declare roleID: CreationOptional<number>
-  declare roleLabel: string
+  declare roleID: CreationOptional<number>;
+  declare roleLabel: string;
 
-  // timestamps (si tu les utilises côté code)
-  declare created_at: CreationOptional<Date>
-  declare updated_at: CreationOptional<Date>
+  // association (Role.hasMany(User, { as: "users" }))
+  declare users?: NonAttribute<User[]>;
+
+  declare created_at: CreationOptional<Date>;
+  declare updated_at: CreationOptional<Date>;
 }
 
 Role.init(
@@ -19,20 +29,20 @@ Role.init(
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
-      field: 'roleID',
+      field: "roleID",
     },
     roleLabel: {
       type: DataTypes.STRING(100),
       allowNull: false,
-      field: 'roleLabel',
+      field: "roleLabel",
     },
   },
   {
     sequelize,
-    tableName: 'Role',
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
-  }
-)
+    tableName: "Role",
+    createdAt: "created_at",
+    updatedAt: "updated_at",
+  },
+);
 
-export default Role
+export default Role;

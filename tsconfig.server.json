@@ -6,11 +6,7 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
 
-    "rootDir": "src",
-    "outDir": "dist",
-
     "types": ["node"],
-
     "typeRoots": ["./src/types", "./node_modules/@types"],
 
     "strict": true,
@@ -19,9 +15,5 @@
 
     "noEmit": true
   },
-  "include": [
-    "src/server/**/*.ts",
-    "src/types/**/*.ts",
-    "src/types/**/*.d.ts"
-  ]
+  "include": ["src/server/**/*.ts", "src/types/**/*.d.ts"]
 }

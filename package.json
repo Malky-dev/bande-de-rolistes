@@ -6,7 +6,8 @@
   "scripts": {
     "prepare": "husky",
     "dev": "vite",
-    "dev:server": "tsx watch src/server/index.ts",
+    "dev:server": "cross-env TZ=Europe/Paris tsx watch src/server/index.ts",
+    "dev:all": "concurrently -n web,api -c auto \"npm run dev\" \"npm run dev:server\"",
     "build": "tsc -b && vite build",
     "lint": "eslint src --max-warnings=0",
     "format": "prettier . --write",
@@ -14,8 +15,9 @@
     "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.server.json",
     "unit-tests": "echo \"Unit tests not implemented yet\"",
     "preview": "vite preview",
-    "db:init": "tsx scripts/init-db.ts",
-    "db:migrate:discord": "tsx scripts/add-discord-column.ts"
+    "db:init": "cross-env TZ=Europe/Paris tsx scripts/init-db.ts",
+    "db:migrate:discord": "cross-env TZ=Europe/Paris tsx scripts/add-discord-column.ts",
+    "db:test:cotisation": "cross-env TZ=Europe/Paris tsx scripts/test-cotisation.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -51,6 +53,8 @@
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
