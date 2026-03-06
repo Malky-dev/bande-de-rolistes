@@ -24,12 +24,11 @@
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
-    "src/types/**/*.d.ts"
+    "src/types/**/*.d.ts",
+    "tests/**/*.ts",
+    "tests/**/*.tsx",
+    "vitest.config*.ts"
   ],
 
-  "exclude": [
-    "src/server",
-    "dist",
-    "node_modules"
-  ]
+  "exclude": ["src/server", "dist", "node_modules"]
 }
