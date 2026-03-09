@@ -39,7 +39,6 @@ describe("cotisation utils", () => {
         paidAt,
       });
 
-      // assert
       expect(Cotisation.findOne).toHaveBeenCalledTimes(1);
       expect(Cotisation.create).toHaveBeenCalledTimes(1);
 
@@ -60,7 +59,7 @@ describe("cotisation utils", () => {
         async (payload: any) => payload,
       );
 
-      const paidAt = new Date(2026, 2, 3, 10, 0, 0); // 2026-03-03
+      const paidAt = new Date(2026, 2, 3, 10, 0, 0);
 
       const created = await createPaidCotisation({
         userID: 42,
@@ -68,9 +67,7 @@ describe("cotisation utils", () => {
         paidAt,
       });
 
-      // periodStart = last.periodEnd + 1 jour
       expect(created.periodStart).toBe("2026-03-11");
-      // periodEnd = +12 mois -1 jour
       expect(created.periodEnd).toBe("2027-03-10");
     });
 
@@ -82,7 +79,7 @@ describe("cotisation utils", () => {
         async (payload: any) => payload,
       );
 
-      const paidAt = new Date(2026, 2, 3, 10, 0, 0); // 2026-03-03
+      const paidAt = new Date(2026, 2, 3, 10, 0, 0);
 
       const created = await createPaidCotisation({
         userID: 42,
@@ -109,7 +106,6 @@ describe("cotisation utils", () => {
         periodEnd: "2026-03-03",
       });
 
-      // fige la date système sur 2026-03-03 local
       vi.useFakeTimers();
       vi.setSystemTime(new Date(2026, 2, 3, 12, 0, 0));
 

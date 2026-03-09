@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/14</span>
+                <span class='fraction'>14/14</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/14</span>
+                <span class='fraction'>14/14</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -142,40 +142,21 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -183,7 +164,26 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -211,21 +211,21 @@ import Quote from "./Quote";
 import Cotisation from "./Cotisation";
 &nbsp;
 // Associations Role &lt;-&gt; User
-<span class="cstat-no" title="statement not covered" >Role.hasMany(User, { foreignKey: "roleID", as: "users" });</span>
-<span class="cstat-no" title="statement not covered" >User.belongsTo(Role, { foreignKey: "roleID", as: "role" });</span>
+Role.hasMany(User, { foreignKey: "roleID", as: "users" });
+User.belongsTo(Role, { foreignKey: "roleID", as: "role" });
 &nbsp;
 // Associations User &lt;-&gt; Session
-<span class="cstat-no" title="statement not covered" >User.hasMany(Session, { foreignKey: "userID", as: "sessions" });</span>
-<span class="cstat-no" title="statement not covered" >Session.belongsTo(User, { foreignKey: "userID", as: "user" });</span>
+User.hasMany(Session, { foreignKey: "userID", as: "sessions" });
+Session.belongsTo(User, { foreignKey: "userID", as: "user" });
 &nbsp;
 // Associations User &lt;-&gt; Cotisation
-<span class="cstat-no" title="statement not covered" >User.hasMany(Cotisation, {</span>
+User.hasMany(Cotisation, {
   foreignKey: "userID",
   as: "cotisations",
   onDelete: "CASCADE",
   onUpdate: "CASCADE",
 });
-<span class="cstat-no" title="statement not covered" >Cotisation.belongsTo(User, {</span>
+Cotisation.belongsTo(User, {
   foreignKey: "userID",
   as: "user",
   onDelete: "CASCADE",
@@ -233,18 +233,18 @@ import Cotisation from "./Cotisation";
 });
 &nbsp;
 // Associations User &lt;-&gt; TableRPG
-<span class="cstat-no" title="statement not covered" >TableRPG.belongsTo(User, { foreignKey: "dungeon_master", as: "dungeonMaster" });</span>
-<span class="cstat-no" title="statement not covered" >User.hasMany(TableRPG, { foreignKey: "dungeon_master", as: "dmTables" });</span>
+TableRPG.belongsTo(User, { foreignKey: "dungeon_master", as: "dungeonMaster" });
+User.hasMany(TableRPG, { foreignKey: "dungeon_master", as: "dmTables" });
 &nbsp;
 // Join table -&gt; parents
-<span class="cstat-no" title="statement not covered" >TableRPGPlayer.belongsTo(TableRPG, { foreignKey: "eventID", as: "event" });</span>
-<span class="cstat-no" title="statement not covered" >TableRPG.hasMany(TableRPGPlayer, { foreignKey: "eventID", as: "signups" });</span>
+TableRPGPlayer.belongsTo(TableRPG, { foreignKey: "eventID", as: "event" });
+TableRPG.hasMany(TableRPGPlayer, { foreignKey: "eventID", as: "signups" });
 &nbsp;
-<span class="cstat-no" title="statement not covered" >TableRPGPlayer.belongsTo(User, { foreignKey: "userID", as: "user" });</span>
-<span class="cstat-no" title="statement not covered" >User.hasMany(TableRPGPlayer, { foreignKey: "userID", as: "rpgSignups" });</span>
+TableRPGPlayer.belongsTo(User, { foreignKey: "userID", as: "user" });
+User.hasMany(TableRPGPlayer, { foreignKey: "userID", as: "rpgSignups" });
 &nbsp;
 // Associations TableRPG &lt;-&gt; User
-<span class="cstat-no" title="statement not covered" >TableRPG.belongsToMany(User, {</span>
+TableRPG.belongsToMany(User, {
   through: TableRPGPlayer,
   foreignKey: "eventID",
   otherKey: "userID",
@@ -252,7 +252,7 @@ import Cotisation from "./Cotisation";
 });
 &nbsp;
 // Associations User &lt;-&gt; TableRPG
-<span class="cstat-no" title="statement not covered" >User.belongsToMany(TableRPG, {</span>
+User.belongsToMany(TableRPG, {
   through: TableRPGPlayer,
   foreignKey: "userID",
   otherKey: "eventID",
@@ -277,7 +277,7 @@ export {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-03-04T23:11:09.687Z
+                at 2026-03-09T17:01:37.314Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

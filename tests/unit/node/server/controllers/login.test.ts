@@ -231,6 +231,23 @@ describe("controllerLogin", () => {
     expect(cookieOpts.secure).toBe(true);
   });
 
+  it("200: req.get absent -> User-Agent vide", async () => {
+    const { controllerLogin, mocks } = await load({
+      user: { userID: 7, password: "hash" },
+      compareOk: true,
+      token: "tok789",
+      deviceParse: {},
+    });
+
+    const req = makeReq({ body: { email: "a@b.c", password: "pw" } });
+    const res = makeRes();
+
+    await controllerLogin(req as any, res as any, vi.fn() as any);
+
+    expect(mocks.parseMock).toHaveBeenCalledWith("");
+    expect(res.json).toHaveBeenCalledWith({ token: "tok789" });
+  });
+
   it("500 si exception Error", async () => {
     const { controllerLogin } = await load({
       userFindOneError: new Error("boom"),

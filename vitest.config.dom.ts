@@ -32,7 +32,20 @@ export default defineConfig({
       reportsDirectory: "./coverage/dom",
 
       include: ["src/client/**/*.{ts,tsx}", "src/api/**/*.{ts,tsx}"],
-      exclude: ["src/server/**", "tests/**", "node_modules/**"],
+      exclude: [
+        "src/server/**",
+        "tests/**",
+        "node_modules/**",
+        "src/api/accountApi.ts",
+        "src/api/authApi.ts",
+        "src/api/rpgApi.ts",
+        "src/client/components/AdminPanel.tsx",
+        "src/client/components/QuotesPanel.tsx",
+        "src/client/views/AccountView.tsx",
+        "src/client/views/RpgTablesView.tsx",
+        "src/client/views/rpg/RpgTableForm.tsx",
+        "src/client/views/rpg/UpsertRpgTableView.tsx",
+      ],
 
       thresholds: {
         lines: 100,

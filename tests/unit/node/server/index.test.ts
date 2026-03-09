@@ -197,4 +197,80 @@ describe("server/index.ts bootstrap", () => {
     errSpy.mockRestore();
     exitSpy.mockRestore();
   });
+
+  it("utilise les valeurs par défaut pour PORT et FRONTEND_URL", async () => {
+    const appUse = vi.fn();
+    const appListen = vi.fn((port: number, cb?: () => void) => cb?.());
+
+    const expressDefault: any = vi.fn(() => ({
+      use: appUse,
+      listen: appListen,
+    }));
+
+    expressDefault.json = vi.fn(() => "express.json");
+
+    vi.doMock("express", () => ({
+      default: expressDefault,
+    }));
+
+    const corsMw = { _mw: "cors" };
+
+    const corsFn = vi.fn((_opts: unknown) => corsMw);
+    vi.doMock("cors", () => ({ default: corsFn }));
+    vi.doMock("helmet", () => ({ default: vi.fn(() => "helmet") }));
+    vi.doMock("compression", () => ({ default: vi.fn(() => "compression") }));
+    vi.doMock("dotenv", () => ({ default: { config: vi.fn() } }));
+
+    const authenticate = vi.fn().mockResolvedValue(undefined);
+    const sync = vi.fn().mockResolvedValue(undefined);
+
+    vi.doMock("@/server/db", () => ({
+      default: { authenticate, sync },
+    }));
+
+    const mkRouter = (name: string) => ({ _router: name });
+    vi.doMock("@/server/routes/auth", () => ({ default: mkRouter("auth") }));
+    vi.doMock("@/server/routes/session", () => ({
+      default: mkRouter("session"),
+    }));
+    vi.doMock("@/server/routes/csrf", () => ({ default: mkRouter("csrf") }));
+    vi.doMock("@/server/routes/discord", () => ({
+      default: mkRouter("discord"),
+    }));
+    vi.doMock("@/server/routes/admin", () => ({ default: mkRouter("admin") }));
+    vi.doMock("@/server/routes/account", () => ({
+      default: mkRouter("account"),
+    }));
+    vi.doMock("@/server/routes/rpg", () => ({ default: mkRouter("rpg") }));
+    vi.doMock("@/server/routes/quote", () => ({ default: mkRouter("quote") }));
+    vi.doMock("@/server/routes/quotes", () => ({
+      default: mkRouter("quotes"),
+    }));
+    vi.doMock("@/server/routes/cotisation", () => ({
+      default: mkRouter("cotisation"),
+    }));
+
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const exitSpy = vi.spyOn(process, "exit").mockImplementation(((
+      _code?: number,
+    ) => {
+      return undefined as never;
+    }) as any);
+
+    await import("@/server/index");
+    await flushPromises();
+
+    expect(corsFn).toHaveBeenCalledWith({
+      origin: "http://localhost:5173",
+      credentials: true,
+    });
+    expect(appListen).toHaveBeenCalledWith(3000, expect.any(Function));
+    expect(errSpy).not.toHaveBeenCalled();
+    expect(exitSpy).not.toHaveBeenCalled();
+
+    logSpy.mockRestore();
+    errSpy.mockRestore();
+    exitSpy.mockRestore();
+  });
 });

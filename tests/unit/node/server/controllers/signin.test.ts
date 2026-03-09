@@ -384,6 +384,34 @@ describe("controllerSignin", () => {
     errSpy.mockRestore();
   });
 
+  it("400 SequelizeValidationError: fallback 'Validation error' si errors absent", async () => {
+    const err: any = new Error("nope");
+    err.name = "SequelizeValidationError";
+
+    const { controllerSignin } = await load({ createError: err });
+
+    const req = makeReq({
+      body: {
+        nickname: "Nick",
+        email: "a@b.c",
+        password: "abc" + "1".repeat(9),
+        passwordCheck: "abc" + "1".repeat(9),
+      },
+    });
+    const res = makeRes();
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    await controllerSignin(req as any, res as any, vi.fn() as any);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      code: "VALIDATION_ERROR",
+      message: "Validation error",
+    });
+    expect(errSpy).toHaveBeenCalled();
+    errSpy.mockRestore();
+  });
+
   it("409 SequelizeUniqueConstraintError", async () => {
     const err: any = new Error("uniq");
     err.name = "SequelizeUniqueConstraintError";

@@ -156,6 +156,21 @@ describe("controllerAdminUpdateRole", () => {
     });
   });
 
+  it("400 si userID est un tableau vide", async () => {
+    const { controllerAdminUpdateRole, makeReq, makeTypedRes } = await load();
+
+    const req = makeReq({ params: { userID: [] }, body: { roleID: "2" } });
+    const { res, status, json } = makeTypedRes();
+
+    await controllerAdminUpdateRole(req, res);
+
+    expect(status).toHaveBeenCalledWith(400);
+    expect(json).toHaveBeenCalledWith({
+      code: "BAD_REQUEST",
+      message: "userID and roleID are required",
+    });
+  });
+
   it("404 si rôle introuvable", async () => {
     const { controllerAdminUpdateRole, makeReq, makeTypedRes, mocks } =
       await load({
@@ -252,6 +267,79 @@ describe("controllerAdminUpdateRole", () => {
       email: "neo@matrix.tld",
       roleID: 2,
       roleLabel: "admin",
+      isVerified: true,
+    });
+  });
+
+  it("200 json si userID et roleID sont fournis sous forme de tableaux", async () => {
+    const userUpdate = vi.fn().mockResolvedValue(undefined);
+
+    const { controllerAdminUpdateRole, makeReq, makeTypedRes, mocks } =
+      await load({
+        userFindByPkFirstResult: { userID: 7, update: userUpdate },
+        userFindByPkSecondResult: {
+          userID: 7,
+          nickname: "Neo",
+          email: "neo@matrix.tld",
+          roleID: 2,
+          isVerified: true,
+          role: { roleID: 2, roleLabel: "admin" },
+        },
+      });
+
+    const req = makeReq({
+      params: { userID: ["7"] },
+      body: { roleID: ["2"] },
+      user: { userID: 99 },
+    });
+    const { res, json } = makeTypedRes();
+
+    await controllerAdminUpdateRole(req, res);
+
+    expect(mocks.Role.findByPk).toHaveBeenCalledWith(2);
+    expect(mocks.User.findByPk).toHaveBeenCalledWith(7);
+    expect(userUpdate).toHaveBeenCalledWith({ roleID: 2 });
+    expect(json).toHaveBeenCalledWith({
+      userID: 7,
+      nickname: "Neo",
+      email: "neo@matrix.tld",
+      roleID: 2,
+      roleLabel: "admin",
+      isVerified: true,
+    });
+  });
+
+  it("200 json avec fallback roleLabel='guest' si roleLabel absent", async () => {
+    const userUpdate = vi.fn().mockResolvedValue(undefined);
+
+    const { controllerAdminUpdateRole, makeReq, makeTypedRes } = await load({
+      userFindByPkFirstResult: { userID: 7, update: userUpdate },
+      userFindByPkSecondResult: {
+        userID: 7,
+        nickname: "Neo",
+        email: "neo@matrix.tld",
+        roleID: 2,
+        isVerified: true,
+        role: { roleID: 2 },
+      },
+    });
+
+    const req = makeReq({
+      params: { userID: "7" },
+      body: { roleID: "2" },
+      user: { userID: 99 },
+    });
+    const { res, json } = makeTypedRes();
+
+    await controllerAdminUpdateRole(req, res);
+
+    expect(userUpdate).toHaveBeenCalledWith({ roleID: 2 });
+    expect(json).toHaveBeenCalledWith({
+      userID: 7,
+      nickname: "Neo",
+      email: "neo@matrix.tld",
+      roleID: 2,
+      roleLabel: "guest",
       isVerified: true,
     });
   });

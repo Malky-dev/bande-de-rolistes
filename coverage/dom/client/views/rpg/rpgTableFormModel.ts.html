@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/16</span>
+                <span class='fraction'>16/16</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/27</span>
+                <span class='fraction'>27/27</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/5</span>
+                <span class='fraction'>5/5</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/12</span>
+                <span class='fraction'>12/12</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -141,7 +141,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -151,8 +151,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -163,22 +163,20 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-yes">8x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -186,7 +184,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -205,8 +205,8 @@ export type RpgTableFormValues = {
   status?: RpgTableStatus // edit only
 }
 &nbsp;
-export function <span class="fstat-no" title="function not covered" >defaultCreateValues(): RpgTableFormValues {</span>
-<span class="cstat-no" title="statement not covered" >  return {</span>
+export function defaultCreateValues(): RpgTableFormValues {
+  return {
     eventDate: null,
     location: '',
     game: '',
@@ -215,9 +215,9 @@ export function <span class="fstat-no" title="function not covered" >defaultCrea
   }
 }
 &nbsp;
-export function <span class="fstat-no" title="function not covered" >valuesFromTable(t</span>able: RpgTableDetails): RpgTableFormValues {
-  const d = <span class="cstat-no" title="statement not covered" >new Date(table.eventDate)</span>
-<span class="cstat-no" title="statement not covered" >  return {</span>
+export function valuesFromTable(table: RpgTableDetails): RpgTableFormValues {
+  const d = new Date(table.eventDate)
+  return {
     eventDate: Number.isNaN(d.getTime()) ? null : d,
     location: table.location ?? '',
     game: table.game ?? '',
@@ -227,21 +227,21 @@ export function <span class="fstat-no" title="function not covered" >valuesFromT
   }
 }
 &nbsp;
-export function <span class="fstat-no" title="function not covered" >validateRpgTable(v</span>alues: RpgTableFormValues): string | null {
-<span class="cstat-no" title="statement not covered" >  if (!values.eventDate) <span class="cstat-no" title="statement not covered" >return 'La date/heure est requise'</span></span>
-<span class="cstat-no" title="statement not covered" >  if (Number.isNaN(values.eventDate.getTime())) <span class="cstat-no" title="statement not covered" >return 'Date/heure invalide'</span></span>
-<span class="cstat-no" title="statement not covered" >  if (values.location.trim().length &lt; 2) <span class="cstat-no" title="statement not covered" >return 'Lieu invalide'</span></span>
-<span class="cstat-no" title="statement not covered" >  if (values.game.trim().length &lt; 2) <span class="cstat-no" title="statement not covered" >return 'Jeu invalide'</span></span>
+export function validateRpgTable(values: RpgTableFormValues): string | null {
+  if (!values.eventDate) return 'La date/heure est requise'
+  if (Number.isNaN(values.eventDate.getTime())) return 'Date/heure invalide'
+  if (values.location.trim().length &lt; 2) return 'Lieu invalide'
+  if (values.game.trim().length &lt; 2) return 'Jeu invalide'
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  if (!Number.isInteger(values.maxPlayers) || values.maxPlayers &lt; 1 || values.maxPlayers &gt; 10) {</span>
-<span class="cstat-no" title="statement not covered" >    return 'Nombre max de joueurs invalide (1 à 10)'</span>
+  if (!Number.isInteger(values.maxPlayers) || values.maxPlayers &lt; 1 || values.maxPlayers &gt; 10) {
+    return 'Nombre max de joueurs invalide (1 à 10)'
   }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  return null</span>
+  return null
 }
 &nbsp;
-export function <span class="fstat-no" title="function not covered" >toCreateBody(v</span>alues: RpgTableFormValues): RpgCreateTableBody {
-<span class="cstat-no" title="statement not covered" >  return {</span>
+export function toCreateBody(values: RpgTableFormValues): RpgCreateTableBody {
+  return {
     eventDate: values.eventDate!.toISOString(),
     location: values.location.trim(),
     game: values.game.trim(),
@@ -250,8 +250,8 @@ export function <span class="fstat-no" title="function not covered" >toCreateBod
   }
 }
 &nbsp;
-export function <span class="fstat-no" title="function not covered" >toUpdateBody(v</span>alues: RpgTableFormValues): RpgUpdateTableBody {
-<span class="cstat-no" title="statement not covered" >  return {</span>
+export function toUpdateBody(values: RpgTableFormValues): RpgUpdateTableBody {
+  return {
     eventDate: values.eventDate!.toISOString(),
     location: values.location.trim(),
     game: values.game.trim(),
@@ -265,7 +265,7 @@ export function <span class="fstat-no" title="function not covered" >toUpdateBod
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-03-04T16:20:19.774Z
+                at 2026-03-09T17:01:53.672Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

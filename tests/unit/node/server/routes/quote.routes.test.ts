@@ -123,6 +123,23 @@ describe("routes/quote", () => {
     expect(payload.q).toBe("%_\\abc");
   });
 
+  it("GET /quotes: fallback page/limit si valeurs invalides", async () => {
+    const { getQuotes } = await load();
+
+    Quote.findAndCountAll.mockResolvedValue({ rows: [], count: 0 });
+
+    const req = makeReq({
+      query: { page: "NaN", limit: "0" },
+    });
+    const res = ensureRes(makeRes());
+
+    await getQuotes(req as any, res as any);
+
+    const args = Quote.findAndCountAll.mock.calls[0][0];
+    expect(args.limit).toBe(10);
+    expect(args.offset).toBe(0);
+  });
+
   it("GET /quotes: catch -> 500", async () => {
     const { getQuotes } = await load();
 
@@ -172,6 +189,23 @@ describe("routes/quote", () => {
     });
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith({ quoteID: 1 });
+  });
+
+  it("POST /quotes: 201 + author trim", async () => {
+    const { postQuotes } = await load();
+
+    Quote.create.mockResolvedValue({ quoteID: 2 });
+
+    const req = makeReq({ body: { content: "  hello  ", author: "  Bob  " } });
+    const res = ensureRes(makeRes());
+
+    await postQuotes(req as any, res as any);
+
+    expect(Quote.create).toHaveBeenCalledWith({
+      content: "hello",
+      author: "Bob",
+    });
+    expect(res.status).toHaveBeenCalledWith(201);
   });
 
   it("POST /quotes: catch -> 500", async () => {
@@ -261,6 +295,30 @@ describe("routes/quote", () => {
 
     expect(quote.content).toBe("abc");
     expect(quote.author).toBe("Bob");
+    expect(quote.save).toHaveBeenCalledTimes(1);
+    expect(res.json).toHaveBeenCalledWith(quote);
+  });
+
+  it("PUT /quotes/:quoteID: success -> author défaut", async () => {
+    const { putQuote } = await load();
+
+    const quote = {
+      content: "",
+      author: "",
+      save: vi.fn().mockResolvedValue(undefined),
+    };
+    Quote.findByPk.mockResolvedValue(quote);
+
+    const req = makeReq({
+      params: { quoteID: "2" },
+      body: { content: "  abc  ", author: "   " },
+    });
+    const res = ensureRes(makeRes());
+
+    await putQuote(req as any, res as any);
+
+    expect(quote.content).toBe("abc");
+    expect(quote.author).toBe("Anonyme");
     expect(quote.save).toHaveBeenCalledTimes(1);
     expect(res.json).toHaveBeenCalledWith(quote);
   });

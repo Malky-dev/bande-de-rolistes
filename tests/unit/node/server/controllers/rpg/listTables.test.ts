@@ -277,6 +277,37 @@ describe("controllerListTables", () => {
     errSpy.mockRestore();
   });
 
+  it("500 si eventDate invalide (string)", async () => {
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const { controllerListTables, makeReq, makeTypedRes } = await load({
+      findAllResult: [
+        makeRow({
+          eventID: 7,
+          eventDate: "not-a-date",
+          dungeonMaster: { userID: 1, nickname: "DM" },
+          location: "Paris",
+          game: "D&D",
+          comments: null,
+          status: "OPEN",
+          maxPlayers: 10,
+        }),
+      ],
+    });
+
+    const req = makeReq();
+    const { res, status, json } = makeTypedRes();
+
+    await controllerListTables(req, res);
+
+    expect(status).toHaveBeenCalledWith(500);
+    expect(json).toHaveBeenCalledWith({
+      code: "ERROR",
+      message: "eventDate invalide",
+    });
+
+    errSpy.mockRestore();
+  });
+
   it("500 si location invalide", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerListTables, makeReq, makeTypedRes } = await load({

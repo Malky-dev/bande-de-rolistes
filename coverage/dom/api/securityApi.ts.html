@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/9</span>
+                <span class='fraction'>9/9</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/6</span>
+                <span class='fraction'>6/6</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/1</span>
+                <span class='fraction'>1/1</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/9</span>
+                <span class='fraction'>9/9</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -85,47 +85,47 @@
 <a name='L20'></a><a href='#L20'>20</a>
 <a name='L21'></a><a href='#L21'>21</a>
 <a name='L22'></a><a href='#L22'>22</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">export async function <span class="fstat-no" title="function not covered" >fetchCsrfToken(): Promise&lt;string&gt; {</span>
-  const res = <span class="cstat-no" title="statement not covered" >await fetch('/api/csrf-token', {</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">export async function fetchCsrfToken(): Promise&lt;string&gt; {
+  const res = await fetch('/api/csrf-token', {
     credentials: 'include',
   })
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  if (!res.ok) {</span>
-<span class="cstat-no" title="statement not covered" >    throw new Error(`CSRF endpoint error: ${res.status}`)</span>
+  if (!res.ok) {
+    throw new Error(`CSRF endpoint error: ${res.status}`)
   }
 &nbsp;
-  const body = <span class="cstat-no" title="statement not covered" >await res.text()</span>
+  const body = await res.text()
 &nbsp;
   // Extraction simple du champ JSON "csrfToken"
   // Exemple attendu: {"csrfToken":"..."}
-  const match = <span class="cstat-no" title="statement not covered" >/"csrfToken"\s*:\s*"([^"]+)"/.exec(body)</span>
-  const csrfToken = <span class="cstat-no" title="statement not covered" >match?.[1]</span>
+  const match = /"csrfToken"\s*:\s*"([^"]+)"/.exec(body)
+  const csrfToken = match?.[1]
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  if (typeof csrfToken !== 'string' || csrfToken.length === 0) {</span>
-<span class="cstat-no" title="statement not covered" >    throw new Error('Invalid CSRF response')</span>
+  if (typeof csrfToken !== 'string' || csrfToken.length === 0) {
+    throw new Error('Invalid CSRF response')
   }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  return csrfToken</span>
+  return csrfToken
 }</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -133,7 +133,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-03-04T16:20:19.774Z
+                at 2026-03-09T17:01:53.672Z
             </div>
         <script src="../prettify.js"></script>
         <script>

@@ -142,6 +142,26 @@ describe("routes/quotes", () => {
     expect(payload.q).toBe("%_\\abc");
   });
 
+  it("GET /quotes: fallback page/limit si valeurs invalides", async () => {
+    const { getQuotes } = await load();
+
+    Quote.findAndCountAll.mockResolvedValue({ rows: [], count: 0 });
+
+    const req = makeReq({
+      query: { page: "NaN", limit: "0" },
+    });
+    const res = ensureRes(makeRes());
+
+    await getQuotes(req, res);
+
+    const args = Quote.findAndCountAll.mock.calls[0]?.[0] as Record<
+      string,
+      unknown
+    >;
+    expect(args.limit).toBe(10);
+    expect(args.offset).toBe(0);
+  });
+
   it("GET /quotes: catch -> 500", async () => {
     const { getQuotes } = await load();
 
@@ -297,6 +317,30 @@ describe("routes/quotes", () => {
 
     expect(quote.content).toBe("abc");
     expect(quote.author).toBe("Anonyme");
+    expect(quote.save).toHaveBeenCalledTimes(1);
+    expect(res.json).toHaveBeenCalledWith(quote);
+  });
+
+  it("PUT /quotes/:quoteID: success -> save + json (author trim)", async () => {
+    const { putQuote } = await load();
+
+    const quote = {
+      content: "",
+      author: "",
+      save: vi.fn().mockResolvedValue(undefined),
+    };
+    Quote.findByPk.mockResolvedValue(quote);
+
+    const req = makeReq({
+      params: { quoteID: "2" },
+      body: { content: "  abc  ", author: "  Bob  " },
+    });
+    const res = ensureRes(makeRes());
+
+    await putQuote(req, res);
+
+    expect(quote.content).toBe("abc");
+    expect(quote.author).toBe("Bob");
     expect(quote.save).toHaveBeenCalledTimes(1);
     expect(res.json).toHaveBeenCalledWith(quote);
   });

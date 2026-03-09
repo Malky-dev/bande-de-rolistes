@@ -215,6 +215,26 @@ describe("controllerGetTable", () => {
     });
   });
 
+  it("500 si eventDate invalide (string)", async () => {
+    const { controllerGetTable, makeReq, makeTypedRes } = await load({
+      tableFindResult: makeTable({
+        dungeonMaster: { userID: 1, nickname: "DM" },
+        eventDate: "not-a-date",
+      }),
+    });
+
+    const req = makeReq("7");
+    const { res, status, json } = makeTypedRes();
+
+    await controllerGetTable(req, res);
+
+    expect(status).toHaveBeenCalledWith(500);
+    expect(json).toHaveBeenCalledWith({
+      code: "ERROR",
+      message: "eventDate invalide",
+    });
+  });
+
   it("500 si eventID invalide dans table JSON", async () => {
     const { controllerGetTable, makeReq, makeTypedRes } = await load({
       tableFindResult: makeTable({
@@ -440,6 +460,40 @@ describe("controllerGetTable", () => {
     const waitlist = payload["waitlist"] as unknown[];
     expect(confirmed.length).toBe(3);
     expect(waitlist.length).toBe(1);
+  });
+
+  it("200: comments non-string devient null", async () => {
+    const signups = [
+      makeSignup({
+        User: { userID: 1, nickname: "A" },
+        created_at: "2026-01-01T00:00:00.000Z",
+      }),
+    ];
+
+    const { controllerGetTable, makeReq, makeTypedRes } = await load({
+      tableFindResult: makeTable({
+        dungeonMaster: { userID: 9, nickname: "DM" },
+        eventDate: "2026-01-01T00:00:00.000Z",
+        eventID: 7,
+        location: "Paris",
+        game: "D&D",
+        comments: 123,
+        status: "OPEN",
+        maxPlayers: 6,
+      }),
+      signupsFindResult: signups,
+    });
+
+    const req = makeReq("7");
+    const { res, json } = makeTypedRes();
+
+    await controllerGetTable(req, res);
+
+    const payload = (json.mock.calls[0]?.[0] ?? null) as Record<
+      string,
+      unknown
+    >;
+    expect(payload.comments).toBeNull();
   });
 
   it("500 si erreur non-Error", async () => {
