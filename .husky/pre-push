@@ -1,2 +1,8 @@
-npm run typecheck
-npm run unit-tests
+npx lint-staged
+
+# Lance les tests uniquement si du code ou des tests ont changé
+changed="$(git diff --cached --name-only)"
+
+echo "$changed" | grep -Eq '^(src/|tests/)' || exit 0
+
+npm run test:quick
