@@ -29,11 +29,14 @@ describe("getCookieValue", () => {
   });
 
   it("si la valeur est mal encodée, renvoie brut", () => {
-    // %E0 est une séquence invalide pour decodeURIComponent
     expect(getCookieValue("bad=%E0%A4; x=1", "bad")).toBe("%E0%A4");
   });
 
   it("ignore les segments invalides (sans '=')", () => {
     expect(getCookieValue("a=1; broken; sid=ok", "sid")).toBe("ok");
+  });
+
+  it("ignore les segments vides entre deux ';'", () => {
+    expect(getCookieValue("a=1;   ; sid=ok", "sid")).toBe("ok");
   });
 });

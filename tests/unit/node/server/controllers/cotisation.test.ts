@@ -201,6 +201,82 @@ describe("cotisation controllers", () => {
     });
   });
 
+  it("createCotisation: 400 si body n'est pas un record", async () => {
+    const { createCotisation, makeReqCreate, makeResCreate } = await load();
+
+    const req = makeReqCreate({
+      params: { userID: "7" },
+      body: null,
+    });
+    const { res, status, json } = makeResCreate();
+    const next = makeNext();
+
+    await createCotisation(req, res, next);
+
+    expect(status).toHaveBeenCalledWith(400);
+    expect(json).toHaveBeenCalledWith({
+      code: "BAD_AMOUNT",
+      message: "amountCents must be a non-negative integer",
+    });
+  });
+
+  it("createCotisation: 400 si paidAt est un Date invalide", async () => {
+    const { createCotisation, makeReqCreate, makeResCreate } = await load();
+
+    const req = makeReqCreate({
+      params: { userID: "7" },
+      body: { amountCents: 1000, paidAt: new Date("invalid") },
+    });
+    const { res, status, json } = makeResCreate();
+    const next = makeNext();
+
+    await createCotisation(req, res, next);
+
+    expect(status).toHaveBeenCalledWith(400);
+    expect(json).toHaveBeenCalledWith({
+      code: "BAD_PAID_AT",
+      message: "paidAt must be a valid date (ISO string, timestamp, or Date)",
+    });
+  });
+
+  it("createCotisation: 400 si paidAt number est invalide", async () => {
+    const { createCotisation, makeReqCreate, makeResCreate } = await load();
+
+    const req = makeReqCreate({
+      params: { userID: "7" },
+      body: { amountCents: 1000, paidAt: Number.NaN },
+    });
+    const { res, status, json } = makeResCreate();
+    const next = makeNext();
+
+    await createCotisation(req, res, next);
+
+    expect(status).toHaveBeenCalledWith(400);
+    expect(json).toHaveBeenCalledWith({
+      code: "BAD_PAID_AT",
+      message: "paidAt must be a valid date (ISO string, timestamp, or Date)",
+    });
+  });
+
+  it("createCotisation: 400 si paidAt string est invalide", async () => {
+    const { createCotisation, makeReqCreate, makeResCreate } = await load();
+
+    const req = makeReqCreate({
+      params: { userID: "7" },
+      body: { amountCents: 1000, paidAt: "not-a-date" },
+    });
+    const { res, status, json } = makeResCreate();
+    const next = makeNext();
+
+    await createCotisation(req, res, next);
+
+    expect(status).toHaveBeenCalledWith(400);
+    expect(json).toHaveBeenCalledWith({
+      code: "BAD_PAID_AT",
+      message: "paidAt must be a valid date (ISO string, timestamp, or Date)",
+    });
+  });
+
   it("createCotisation: 201 + payload si ok", async () => {
     const { createCotisation, makeReqCreate, makeResCreate, mocks } =
       await load({
@@ -227,6 +303,101 @@ describe("cotisation controllers", () => {
     expect(mocks.createPaidCotisation).toHaveBeenCalled();
     expect(status).toHaveBeenCalledWith(201);
     expect(json).toHaveBeenCalled();
+  });
+
+  it("createCotisation: accepte paidAt Date valide", async () => {
+    const { createCotisation, makeReqCreate, makeResCreate, mocks } =
+      await load({
+        createPaidCotisationResult: {
+          cotisationID: 11,
+          userID: 7,
+          amountCents: 2000,
+          paidAt: new Date("2026-03-04T05:06:07.000Z"),
+          periodStart: "2026-03-04",
+          periodEnd: "2027-03-03",
+          status: "paid",
+        },
+      });
+
+    const paidAt = new Date("2026-03-04T05:06:07.000Z");
+    const req = makeReqCreate({
+      params: { userID: "7" },
+      body: { amountCents: 2000, paidAt },
+    });
+    const { res, status } = makeResCreate();
+    const next = makeNext();
+
+    await createCotisation(req, res, next);
+
+    expect(mocks.createPaidCotisation).toHaveBeenCalledWith({
+      userID: 7,
+      amountCents: 2000,
+      paidAt,
+    });
+    expect(status).toHaveBeenCalledWith(201);
+  });
+
+  it("createCotisation: accepte paidAt number", async () => {
+    const { createCotisation, makeReqCreate, makeResCreate, mocks } =
+      await load({
+        createPaidCotisationResult: {
+          cotisationID: 9,
+          userID: 7,
+          amountCents: 2500,
+          paidAt: new Date("2026-01-02T00:00:00.000Z"),
+          periodStart: "2026-01-02",
+          periodEnd: "2027-01-01",
+          status: "paid",
+        },
+      });
+
+    const paidAt = Date.parse("2026-01-02T00:00:00.000Z");
+    const req = makeReqCreate({
+      params: { userID: "7" },
+      body: { amountCents: "2500", paidAt },
+    });
+    const { res, status } = makeResCreate();
+    const next = makeNext();
+
+    await createCotisation(req, res, next);
+
+    expect(mocks.createPaidCotisation).toHaveBeenCalledWith({
+      userID: 7,
+      amountCents: 2500,
+      paidAt: new Date(paidAt),
+    });
+    expect(status).toHaveBeenCalledWith(201);
+  });
+
+  it("createCotisation: accepte paidAt string ISO", async () => {
+    const { createCotisation, makeReqCreate, makeResCreate, mocks } =
+      await load({
+        createPaidCotisationResult: {
+          cotisationID: 10,
+          userID: 7,
+          amountCents: 1500,
+          paidAt: new Date("2026-02-03T04:05:06.000Z"),
+          periodStart: "2026-02-03",
+          periodEnd: "2027-02-02",
+          status: "paid",
+        },
+      });
+
+    const req = makeReqCreate({
+      params: { userID: "7" },
+      body: { amountCents: 1500, paidAt: "2026-02-03T04:05:06.000Z" },
+    });
+    const { res, status } = makeResCreate();
+    const next = makeNext();
+
+    await createCotisation(req, res, next);
+
+    expect(mocks.createPaidCotisation).toHaveBeenCalledWith({
+      userID: 7,
+      amountCents: 1500,
+      paidAt: new Date("2026-02-03T04:05:06.000Z"),
+    });
+    expect(status).toHaveBeenCalledWith(201);
   });
 
   it("createCotisation: next(err) si erreur", async () => {
@@ -312,6 +483,23 @@ describe("cotisation controllers", () => {
       { cotisationID: 1 },
       { cotisationID: 2 },
     ]);
+  });
+
+  it("listCotisations: 400 si userID invalide", async () => {
+    const { listCotisations, makeReqList, makeResList, mocks } = await load();
+
+    const req = makeReqList({ params: { userID: "NaN" } });
+    const { res, status, json } = makeResList();
+    const next = makeNext();
+
+    await listCotisations(req, res, next);
+
+    expect(status).toHaveBeenCalledWith(400);
+    expect(json).toHaveBeenCalledWith({
+      code: "BAD_USER_ID",
+      message: "Invalid userID",
+    });
+    expect(mocks.Cotisation.findAll).not.toHaveBeenCalled();
   });
 
   it("listCotisations: next(err) si erreur", async () => {

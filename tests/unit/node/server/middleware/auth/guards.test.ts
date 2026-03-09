@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 import { makeReq, makeRes, makeNext } from "@/../tests/helpers/express";
 
-// IMPORTANT : on mock requireAuth AVANT d'importer guards.ts
 vi.mock("@/server/middleware/auth/requireAuth", () => ({
   default: vi.fn((_req: any, _res: any, next: any) => next()),
 }));
@@ -184,7 +183,7 @@ describe("auth guards", () => {
 
   describe("requireAdminOrOwner", () => {
     it("400 si param userID invalide (non entier / <= 0)", () => {
-      const mw = requireAdminOrOwner(); // paramName = "userID"
+      const mw = requireAdminOrOwner();
 
       const req = makeReq({
         params: { userID: "0" } as any,

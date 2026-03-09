@@ -174,4 +174,36 @@ describe("requireAuth", () => {
 
     errSpy.mockRestore();
   });
+
+  it("500 si erreur Error(message)", async () => {
+    vi.resetModules();
+
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    vi.doMock("@/server/middleware/auth/token", () => ({
+      extractAuthToken: vi.fn().mockReturnValue("tok"),
+    }));
+
+    const Session = {
+      findOne: vi.fn().mockRejectedValue(new Error("boom")),
+    };
+    vi.doMock("@/server/models", () => ({ Session, User: {}, Role: {} }));
+
+    const mod = await import("@/server/middleware/auth/requireAuth");
+    const requireAuth = mod.default;
+
+    const req = makeReq();
+    const { res, status, json } = makeRes();
+    const next = makeNext();
+
+    await requireAuth(req, res, next);
+
+    expect(status).toHaveBeenCalledWith(500);
+    expect(json).toHaveBeenCalledWith({
+      code: "ERROR",
+      message: "boom",
+    });
+
+    errSpy.mockRestore();
+  });
 });

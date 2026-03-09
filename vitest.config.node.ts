@@ -27,7 +27,13 @@ export default defineConfig({
       reportsDirectory: "./coverage/node",
 
       include: ["src/server/**/*.{ts,tsx}"],
-      exclude: ["tests/**", "node_modules/**"],
+      exclude: [
+        "tests/**",
+        "node_modules/**",
+        "src/server/constants.ts",
+        "src/server/middleware/index.ts",
+        "src/server/middleware/auth/types.ts",
+      ],
 
       thresholds: {
         lines: 100,

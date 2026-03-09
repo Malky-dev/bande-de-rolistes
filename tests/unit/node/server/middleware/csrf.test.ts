@@ -16,7 +16,6 @@ function makeResWithCookie() {
   const json = vi.fn().mockReturnThis();
   const cookie = vi.fn<CookieSetter>();
 
-  // on retourne aussi cookieMock pour inspecter mock.calls sans cast dégueu partout
   return {
     res: { status, json, cookie },
     cookieMock: cookie,
@@ -65,7 +64,6 @@ describe("csrf middleware", () => {
         maxAge: 1000 * 60 * 60 * 24 * 7,
       });
 
-      // sanity: le token doit être vérifiable avec ce secret
       expect(tokens.verify(secret, token)).toBe(true);
     });
 
@@ -211,6 +209,28 @@ describe("csrf middleware", () => {
       expect(res.json).not.toHaveBeenCalled();
     });
 
+    it("403 si csrfToken body n'est pas une string", async () => {
+      const mw = verifyCsrf();
+      const secret = tokens.secretSync();
+
+      const req = makeReq({
+        headers: { cookie: `csrf-secret=${encodeURIComponent(secret)}` },
+        body: { csrfToken: 123 },
+      });
+
+      const { res } = makeResWithCookie();
+      const next = makeNext() as NextFunction;
+
+      await mw(req as any, res as any, next);
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({
+        code: "FORBIDDEN",
+        message: "Token CSRF manquant (header x-csrf-token ou body csrfToken).",
+      });
+      expect(next).not.toHaveBeenCalled();
+    });
+
     it("prend le premier élément si x-csrf-token est un tableau", async () => {
       const mw = verifyCsrf();
       const secret = tokens.secretSync();
@@ -266,6 +286,38 @@ describe("verifyCsrf - error handling", () => {
 
     expect(status).toHaveBeenCalledWith(500);
     expect(json).toHaveBeenCalledWith({ code: "ERROR", message: "boom" });
+    expect(next).not.toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
+  });
+
+  it("500 si une exception non-Error est levée (catch)", async () => {
+    vi.doMock("@/server/utils/cookies", () => ({
+      getCookieValue: vi.fn(() => {
+        throw "nope";
+      }),
+    }));
+
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const { verifyCsrf } = await import("@/server/middleware/csrf");
+
+    const mw = verifyCsrf();
+
+    const req = makeReq({ headers: {} });
+    const status = vi.fn().mockReturnThis();
+    const json = vi.fn().mockReturnThis();
+    const cookie = vi.fn();
+
+    const res = { status, json, cookie };
+    const next = vi.fn();
+
+    await mw(req as any, res as any, next as any);
+
+    expect(status).toHaveBeenCalledWith(500);
+    expect(json).toHaveBeenCalledWith({
+      code: "ERROR",
+      message: "Erreur serveur",
+    });
     expect(next).not.toHaveBeenCalled();
 
     consoleSpy.mockRestore();

@@ -77,7 +77,7 @@ describe("extractAuthToken", () => {
   });
 
   it("ignore Cookie header si req.get('Cookie') ne renvoie pas une string", () => {
-    (getCookieValue as any).mockReturnValue("cookie-token"); // ne doit pas être utilisé
+    (getCookieValue as any).mockReturnValue("cookie-token");
 
     const req: ReqLike = {
       get: () => 12345,

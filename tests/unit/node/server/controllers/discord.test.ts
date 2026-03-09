@@ -271,6 +271,44 @@ describe("discord controllers", () => {
     errSpy.mockRestore();
   });
 
+  it("controllerDiscordInit: 500 si erreur non-Error", async () => {
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const { controllerDiscordInit, makeReqInit, makeResInit, makeNext } =
+      await load({
+        generateAuthUrlThrow: "nope",
+      });
+
+    const req = makeReqInit({ state: "s" });
+    const { res, status, json } = makeResInit();
+    const next = makeNext();
+
+    controllerDiscordInit(req, res, next);
+
+    expect(status).toHaveBeenCalledWith(500);
+    expect(json).toHaveBeenCalledWith({
+      code: "ERROR",
+      message: "Erreur serveur",
+    });
+
+    errSpy.mockRestore();
+  });
+
+  it("controllerDiscordInit: state par défaut si query.state n'est pas une string", async () => {
+    const { controllerDiscordInit, makeReqInit, makeResInit, makeNext, mocks } =
+      await load();
+
+    const req = makeReqInit({ state: ["bad"] as unknown });
+    const { res } = makeResInit();
+    const next = makeNext();
+
+    controllerDiscordInit(req, res, next);
+
+    expect(mocks.oauthInstance.generateAuthUrl).toHaveBeenCalledWith({
+      scope: ["identify", "email"],
+      state: "default",
+    });
+  });
+
   it("controllerDiscordCallback: 400 si code manquant", async () => {
     const { controllerDiscordCallback, makeReqCb, makeResCb, makeNext } =
       await load();
@@ -326,6 +364,32 @@ describe("discord controllers", () => {
     expect(mocks.User.findOne).toHaveBeenCalledTimes(1);
     expect(mocks.Session.create).toHaveBeenCalledTimes(1);
     expect(fns.redirect).toHaveBeenCalledWith("http://frontend.local");
+  });
+
+  it("controllerDiscordCallback: sans user-agent -> device et browser null", async () => {
+    const user = { userID: 7 } as unknown;
+
+    const { controllerDiscordCallback, makeReqCb, makeResCb, makeNext, mocks } =
+      await load({
+        userFindOneResults: [user],
+        getUserResult: { id: "123" },
+        generateSessionToken: "t",
+        deviceParse: {},
+      });
+
+    const req = makeReqCb({ code: "c" });
+    const { res } = makeResCb();
+    const next = makeNext();
+
+    await controllerDiscordCallback(req, res, next);
+
+    expect(mocks.deviceDetectorInstance.parse).toHaveBeenCalledWith("");
+    expect(mocks.Session.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        device: null,
+        browser: null,
+      }),
+    );
   });
 
   it("controllerDiscordCallback: user trouvé par email -> save -> session + redirect", async () => {
@@ -387,6 +451,37 @@ describe("discord controllers", () => {
     expect(fns.redirect).toHaveBeenCalledWith("http://frontend.local");
   });
 
+  it("controllerDiscordCallback: crée un user avec fallback username/email", async () => {
+    const createdUser = { userID: 77 } as unknown;
+    const hashedValue = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+    const { controllerDiscordCallback, makeReqCb, makeResCb, makeNext, mocks } =
+      await load({
+        userFindOneResults: [null],
+        userCreateResult: createdUser,
+        getUserResult: {
+          id: "1234567890",
+        },
+        hashPassword: hashedValue,
+        generateSessionToken: "t",
+      });
+
+    const req = makeReqCb({ code: "c" }, { "user-agent": "ua" });
+    const { res } = makeResCb();
+    const next = makeNext();
+
+    await controllerDiscordCallback(req, res, next);
+
+    expect(mocks.User.create).toHaveBeenCalledWith({
+      nickname: "Discord_12345678",
+      email: "1234567890@discord.local",
+      password: hashedValue,
+      roleID: 5,
+      discordId: "1234567890",
+      isVerified: false,
+    });
+  });
+
   it("controllerDiscordCallback: 500 si erreur Error(message)", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerDiscordCallback, makeReqCb, makeResCb, makeNext } =
@@ -404,5 +499,60 @@ describe("discord controllers", () => {
     expect(json).toHaveBeenCalledWith({ code: "ERROR", message: "boom" });
 
     errSpy.mockRestore();
+  });
+
+  it("controllerDiscordCallback: 500 si erreur non-Error", async () => {
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const { controllerDiscordCallback, makeReqCb, makeResCb, makeNext } =
+      await load({
+        tokenRequestReject: "nope",
+      });
+
+    const req = makeReqCb({ code: "c" });
+    const { res, status, json } = makeResCb();
+    const next = makeNext();
+
+    await controllerDiscordCallback(req, res, next);
+
+    expect(status).toHaveBeenCalledWith(500);
+    expect(json).toHaveBeenCalledWith({
+      code: "ERROR",
+      message: "Erreur serveur",
+    });
+
+    errSpy.mockRestore();
+  });
+});
+
+describe("discord controller module init", () => {
+  it("throws when a required Discord environment variable is missing", async () => {
+    vi.resetModules();
+    vi.clearAllMocks();
+
+    process.env.DISCORD_CLIENT_ID = "";
+    process.env.DISCORD_CLIENT_SECRET = "secret";
+    process.env.DISCORD_REDIRECT_URI = "http://localhost/callback";
+    process.env.FRONTEND_URL = "http://frontend.local";
+
+    vi.doMock("discord-oauth2", () => ({
+      __esModule: true,
+      default: vi.fn(),
+    }));
+    vi.doMock("device-detector-js", () => ({
+      __esModule: true,
+      default: vi.fn(),
+    }));
+    vi.doMock(globalPath, () => ({
+      hashPassword: vi.fn(),
+      generateSessionToken: vi.fn(),
+    }));
+    vi.doMock(modelsIndexPath, () => ({
+      User: { findOne: vi.fn(), create: vi.fn() },
+      Session: { create: vi.fn() },
+    }));
+
+    await expect(import(controllerPath)).rejects.toThrow(
+      "Variables d'environnement Discord manquantes (DISCORD_CLIENT_ID)",
+    );
   });
 });

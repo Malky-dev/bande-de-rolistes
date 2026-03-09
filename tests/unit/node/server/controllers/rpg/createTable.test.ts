@@ -310,6 +310,81 @@ describe("controllerCreateTable", () => {
     });
   });
 
+  it("400 si le JSON du DM n'est pas un record", async () => {
+    const { controllerCreateTable, makeReq, makeTypedRes } = await load({
+      roleID: 4,
+      dmFindResult: { toJSON: () => "bad-shape" },
+    });
+
+    const req = makeReq({
+      body: {
+        eventDate: "2026-01-01T00:00:00.000Z",
+        dungeonMasterUserID: 123,
+        location: "Paris",
+        game: "D&D",
+      },
+    });
+    const { res, status, json } = makeTypedRes();
+
+    await controllerCreateTable(req, res);
+
+    expect(status).toHaveBeenCalledWith(400);
+    expect(json).toHaveBeenCalledWith({
+      code: "BAD_REQUEST",
+      message: "Le MJ doit avoir un rôle 1, 2 ou 3",
+    });
+  });
+
+  it("400 si le JSON du DM ne contient pas un Role record", async () => {
+    const { controllerCreateTable, makeReq, makeTypedRes } = await load({
+      roleID: 4,
+      dmFindResult: { toJSON: () => ({ Role: "bad-shape" }) },
+    });
+
+    const req = makeReq({
+      body: {
+        eventDate: "2026-01-01T00:00:00.000Z",
+        dungeonMasterUserID: 123,
+        location: "Paris",
+        game: "D&D",
+      },
+    });
+    const { res, status, json } = makeTypedRes();
+
+    await controllerCreateTable(req, res);
+
+    expect(status).toHaveBeenCalledWith(400);
+    expect(json).toHaveBeenCalledWith({
+      code: "BAD_REQUEST",
+      message: "Le MJ doit avoir un rôle 1, 2 ou 3",
+    });
+  });
+
+  it("400 si le roleID du DM n'est pas un number", async () => {
+    const { controllerCreateTable, makeReq, makeTypedRes } = await load({
+      roleID: 4,
+      dmFindResult: { toJSON: () => ({ Role: { roleID: "1" } }) },
+    });
+
+    const req = makeReq({
+      body: {
+        eventDate: "2026-01-01T00:00:00.000Z",
+        dungeonMasterUserID: 123,
+        location: "Paris",
+        game: "D&D",
+      },
+    });
+    const { res, status, json } = makeTypedRes();
+
+    await controllerCreateTable(req, res);
+
+    expect(status).toHaveBeenCalledWith(400);
+    expect(json).toHaveBeenCalledWith({
+      code: "BAD_REQUEST",
+      message: "Le MJ doit avoir un rôle 1, 2 ou 3",
+    });
+  });
+
   it("400 si maxPlayers hors limites", async () => {
     const { controllerCreateTable, makeReq, makeTypedRes, mocks } = await load({
       roleID: 1,
@@ -368,6 +443,67 @@ describe("controllerCreateTable", () => {
 
     expect(status).toHaveBeenCalledWith(201);
     expect(json).toHaveBeenCalledWith({ eventID: 99, message: "Table créée" });
+  });
+
+  it("201 si comments est une string et maxPlayers est arrondi", async () => {
+    const { controllerCreateTable, makeReq, makeTypedRes, mocks } = await load({
+      roleID: 4,
+      createResult: { eventID: 100 },
+      dmFindResult: { toJSON: () => ({ Role: { roleID: 2 } }) },
+    });
+
+    const req = makeReq({
+      body: {
+        eventDate: "2026-01-01T00:00:00.000Z",
+        dungeonMasterUserID: 123,
+        location: "  Paris  ",
+        game: "  D&D  ",
+        comments: "Bring dice",
+        maxPlayers: 6.8,
+      },
+      user: { role: { roleID: 4 } },
+    });
+    const { res, status, json } = makeTypedRes();
+
+    await controllerCreateTable(req, res);
+
+    expect(mocks.TableRPG.create).toHaveBeenCalledWith({
+      eventDate: new Date("2026-01-01T00:00:00.000Z"),
+      dungeon_master: 123,
+      location: "Paris",
+      game: "D&D",
+      comments: "Bring dice",
+      status: "OPEN",
+      maxPlayers: 6,
+    });
+    expect(status).toHaveBeenCalledWith(201);
+    expect(json).toHaveBeenCalledWith({ eventID: 100, message: "Table créée" });
+  });
+
+  it("500 si erreur Error(message)", async () => {
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const { controllerCreateTable, makeReq, makeTypedRes } = await load({
+      createReject: new Error("boom"),
+    });
+
+    const req = makeReq({
+      body: {
+        eventDate: "2026-01-01T00:00:00.000Z",
+        location: "Paris",
+        game: "D&D",
+      },
+    });
+    const { res, status, json } = makeTypedRes();
+
+    await controllerCreateTable(req, res);
+
+    expect(status).toHaveBeenCalledWith(500);
+    expect(json).toHaveBeenCalledWith({
+      code: "ERROR",
+      message: "boom",
+    });
+
+    errSpy.mockRestore();
   });
 
   it("500 si erreur non-Error", async () => {
