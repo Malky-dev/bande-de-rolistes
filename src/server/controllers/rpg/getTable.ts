@@ -179,7 +179,7 @@ const controllerGetTable: RequestHandler<
         continue;
       }
 
-      const userUnknown = signupJsonUnknown["User"];
+      const userUnknown = signupJsonUnknown["user"];
       if (!isRecord(userUnknown)) {
         continue;
       }

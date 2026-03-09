@@ -336,36 +336,36 @@ describe("controllerGetTable", () => {
       makeSignup("bad"),
       makeSignup({}),
       makeSignup({
-        User: { userID: "1", nickname: "A" },
+        user: { userID: "1", nickname: "A" },
         created_at: "2026-01-01T00:00:00.000Z",
       }),
-      makeSignup({ User: { userID: 1, nickname: "A" }, created_at: {} }),
+      makeSignup({ user: { userID: 1, nickname: "A" }, created_at: {} }),
       makeSignup({
-        User: { userID: 1, nickname: "A" },
+        user: { userID: 1, nickname: "A" },
         created_at: 1700000000000,
       }),
       makeSignup({
-        User: { userID: 2, nickname: "B" },
+        user: { userID: 2, nickname: "B" },
         created_at: "2026-01-01T00:00:01.000Z",
       }),
       makeSignup({
-        User: { userID: 3, nickname: "C" },
+        user: { userID: 3, nickname: "C" },
         created_at: "2026-01-01T00:00:02.000Z",
       }),
       makeSignup({
-        User: { userID: 4, nickname: "D" },
+        user: { userID: 4, nickname: "D" },
         created_at: "2026-01-01T00:00:03.000Z",
       }),
       makeSignup({
-        User: { userID: 5, nickname: "E" },
+        user: { userID: 5, nickname: "E" },
         created_at: "2026-01-01T00:00:04.000Z",
       }),
       makeSignup({
-        User: { userID: 6, nickname: "F" },
+        user: { userID: 6, nickname: "F" },
         created_at: "2026-01-01T00:00:05.000Z",
       }),
       makeSignup({
-        User: { userID: 7, nickname: "G" },
+        user: { userID: 7, nickname: "G" },
         created_at: "2026-01-01T00:00:06.000Z",
       }),
     ];
@@ -413,19 +413,19 @@ describe("controllerGetTable", () => {
   it("200: comments null et cap basé sur maxPlayers", async () => {
     const signups = [
       makeSignup({
-        User: { userID: 1, nickname: "A" },
+        user: { userID: 1, nickname: "A" },
         created_at: "2026-01-01T00:00:00.000Z",
       }),
       makeSignup({
-        User: { userID: 2, nickname: "B" },
+        user: { userID: 2, nickname: "B" },
         created_at: "2026-01-01T00:00:01.000Z",
       }),
       makeSignup({
-        User: { userID: 3, nickname: "C" },
+        user: { userID: 3, nickname: "C" },
         created_at: "2026-01-01T00:00:02.000Z",
       }),
       makeSignup({
-        User: { userID: 4, nickname: "D" },
+        user: { userID: 4, nickname: "D" },
         created_at: "2026-01-01T00:00:03.000Z",
       }),
     ];
@@ -465,7 +465,7 @@ describe("controllerGetTable", () => {
   it("200: comments non-string devient null", async () => {
     const signups = [
       makeSignup({
-        User: { userID: 1, nickname: "A" },
+        user: { userID: 1, nickname: "A" },
         created_at: "2026-01-01T00:00:00.000Z",
       }),
     ];
