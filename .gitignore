@@ -39,3 +39,4 @@ CODE_REVIEW.md
 CODE_REVIEW.spec.md
 package-lock.json
 package.json
+coverage/
