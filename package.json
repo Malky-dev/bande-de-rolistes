@@ -18,6 +18,7 @@
     "test:quick": "npm run test:node && npm run test:dom",
     "test:coverage": "npm run test:node -- --coverage && npm run test:dom -- --coverage",
     "test:full": "npm run test:quick && npm run test:coverage",
+    "test:related": "vitest related --run",
     "typecheck:tests": "tsc -p tsconfig.tests.json --noEmit",
     "preview": "vite preview",
     "db:init": "cross-env TZ=Europe/Paris tsx scripts/init-db.ts",
@@ -82,14 +83,20 @@
   "lint-staged": {
     "src/**/*.{ts,tsx,js,jsx,json,css,md}": [
       "prettier --write",
-      "eslint --fix"
+      "vitest related --run"
     ],
     "tests/**/*.{ts,tsx,js,jsx,json,css,md}": [
       "prettier --write",
-      "eslint --fix"
+      "vitest related --run"
     ],
-    ".gitignore": ["prettier --write"],
-    "*.config.{ts,js,mjs,cjs}": ["prettier --write"],
-    "README.md": ["prettier --write"]
+    "*.{json,css,md}": [
+      "prettier --write"
+    ],
+    ".gitignore": [
+      "prettier --write"
+    ],
+    "*.config.{ts,js,mjs,cjs}": [
+      "prettier --write"
+    ]
   }
 }
