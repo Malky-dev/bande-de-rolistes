@@ -1,7 +1,5 @@
-npx lint-staged
+npx lint-staged || exit 1
 
-changed="$(git diff --cached --name-only)"
-echo "$changed" | grep -E '^(src/|tests/)' >/dev/null 2>&1
-if [ $? -eq 0 ]; then
-  npm run test:quick
+if git diff --cached --name-only | grep -E '^(src/|tests/)' >/dev/null 2>&1; then
+  npm run test:quick || exit 1
 fi
