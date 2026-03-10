@@ -26,12 +26,6 @@ function AboutView({ onJoinTable }: AboutViewProps) {
               Voir les tables
             </button>
           </div>
-
-          <div className="hero-meta">
-            <span>📍 Une association locale</span>
-            <span>🕒 Des rendez-vous réguliers</span>
-            <span>🎲 Débutants et habitués bienvenus</span>
-          </div>
         </div>
 
         <div className="hero-right">
@@ -42,6 +36,12 @@ function AboutView({ onJoinTable }: AboutViewProps) {
               découvrir le jeu de rôle et de créer des tables où chacun peut
               trouver sa place.
             </p>
+          </div>
+
+          <div className="hero-meta">
+            <p>📍 Une association locale</p>
+            <p>🕒 Des rendez-vous réguliers</p>
+            <p>🎲 Débutants et habitués bienvenus</p>
           </div>
         </div>
       </section>
@@ -159,20 +159,6 @@ function AboutView({ onJoinTable }: AboutViewProps) {
               exactement de la même façon.
             </p>
           </article>
-        </div>
-      </section>
-
-      <section className="panel panel--center about-cta">
-        <h2 className="panel__title">Envie de nous rejoindre ?</h2>
-        <p className="panel__subtitle">
-          Que tu sois rôliste confirmé, simple curieux ou en quête de ta
-          première partie, il y a une place pour toi à la table.
-        </p>
-
-        <div className="hero-actions">
-          <button className="btn-primary" type="button" onClick={onJoinTable}>
-            Rejoindre une table
-          </button>
         </div>
       </section>
     </div>

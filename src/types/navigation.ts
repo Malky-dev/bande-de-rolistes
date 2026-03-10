@@ -11,6 +11,10 @@ export const appViews = {
     label: "Qui sommes-nous ?",
     inNavbar: true,
   },
+  location: {
+    label: "Nos locaux",
+    inNavbar: true,
+  },
   rpg: {
     label: "Tables JDR",
     inNavbar: true,

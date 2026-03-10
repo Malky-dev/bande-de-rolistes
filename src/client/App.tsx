@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import AuthForms from "./components/AuthForms";
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
+import type { View } from "@/types/navigation";
 import type { SessionInfo } from "../types/api/session";
 import { apiSession } from "../api/authApi";
 import { fetchCsrfToken } from "../api/securityApi";
+import AuthForms from "./components/AuthForms";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 import HomeView from "./views/HomeView";
 import AdminView from "./views/AdminView";
 import RpgTablesView from "./views/RpgTablesView";
@@ -14,7 +15,7 @@ import UpsertRpgTableView from "./views/rpg/UpsertRpgTableView";
 import QuotesView from "./views/QuoteView";
 import WhatIsRpg from "./views/WhatIsRpg";
 import AboutView from "./views/AboutView";
-import type { View } from "@/types/navigation";
+import LocationView from "./views/LocationView";
 
 function App() {
   const [view, setView] = useState<View>("home");
@@ -84,6 +85,10 @@ function App() {
 
         {view === "what-is-rpg" && (
           <WhatIsRpg onJoinTable={() => setView("rpg")} />
+        )}
+
+        {view === "location" && (
+          <LocationView onJoinTable={() => setView("rpg")} />
         )}
 
         {view === "rpg" && (

@@ -20,6 +20,19 @@
   .about-values {
     grid-template-columns: 1fr;
   }
+
+  .location-place,
+  .location-features {
+    grid-template-columns: 1fr;
+  }
+
+  .location-map {
+    min-height: 220px;
+  }
+
+  .location-map iframe {
+    min-height: 220px;
+  }
 }
 
 @media (max-width: 640px) {

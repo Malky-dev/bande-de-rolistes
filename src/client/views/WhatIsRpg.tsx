@@ -176,21 +176,6 @@ function WhatIsRpgView({ onJoinTable }: WhatIsRpgViewProps) {
           </article>
         </div>
       </section>
-
-      <section className="panel panel--center what-is-rpg-cta">
-        <h2 className="panel__title">Chez Bande de Rôlistes</h2>
-        <p className="panel__subtitle">
-          Nous accueillons aussi bien les curieux que les habitués. Que tu
-          veuilles découvrir ton premier scénario ou rejoindre une campagne, il
-          y a une place pour toi à la table.
-        </p>
-
-        <div className="hero-actions">
-          <button className="btn-primary" type="button" onClick={onJoinTable}>
-            Rejoindre une table
-          </button>
-        </div>
-      </section>
     </div>
   );
 }
