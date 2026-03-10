@@ -6,7 +6,7 @@ import { verifyCsrf } from "../middleware/csrf";
 
 const router = Router();
 
-router.get("/quotes", requireAuth, requireStaff, async (req, res) => {
+router.get("/quotes", requireAuth, requireStaff(), async (req, res) => {
   try {
     const page = Math.max(1, Number(req.query.page ?? 1) || 1);
     const limit = Math.min(
@@ -58,7 +58,7 @@ router.get("/quotes", requireAuth, requireStaff, async (req, res) => {
 router.post(
   "/quotes",
   requireAuth,
-  requireStaff,
+  requireStaff(),
   verifyCsrf(),
   async (req, res) => {
     try {
@@ -95,7 +95,7 @@ router.post(
 router.put(
   "/quotes/:quoteID",
   requireAuth,
-  requireStaff,
+  requireStaff(),
   verifyCsrf(),
   async (req, res) => {
     try {
@@ -142,7 +142,7 @@ router.put(
 router.delete(
   "/quotes/:quoteID",
   requireAuth,
-  requireStaff,
+  requireStaff(),
   verifyCsrf(),
   async (req, res) => {
     try {

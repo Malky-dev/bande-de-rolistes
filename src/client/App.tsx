@@ -13,18 +13,8 @@ import ForbiddenView from "./views/ForbiddenView";
 import UpsertRpgTableView from "./views/rpg/UpsertRpgTableView";
 import QuotesView from "./views/QuoteView";
 import WhatIsRpg from "./views/WhatIsRpg";
-
-type View =
-  | "home"
-  | "login"
-  | "signup"
-  | "admin"
-  | "account"
-  | "rpg"
-  | "rpg-create"
-  | "rpg-edit"
-  | "quotes"
-  | "what-is-rpg";
+import AboutView from "./views/AboutView";
+import type { View } from "@/types/navigation";
 
 function App() {
   const [view, setView] = useState<View>("home");
@@ -89,6 +79,8 @@ function App() {
 
       <main className="main">
         {view === "home" && <HomeView />}
+
+        {view === "about" && <AboutView onJoinTable={() => setView("rpg")} />}
 
         {view === "what-is-rpg" && (
           <WhatIsRpg onJoinTable={() => setView("rpg")} />

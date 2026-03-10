@@ -1,17 +1,6 @@
 import type { SessionInfo } from "../../types/api/session";
 import logoBDR from "../../assets/img/LogoBDR_creme-removebg.png";
-
-type View =
-  | "home"
-  | "login"
-  | "signup"
-  | "admin"
-  | "account"
-  | "rpg"
-  | "rpg-create"
-  | "rpg-edit"
-  | "quotes"
-  | "what-is-rpg";
+import { mainNavItems, type View } from "@/types/navigation";
 
 type NavbarProps = {
   view: View;
@@ -44,36 +33,17 @@ function Navbar({
       </div>
 
       <nav className="navbar-links">
-        <button
-          className={`navbar-link navbar-link-button ${
-            view === "home" ? "navbar-link-active" : ""
-          }`}
-          onClick={() => onChangeView("home")}
-        >
-          Accueil
-        </button>
-
-        <button
-          className={`navbar-link navbar-link-button ${
-            view === "rpg" ? "navbar-link-active" : ""
-          }`}
-          onClick={() => onChangeView("rpg")}
-        >
-          Tables JDR
-        </button>
-
-        <button className="navbar-link navbar-link-button">
-          Qui sommes-nous ?
-        </button>
-
-        <button
-          className={`navbar-link navbar-link-button ${
-            view === "what-is-rpg" ? "navbar-link-active" : ""
-          }`}
-          onClick={() => onChangeView("what-is-rpg")}
-        >
-          Le jeu de rôle
-        </button>
+        {mainNavItems.map((item) => (
+          <button
+            key={item.view}
+            className={`navbar-link navbar-link-button ${
+              view === item.view ? "navbar-link-active" : ""
+            }`}
+            onClick={() => onChangeView(item.view)}
+          >
+            {item.label}
+          </button>
+        ))}
 
         {!checkingSession && !session && (
           <>
@@ -120,6 +90,7 @@ function Navbar({
                 Privilèges Admin
               </button>
             )}
+
             <button
               className={`navbar-link navbar-link-button ${
                 view === "account" ? "navbar-link-active" : ""
@@ -128,6 +99,7 @@ function Navbar({
             >
               Mon compte - {session.nickname}
             </button>
+
             <button
               className="navbar-link navbar-link-button"
               onClick={onLogout}

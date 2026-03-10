@@ -1,5 +1,5 @@
 /* =========================================================
-   05) LAYOUT PRINCIPAL + PANELS
+   04) LAYOUT PRINCIPAL + PANELS
 ========================================================= */
 
 .app-root {
@@ -15,10 +15,10 @@
 }
 
 .main::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
-  background: url('../../assets/img/rolistes.jpg') center/cover no-repeat;
+  background: url("../../assets/img/rolistes.jpg") center/cover no-repeat;
   opacity: 0.22;
   filter: saturate(0.9) contrast(1.05);
   transform: scale(1.02);

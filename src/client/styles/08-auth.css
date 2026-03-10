@@ -1,5 +1,5 @@
 /* =========================================================
-   07) AUTH / ACCOUNT
+   08) AUTH / ACCOUNT
    - Auth screen (login/signup)
    - AccountView helpers
 ========================================================= */
@@ -106,7 +106,7 @@
 
 .auth-divider::before,
 .auth-divider::after {
-  content: '';
+  content: "";
   height: 1px;
   flex: 1;
   background: rgba(148, 163, 184, 0.25);
