@@ -1,5 +1,5 @@
 /* =========================================================
-   10) RESPONSIVE GLOBAL
+   05) RESPONSIVE GLOBAL
 ========================================================= */
 
 @media (max-width: 900px) {
@@ -12,6 +12,12 @@
   }
 
   .rpg-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .about-story-grid,
+  .about-cards,
+  .about-values {
     grid-template-columns: 1fr;
   }
 }

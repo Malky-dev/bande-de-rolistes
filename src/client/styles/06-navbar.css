@@ -1,5 +1,5 @@
 /* =========================================================
-   04) NAVBAR
+   06) NAVBAR
 ========================================================= */
 
 .navbar {
@@ -80,7 +80,7 @@
 }
 
 .navbar-link::after {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   bottom: -0.25rem;
@@ -112,13 +112,21 @@
   padding: 0.45rem 0.9rem;
   border-radius: 999px;
   border: 1px solid rgba(250, 204, 21, 0.6);
-  background: radial-gradient(circle at top left, rgba(250, 204, 21, 0.15), transparent 60%);
+  background: radial-gradient(
+    circle at top left,
+    rgba(250, 204, 21, 0.15),
+    transparent 60%
+  );
   font-size: 0.9rem;
   color: var(--accent);
   font-weight: 500;
 }
 
 .navbar-cta:hover {
-  background: radial-gradient(circle at top left, rgba(250, 204, 21, 0.25), transparent 60%);
+  background: radial-gradient(
+    circle at top left,
+    rgba(250, 204, 21, 0.25),
+    transparent 60%
+  );
   border-color: rgba(250, 204, 21, 0.8);
 }
