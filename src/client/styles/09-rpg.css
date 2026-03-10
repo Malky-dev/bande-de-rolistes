@@ -197,3 +197,115 @@
 .rpg-block li {
   margin: 4px 0;
 }
+
+/* =========================================================
+   10) WHAT IS RPG VIEW
+========================================================= */
+
+.what-is-rpg-wrap {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 22px 44px;
+}
+
+.what-is-rpg-hero {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.what-is-rpg-section {
+  margin-top: 24px;
+}
+
+.what-is-rpg-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.what-is-rpg-card {
+  height: 100%;
+}
+
+.what-is-rpg-card h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.what-is-rpg-card p {
+  margin: 0;
+}
+
+.what-is-rpg-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  margin-bottom: 12px;
+  border-radius: 12px;
+  background: rgba(250, 204, 21, 0.1);
+  border: 1px solid rgba(250, 204, 21, 0.22);
+  font-size: 20px;
+}
+
+.what-is-rpg-steps {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.what-is-rpg-step {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 14px;
+  align-items: start;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  background: rgba(2, 6, 23, 0.25);
+}
+
+.what-is-rpg-step__number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  font-weight: 800;
+  color: #1b1b1b;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+}
+
+.what-is-rpg-step h3 {
+  margin: 2px 0 8px;
+  font-size: 17px;
+}
+
+.what-is-rpg-step p {
+  margin: 0;
+  color: rgba(229, 231, 235, 0.85);
+  line-height: 1.6;
+}
+
+.what-is-rpg-highlight {
+  margin-top: 24px;
+  border-color: rgba(250, 204, 21, 0.28);
+  box-shadow:
+    0 0 0 1px rgba(250, 204, 21, 0.08),
+    var(--shadow);
+}
+
+.what-is-rpg-split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.what-is-rpg-cta {
+  margin-top: 24px;
+}

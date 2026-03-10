@@ -20,4 +20,10 @@
   .inline-row {
     grid-template-columns: 1fr;
   }
+
+  .what-is-rpg-cards,
+  .what-is-rpg-steps,
+  .what-is-rpg-split {
+    grid-template-columns: 1fr;
+  }
 }
