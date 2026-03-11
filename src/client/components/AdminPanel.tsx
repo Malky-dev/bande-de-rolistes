@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { apiAdminRoles, apiAdminUpdateRole, apiAdminUsers } from '../../api/authApi'
 import type { AdminRole, AdminUser } from '@/types/api/admin'
-import './AdminPanel.css'
 
 function AdminPanel() {
   const [users, setUsers] = useState<AdminUser[]>([])

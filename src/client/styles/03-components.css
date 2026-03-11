@@ -1,0 +1,192 @@
+/* =========================================================
+   03) UI COMPONENTS
+   - Boutons (primary/secondary + variantes)
+   - Discord button
+   - Feedback
+   - Forms (base + inline row)
+   - Actions (boutons alignés)
+========================================================= */
+
+.btn-primary,
+.btn-secondary {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.1s, filter 0.15s;
+}
+
+.btn-primary {
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  color: #1b1b1b;
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid rgba(250, 204, 21, 0.55);
+  color: var(--text);
+}
+
+.btn-primary:hover,
+.btn-secondary:hover {
+  filter: brightness(1.1);
+}
+
+.btn-primary:active,
+.btn-secondary:active {
+  transform: translateY(1px);
+}
+
+.btn-secondary--xs {
+  padding: 6px 10px;
+  font-size: 0.85rem;
+}
+
+.btn-discord {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+  gap: 10px;
+
+  border-radius: 999px;
+  padding: 10px 16px;
+  background: #5865f2;
+  color: #fff;
+  font-weight: 800;
+  border: none;
+}
+
+.btn-discord:hover {
+  filter: brightness(1.06);
+}
+
+.auth-success {
+  margin-top: 12px;
+  color: var(--succ);
+  font-weight: 700;
+}
+
+.auth-error {
+  margin-top: 12px;
+  color: var(--err);
+  font-weight: 700;
+}
+
+.form {
+  display: grid;
+  gap: 12px;
+}
+
+.form label {
+  font-weight: 700;
+  color: rgba(229, 231, 235, 0.9);
+}
+
+.form input,
+.form textarea,
+.form select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(2, 6, 23, 0.4);
+  color: var(--text);
+  outline: none;
+}
+
+.form select {
+  appearance: auto;
+}
+
+.form textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 18px; /* row / column */
+  align-items: center;
+}
+
+.radio-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+
+.radio-row span {
+  white-space: nowrap;
+}
+
+.form-actions {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.formField--grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.formField--small {
+  max-width: 200px;
+}
+
+.form .react-datepicker-wrapper,
+.form .react-datepicker__input-container {
+  width: 100%;
+}
+
+.form .react-datepicker-wrapper input {
+  width: 100%;
+}
+
+.input--location {
+  width: 100%;
+}
+
+.inline-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.inline-row--2 {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.inline-row--2 > div {
+  min-width: 0;
+}
+
+.hero-actions {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hero-actions > .btn-primary,
+.hero-actions > .btn-secondary {
+  min-width: 220px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}

@@ -6,21 +6,30 @@
   "scripts": {
     "prepare": "husky",
     "dev": "vite",
-    "dev:server": "tsx watch src/server/index.ts",
+    "dev:server": "cross-env TZ=Europe/Paris tsx watch src/server/index.ts",
+    "dev:all": "concurrently -n web,api -c auto \"npm run dev\" \"npm run dev:server\"",
     "build": "tsc -b && vite build",
-    "lint": "eslint src --max-warnings=0",
+    "lint": "eslint src tests --max-warnings=0",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
     "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.server.json",
-    "unit-tests": "echo \"Unit tests not implemented yet\"",
+    "test:node": "cross-env TZ=Europe/Paris vitest run --config vitest.config.node.ts",
+    "test:dom": "cross-env TZ=Europe/Paris vitest run --config vitest.config.dom.ts",
+    "test:quick": "npm run test:node && npm run test:dom",
+    "test:coverage": "npm run test:node -- --coverage && npm run test:dom -- --coverage",
+    "test:full": "npm run test:quick && npm run test:coverage",
+    "test:related": "vitest related --run --config vitest.config.ts",
+    "typecheck:tests": "tsc -p tsconfig.tests.json --noEmit",
     "preview": "vite preview",
-    "db:init": "tsx scripts/init-db.ts",
-    "db:migrate:discord": "tsx scripts/add-discord-column.ts"
+    "db:init": "cross-env TZ=Europe/Paris tsx scripts/init-db.ts",
+    "db:migrate:discord": "cross-env TZ=Europe/Paris tsx scripts/add-discord-column.ts",
+    "db:test:cotisation": "cross-env TZ=Europe/Paris tsx scripts/test-cotisation.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@tanstack/react-query": "^5.90.21",
     "bcrypt": "^6.0.0",
     "compression": "^1.8.1",
-    "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "csrf": "^3.1.0",
     "csrf-csrf": "^4.0.3",
@@ -41,9 +50,11 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/bcrypt": "^6.0.0",
     "@types/compression": "^1.8.1",
-    "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/express-rate-limit": "^6.0.2",
@@ -51,21 +62,41 @@
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
+    "@vitest/coverage-v8": "^4.0.18",
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
     "husky": "^9.1.7",
+    "jsdom": "^28.1.0",
     "lint-staged": "^16.2.7",
+    "prettier": "3.8.1",
     "ts-node-dev": "^2.0.0",
     "tsx": "^4.21.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
-    "vite": "^7.2.4"
+    "vite": "^7.2.4",
+    "vitest": "^4.0.18"
   },
   "lint-staged": {
-    "src/**/*.{ts,tsx,js,jsx}": [
-      "eslint --fix"
+    "src/**/*.{ts,tsx,js,jsx,json,css,md}": [
+      "prettier --write",
+      "npm run test:related --"
+    ],
+    "tests/**/*.{ts,tsx,js,jsx,json,css,md}": [
+      "prettier --write",
+      "npm run test:related --"
+    ],
+    "*.{json,css,md}": [
+      "prettier --write"
+    ],
+    ".gitignore": [
+      "prettier --write"
+    ],
+    "*.config.{ts,js,mjs,cjs}": [
+      "prettier --write"
     ]
   }
 }

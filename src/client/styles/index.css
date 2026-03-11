@@ -1,0 +1,18 @@
+/* src/client/styles/index.css */
+@import "./00-settings.css";
+@import "./01-base.css";
+@import "./02-utilities.css";
+@import "./03-components.css";
+@import "./04-layout.css";
+@import "./05-responsive.css";
+@import "./06-navbar.css";
+@import "./07-footer.css";
+@import "./08-auth.css";
+@import "./09-home.css";
+@import "./10-what-is-rpg.css";
+@import "./11-rpg.css";
+@import "./12-about.css";
+@import "./13-location.css";
+
+@import "./admin/adminPanel.css";
+@import "./admin/quotesAdminPanel.css";

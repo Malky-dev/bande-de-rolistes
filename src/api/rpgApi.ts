@@ -1,403 +1,407 @@
-import { fetchCsrfToken } from './securityApi'
+import { fetchCsrfToken } from "./securityApi";
+import type { RpgTableStatus } from "../shared/constants";
 
-export type RpgTableListItem = {
-  eventID: number
-  eventDate: string
-  dungeonMaster: { userID: number; nickname: string }
-  location: string
-  game: string
-  comments: string | null
-  status: 'OPEN' | 'CLOSED' | 'CANCELLED'
-  maxPlayers: number
-}
+import type {
+  RpgTableListItem,
+  RpgTableDetails,
+  RpgSignupItem,
+  RpgCreateTableBody,
+  RpgUpdateTableBody,
+} from "../types/api/rpg";
 
-export type RpgSignupItem = {
-  userID: number
-  nickname: string
-  created_at: string
-}
+type ApiErrorPayload = { message?: string; code?: string };
 
-export type RpgTableDetails = {
-  eventID: number
-  eventDate: string
-  dungeonMaster: { userID: number; nickname: string }
-  location: string
-  game: string
-  comments: string | null
-  status: 'OPEN' | 'CLOSED' | 'CANCELLED'
-  maxPlayers: number
-  confirmedCap: number
-  confirmed: RpgSignupItem[]
-  waitlist: RpgSignupItem[]
-}
+export const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === "object" && value !== null;
+};
 
-export type RpgCreateTableBody = {
-  eventDate: string
-  dungeonMasterUserID?: number
-  location: string
-  game: string
-  comments?: string | null
-  maxPlayers?: number
-}
-
-export type RpgUpdateTableBody = {
-  eventDate?: string
-  location?: string
-  game?: string
-  comments?: string | null
-  maxPlayers?: number
-}
-
-export type RpgTableStatus = 'OPEN' | 'CLOSED' | 'CANCELLED'
-
-type ApiErrorPayload = { message?: string; code?: string }
-
-const isRecord = (value: unknown): value is Record<string, unknown> => {
-  return typeof value === 'object' && value !== null
-}
-
-function isApiErrorPayload(value: unknown): value is ApiErrorPayload {
+export function isApiErrorPayload(value: unknown): value is ApiErrorPayload {
   if (!isRecord(value)) {
-    return false
+    return false;
   }
 
-  const messageUnknown = value.message
-  const codeUnknown = value.code
+  const messageUnknown = value.message;
+  const codeUnknown = value.code;
 
-  const messageOk = typeof messageUnknown === 'string' || typeof messageUnknown === 'undefined'
-  const codeOk = typeof codeUnknown === 'string' || typeof codeUnknown === 'undefined'
+  const messageOk =
+    typeof messageUnknown === "string" || typeof messageUnknown === "undefined";
+  const codeOk =
+    typeof codeUnknown === "string" || typeof codeUnknown === "undefined";
 
-  return messageOk && codeOk
+  return messageOk && codeOk;
 }
 
-function parseJsonUnknown(text: string): unknown {
-  const parsed: unknown = JSON.parse(text)
-  return parsed
+export function parseJsonUnknown(text: string): unknown {
+  const parsed: unknown = JSON.parse(text);
+  return parsed;
 }
 
-async function readJsonUnknown(res: Response): Promise<unknown> {
-  const text = await res.text()
-  return parseJsonUnknown(text)
+export async function readJsonUnknown(res: Response): Promise<unknown> {
+  const text = await res.text();
+  return parseJsonUnknown(text);
 }
 
-async function readErrorMessage(res: Response, fallback: string): Promise<string> {
+export async function readErrorMessage(
+  res: Response,
+  fallback: string,
+): Promise<string> {
   try {
-    const value = await readJsonUnknown(res)
-    if (isApiErrorPayload(value) && typeof value.message === 'string' && value.message.length > 0) {
-      return value.message
+    const value = await readJsonUnknown(res);
+    if (
+      isApiErrorPayload(value) &&
+      typeof value.message === "string" &&
+      value.message.length > 0
+    ) {
+      return value.message;
     }
-    return fallback
+    return fallback;
   } catch {
-    return fallback
+    return fallback;
   }
 }
 
-function isRpgTableListItem(value: unknown): value is RpgTableListItem {
+export function isRpgTableListItem(value: unknown): value is RpgTableListItem {
   if (!isRecord(value)) {
-    return false
+    return false;
   }
 
-  const eventID = value.eventID
-  const eventDate = value.eventDate
-  const dungeonMaster = value.dungeonMaster
-  const location = value.location
-  const game = value.game
-  const comments = value.comments
-  const status = value.status
-  const maxPlayers = value.maxPlayers
+  const eventID = value.eventID;
+  const eventDate = value.eventDate;
+  const dungeonMaster = value.dungeonMaster;
+  const location = value.location;
+  const game = value.game;
+  const comments = value.comments;
+  const status = value.status;
+  const maxPlayers = value.maxPlayers;
 
-  if (typeof eventID !== 'number') {
-    return false
+  if (typeof eventID !== "number") {
+    return false;
   }
 
-  if (typeof eventDate !== 'string') {
-    return false
+  if (typeof eventDate !== "string") {
+    return false;
   }
 
   if (!isRecord(dungeonMaster)) {
-    return false
+    return false;
   }
 
-  const dmUserID = dungeonMaster.userID
-  const dmNickname = dungeonMaster.nickname
+  const dmUserID = dungeonMaster.userID;
+  const dmNickname = dungeonMaster.nickname;
 
-  if (typeof dmUserID !== 'number') {
-    return false
+  if (typeof dmUserID !== "number") {
+    return false;
   }
 
-  if (typeof dmNickname !== 'string') {
-    return false
+  if (typeof dmNickname !== "string") {
+    return false;
   }
 
-  if (typeof location !== 'string') {
-    return false
+  if (typeof location !== "string") {
+    return false;
   }
 
-  if (typeof game !== 'string') {
-    return false
+  if (typeof game !== "string") {
+    return false;
   }
 
-  const commentsOk = typeof comments === 'string' || comments === null || typeof comments === 'undefined'
+  const commentsOk =
+    typeof comments === "string" ||
+    comments === null ||
+    typeof comments === "undefined";
   if (!commentsOk) {
-    return false
+    return false;
   }
 
-  const statusOk = status === 'OPEN' || status === 'CLOSED' || status === 'CANCELLED'
+  const statusOk =
+    status === "OPEN" || status === "CLOSED" || status === "CANCELLED";
   if (!statusOk) {
-    return false
+    return false;
   }
 
-  if (typeof maxPlayers !== 'number') {
-    return false
+  if (typeof maxPlayers !== "number") {
+    return false;
   }
 
-  return true
+  return true;
 }
 
-function hasRpgTableBaseFields(value: unknown): boolean {
+export function hasRpgTableBaseFields(value: unknown): boolean {
   if (!isRecord(value)) {
-    return false
+    return false;
   }
 
-  const eventID = value.eventID
-  const eventDate = value.eventDate
-  const dungeonMaster = value.dungeonMaster
-  const location = value.location
-  const game = value.game
-  const status = value.status
-  const maxPlayers = value.maxPlayers
+  const eventID = value.eventID;
+  const eventDate = value.eventDate;
+  const dungeonMaster = value.dungeonMaster;
+  const location = value.location;
+  const game = value.game;
+  const status = value.status;
+  const maxPlayers = value.maxPlayers;
 
-  if (typeof eventID !== 'number') {
-    return false
+  if (typeof eventID !== "number") {
+    return false;
   }
 
-  if (typeof eventDate !== 'string') {
-    return false
+  if (typeof eventDate !== "string") {
+    return false;
   }
 
   if (!isRecord(dungeonMaster)) {
-    return false
+    return false;
   }
 
-  const dmUserID = dungeonMaster.userID
-  const dmNickname = dungeonMaster.nickname
+  const dmUserID = dungeonMaster.userID;
+  const dmNickname = dungeonMaster.nickname;
 
-  if (typeof dmUserID !== 'number') {
-    return false
+  if (typeof dmUserID !== "number") {
+    return false;
   }
 
-  if (typeof dmNickname !== 'string') {
-    return false
+  if (typeof dmNickname !== "string") {
+    return false;
   }
 
-  if (typeof location !== 'string') {
-    return false
+  if (typeof location !== "string") {
+    return false;
   }
 
-  if (typeof game !== 'string') {
-    return false
+  if (typeof game !== "string") {
+    return false;
   }
 
-  const statusOk = status === 'OPEN' || status === 'CLOSED' || status === 'CANCELLED'
+  const statusOk =
+    status === "OPEN" || status === "CLOSED" || status === "CANCELLED";
   if (!statusOk) {
-    return false
+    return false;
   }
 
-  if (typeof maxPlayers !== 'number') {
-    return false
+  if (typeof maxPlayers !== "number") {
+    return false;
   }
 
-  return true
+  return true;
 }
 
-function isRpgTableList(value: unknown): value is RpgTableListItem[] {
-  return Array.isArray(value) && value.every(isRpgTableListItem)
+export function isRpgTableList(value: unknown): value is RpgTableListItem[] {
+  return Array.isArray(value) && value.every(isRpgTableListItem);
 }
 
-function isSignupItem(value: unknown): value is RpgSignupItem {
+export function isSignupItem(value: unknown): value is RpgSignupItem {
   if (!isRecord(value)) {
-    return false
+    return false;
   }
 
-  const userID = value.userID
-  const nickname = value.nickname
-  const createdAt = value.created_at
+  const userID = value.userID;
+  const nickname = value.nickname;
+  const createdAt = value.created_at;
 
-  return typeof userID === 'number' && typeof nickname === 'string' && typeof createdAt === 'string'
+  return (
+    typeof userID === "number" &&
+    typeof nickname === "string" &&
+    typeof createdAt === "string"
+  );
 }
 
-function isRpgTableDetails(value: unknown): value is RpgTableDetails {
+export function isRpgTableDetails(value: unknown): value is RpgTableDetails {
   if (!hasRpgTableBaseFields(value)) {
-    return false
+    return false;
   }
 
   if (!isRecord(value)) {
-    return false
+    return false;
   }
 
-  const comments = value.comments
-  const commentsOk = typeof comments === 'string' || comments === null || typeof comments === 'undefined'
+  const comments = value.comments;
+  const commentsOk =
+    typeof comments === "string" ||
+    comments === null ||
+    typeof comments === "undefined";
   if (!commentsOk) {
-    return false
+    return false;
   }
 
-  const confirmedCap = value.confirmedCap
-  const confirmed = value.confirmed
-  const waitlist = value.waitlist
+  const confirmedCap = value.confirmedCap;
+  const confirmed = value.confirmed;
+  const waitlist = value.waitlist;
 
-  if (typeof confirmedCap !== 'number') {
-    return false
+  if (typeof confirmedCap !== "number") {
+    return false;
   }
 
   if (!Array.isArray(confirmed) || !confirmed.every(isSignupItem)) {
-    return false
+    return false;
   }
 
   if (!Array.isArray(waitlist) || !waitlist.every(isSignupItem)) {
-    return false
+    return false;
   }
 
-  return true
+  return true;
 }
 
 export async function apiListRpgTables(): Promise<RpgTableListItem[]> {
-  const res = await fetch('/api/rpg/tables', { credentials: 'include' })
+  const res = await fetch("/api/rpg/tables", { credentials: "include" });
   if (!res.ok) {
-    throw new Error(await readErrorMessage(res, 'Impossible de charger les tables JDR'))
+    throw new Error(
+      await readErrorMessage(res, "Impossible de charger les tables JDR"),
+    );
   }
 
-  const value: unknown = await readJsonUnknown(res)
+  const value: unknown = await readJsonUnknown(res);
   if (!isRpgTableList(value)) {
-    throw new Error('Invalid tables payload')
+    throw new Error("Invalid tables payload");
   }
 
-  return value
+  return value;
 }
 
-export async function apiGetRpgTable(eventID: number): Promise<RpgTableDetails> {
-  const res = await fetch(`/api/rpg/tables/${eventID}`, { credentials: 'include' })
+export async function apiGetRpgTable(
+  eventID: number,
+): Promise<RpgTableDetails> {
+  const res = await fetch(`/api/rpg/tables/${eventID}`, {
+    credentials: "include",
+  });
   if (!res.ok) {
-    throw new Error(await readErrorMessage(res, 'Impossible de charger la table'))
+    throw new Error(
+      await readErrorMessage(res, "Impossible de charger la table"),
+    );
   }
 
-  const value: unknown = await readJsonUnknown(res)
+  const value: unknown = await readJsonUnknown(res);
   if (!isRpgTableDetails(value)) {
-    throw new Error('Invalid table payload')
+    throw new Error("Invalid table payload");
   }
 
-  return value
+  return value;
 }
 
 export async function apiSignupRpg(eventID: number): Promise<void> {
-  const csrfToken = await fetchCsrfToken()
+  const csrfToken = await fetchCsrfToken();
   const res = await fetch(`/api/rpg/tables/${eventID}/signup`, {
-    method: 'POST',
-    headers: { 'x-csrf-token': csrfToken },
-    credentials: 'include',
-  })
+    method: "POST",
+    headers: { "x-csrf-token": csrfToken },
+    credentials: "include",
+  });
 
   if (!res.ok) {
-    throw new Error(await readErrorMessage(res, 'Inscription impossible'))
+    throw new Error(await readErrorMessage(res, "Inscription impossible"));
   }
 }
 
 export async function apiUnsignupRpg(eventID: number): Promise<void> {
-  const csrfToken = await fetchCsrfToken()
+  const csrfToken = await fetchCsrfToken();
   const res = await fetch(`/api/rpg/tables/${eventID}/signup`, {
-    method: 'DELETE',
-    headers: { 'x-csrf-token': csrfToken },
-    credentials: 'include',
-  })
+    method: "DELETE",
+    headers: { "x-csrf-token": csrfToken },
+    credentials: "include",
+  });
 
   if (!res.ok) {
-    throw new Error(await readErrorMessage(res, 'Désinscription impossible'))
+    throw new Error(await readErrorMessage(res, "Désinscription impossible"));
   }
 }
 
-export async function apiCreateRpgTable(body: RpgCreateTableBody): Promise<{ eventID: number; message: string }> {
-  const csrfToken = await fetchCsrfToken()
-  const res = await fetch('/api/rpg/tables', {
-    method: 'POST',
+export async function apiCreateRpgTable(
+  body: RpgCreateTableBody,
+): Promise<{ eventID: number; message: string }> {
+  const csrfToken = await fetchCsrfToken();
+  const res = await fetch("/api/rpg/tables", {
+    method: "POST",
     headers: {
-      'content-type': 'application/json',
-      'x-csrf-token': csrfToken,
+      "content-type": "application/json",
+      "x-csrf-token": csrfToken,
     },
-    credentials: 'include',
+    credentials: "include",
     body: JSON.stringify(body),
-  })
+  });
 
   if (!res.ok) {
-    throw new Error(await readErrorMessage(res, 'Création impossible'))
+    throw new Error(await readErrorMessage(res, "Création impossible"));
   }
 
-  const value: unknown = await readJsonUnknown(res)
+  const value: unknown = await readJsonUnknown(res);
 
   if (!isRecord(value)) {
-    throw new Error('Invalid create payload')
+    throw new Error("Invalid create payload");
   }
 
-  const eventID = value.eventID
-  const message = value.message
+  const eventID = value.eventID;
+  const message = value.message;
 
-  if (typeof eventID !== 'number' || typeof message !== 'string') {
-    throw new Error('Invalid create payload')
+  if (typeof eventID !== "number" || typeof message !== "string") {
+    throw new Error("Invalid create payload");
   }
 
-  return { eventID, message }
+  return { eventID, message };
 }
 
-export async function apiUpdateRpgTable(eventID: number, body: RpgUpdateTableBody): Promise<void> {
-  const csrfToken = await fetchCsrfToken()
+export async function apiUpdateRpgTable(
+  eventID: number,
+  body: RpgUpdateTableBody,
+): Promise<void> {
+  const csrfToken = await fetchCsrfToken();
   const res = await fetch(`/api/rpg/tables/${eventID}`, {
-    method: 'PUT',
+    method: "PUT",
     headers: {
-      'content-type': 'application/json',
-      'x-csrf-token': csrfToken,
+      "content-type": "application/json",
+      "x-csrf-token": csrfToken,
     },
-    credentials: 'include',
+    credentials: "include",
     body: JSON.stringify(body),
-  })
+  });
 
   if (!res.ok) {
-    throw new Error(await readErrorMessage(res, 'Mise à jour impossible'))
+    throw new Error(await readErrorMessage(res, "Mise à jour impossible"));
   }
 }
 
-export async function apiUpdateRpgTableStatus(eventID: number, status: RpgTableStatus): Promise<void> {
-  const csrfToken = await fetchCsrfToken()
+export async function apiUpdateRpgTableStatus(
+  eventID: number,
+  status: RpgTableStatus,
+): Promise<void> {
+  const csrfToken = await fetchCsrfToken();
   const res = await fetch(`/api/rpg/tables/${eventID}/status`, {
-    method: 'PUT',
+    method: "PUT",
     headers: {
-      'content-type': 'application/json',
-      'x-csrf-token': csrfToken,
+      "content-type": "application/json",
+      "x-csrf-token": csrfToken,
     },
-    credentials: 'include',
+    credentials: "include",
     body: JSON.stringify({ status }),
-  })
+  });
 
   if (!res.ok) {
-    throw new Error(await readErrorMessage(res, 'Mise à jour du statut impossible'))
+    throw new Error(
+      await readErrorMessage(res, "Mise à jour du statut impossible"),
+    );
   }
 }
 
-function isRpgTableStatus(value: unknown): value is RpgTableStatus {
-  return value === 'OPEN' || value === 'CLOSED' || value === 'CANCELLED'
+export function isRpgTableStatus(value: unknown): value is RpgTableStatus {
+  return value === "OPEN" || value === "CLOSED" || value === "CANCELLED";
 }
 
-function isRpgTableStatusList(value: unknown): value is RpgTableStatus[] {
-  return Array.isArray(value) && value.every(isRpgTableStatus)
+export function isRpgTableStatusList(
+  value: unknown,
+): value is RpgTableStatus[] {
+  return Array.isArray(value) && value.every(isRpgTableStatus);
 }
 
 export async function apiListRpgStatuses(): Promise<RpgTableStatus[]> {
-  const res = await fetch('/api/rpg/tables/statuses', { credentials: 'include' })
+  const res = await fetch("/api/rpg/tables/statuses", {
+    credentials: "include",
+  });
   if (!res.ok) {
-    throw new Error(await readErrorMessage(res, 'Impossible de charger les statuts'))
+    throw new Error(
+      await readErrorMessage(res, "Impossible de charger les statuts"),
+    );
   }
 
-  const value: unknown = await readJsonUnknown(res)
+  const value: unknown = await readJsonUnknown(res);
   if (!isRpgTableStatusList(value)) {
-    throw new Error('Invalid statuses payload')
+    throw new Error("Invalid statuses payload");
   }
 
-  return value
+  return value;
 }

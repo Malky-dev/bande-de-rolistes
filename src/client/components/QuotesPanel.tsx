@@ -1,137 +1,132 @@
-import { useEffect, useMemo, useState } from 'react'
+import { QUOTES_PAGE_SIZE } from "../../shared/constants";
+import { useEffect, useMemo, useState } from "react";
 import {
   apiQuotesCreate,
   apiQuotesDelete,
   apiQuotesList,
   apiQuotesUpdate,
   type QuoteAdmin,
-} from '../../api/authApi'
-import './AdminPanel.css'
-import './QuotesAdminPanel.css'
+} from "../../api/authApi";
 
-const PAGE_SIZE = 10
+import {
+  buildQuotesPageWindow,
+  getQuotesRangeLabel,
+  getQuotesReloadPageAfterDelete,
+} from "./quotesPanel.helpers";
 
 function QuotesPanel() {
-  const [page, setPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [totalItems, setTotalItems] = useState(0)
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
-  const [items, setItems] = useState<QuoteAdmin[]>([])
-  const [loading, setLoading] = useState(true)
+  const [items, setItems] = useState<QuoteAdmin[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [query, setQuery] = useState('') 
-  const [activeQuery, setActiveQuery] = useState('')
+  const [query, setQuery] = useState("");
+  const [activeQuery, setActiveQuery] = useState("");
 
-  const [error, setError] = useState<string | null>(null)
-  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Create
-  const [newContent, setNewContent] = useState('')
-  const [newAuthor, setNewAuthor] = useState('')
-  const [saving, setSaving] = useState(false)
+  const [newContent, setNewContent] = useState("");
+  const [newAuthor, setNewAuthor] = useState("");
+  const [saving, setSaving] = useState(false);
 
   // Edit
-  const [editId, setEditId] = useState<number | null>(null)
-  const [editContent, setEditContent] = useState('')
-  const [editAuthor, setEditAuthor] = useState('')
-  const [updating, setUpdating] = useState(false)
+  const [editId, setEditId] = useState<number | null>(null);
+  const [editContent, setEditContent] = useState("");
+  const [editAuthor, setEditAuthor] = useState("");
+  const [updating, setUpdating] = useState(false);
 
   async function reload(targetPage = page, q = activeQuery): Promise<void> {
     try {
-      setLoading(true)
-      setError(null)
-      const data = await apiQuotesList(targetPage, PAGE_SIZE, q)
-      setItems(data.items)
-      setPage(data.page)
-      setTotalPages(data.totalPages)
-      setTotalItems(data.totalItems)
+      setLoading(true);
+      setError(null);
+      const data = await apiQuotesList(targetPage, QUOTES_PAGE_SIZE, q);
+      setItems(data.items);
+      setPage(data.page);
+      setTotalPages(data.totalPages);
+      setTotalItems(data.totalItems);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erreur chargement')
+      setError(e instanceof Error ? e.message : "Erreur chargement");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   useEffect(() => {
-    void reload(1)
+    void reload(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, []);
 
   function toastOk(msg: string) {
-    setSuccessMessage(msg)
-    setTimeout(() => setSuccessMessage(null), 2000)
-  }
-
-  function buildPageWindow(current: number, total: number, radius = 3): number[] {
-    const start = Math.max(1, current - radius)
-    const end = Math.min(total, current + radius)
-    const pages: number[] = []
-    for (let p = start; p <= end; p++) pages.push(p)
-    return pages
+    setSuccessMessage(msg);
+    setTimeout(() => setSuccessMessage(null), 2000);
   }
 
   const rangeLabel = useMemo(() => {
-    const from = totalItems === 0 ? 0 : (page - 1) * PAGE_SIZE + 1
-    const to = Math.min(totalItems, page * PAGE_SIZE)
-    return `${from}-${to} / ${totalItems}`
-  }, [page, totalItems])
+    return getQuotesRangeLabel(page, totalItems, QUOTES_PAGE_SIZE);
+  }, [page, totalItems]);
 
   async function onCreate(e: React.FormEvent) {
-    e.preventDefault()
-    setSaving(true)
-    setError(null)
+    e.preventDefault();
+    setSaving(true);
+    setError(null);
     try {
-      await apiQuotesCreate({ content: newContent, author: newAuthor })
-      setNewContent('')
-      setNewAuthor('')
-      toastOk('Citation ajoutée')
-      await reload(1)
+      await apiQuotesCreate({ content: newContent, author: newAuthor });
+      setNewContent("");
+      setNewAuthor("");
+      toastOk("Citation ajoutée");
+      await reload(1);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Erreur d'ajout")
+      setError(e instanceof Error ? e.message : "Erreur d'ajout");
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
   }
 
   function startEdit(q: QuoteAdmin) {
-    setEditId(q.quoteID)
-    setEditContent(q.content)
-    setEditAuthor(q.author)
+    setEditId(q.quoteID);
+    setEditContent(q.content);
+    setEditAuthor(q.author);
   }
 
   function cancelEdit() {
-    setEditId(null)
-    setEditContent('')
-    setEditAuthor('')
+    setEditId(null);
+    setEditContent("");
+    setEditAuthor("");
   }
 
   async function saveEdit() {
-    if (editId === null) return
-    setUpdating(true)
-    setError(null)
+    if (editId === null) return;
+    setUpdating(true);
+    setError(null);
     try {
-      await apiQuotesUpdate(editId, { content: editContent, author: editAuthor })
-      toastOk('Citation mise à jour')
-      cancelEdit()
-      await reload(page)
+      await apiQuotesUpdate(editId, {
+        content: editContent,
+        author: editAuthor,
+      });
+      toastOk("Citation mise à jour");
+      cancelEdit();
+      await reload(page);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erreur update')
+      setError(e instanceof Error ? e.message : "Erreur update");
     } finally {
-      setUpdating(false)
+      setUpdating(false);
     }
   }
 
   async function onDelete(q: QuoteAdmin) {
-    const ok = window.confirm(`Supprimer la citation #${q.quoteID} ?`)
-    if (!ok) return
-    setError(null)
+    const ok = window.confirm(`Supprimer la citation #${q.quoteID} ?`);
+    if (!ok) return;
+    setError(null);
     try {
-      await apiQuotesDelete(q.quoteID)
-      toastOk('Citation supprimée')
-      const lastOnPage = items.length === 1 && page > 1
-      await reload(lastOnPage ? page - 1 : page)
+      await apiQuotesDelete(q.quoteID);
+      toastOk("Citation supprimée");
+      await reload(getQuotesReloadPageAfterDelete(items.length, page));
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erreur suppression')
+      setError(e instanceof Error ? e.message : "Erreur suppression");
     }
   }
 
@@ -140,10 +135,10 @@ function QuotesPanel() {
       <div className="admin admin--loading">
         <p className="admin__loading">Chargement...</p>
       </div>
-    )
+    );
   }
 
-  const pageWindow = buildPageWindow(page, totalPages, 3)
+  const pageWindow = buildQuotesPageWindow(page, totalPages, 3);
 
   return (
     <section className="admin">
@@ -153,10 +148,13 @@ function QuotesPanel() {
       </header>
 
       {error && <div className="admin__alert admin__alert--error">{error}</div>}
-      {successMessage && <div className="admin__alert admin__alert--success">{successMessage}</div>}
+      {successMessage && (
+        <div className="admin__alert admin__alert--success">
+          {successMessage}
+        </div>
+      )}
 
       <div className="admin__actions">
-        
         <form onSubmit={(e) => void onCreate(e)} className="quotes__form">
           <textarea
             className="quotes__textarea"
@@ -175,9 +173,14 @@ function QuotesPanel() {
 
           <div className="quotes__actionsInline">
             <button className="btn-primary" type="submit" disabled={saving}>
-              {saving ? '...' : 'Ajouter'}
+              {saving ? "..." : "Ajouter"}
             </button>
-            <button className="btn-secondary" type="button" onClick={() => void reload(page)} disabled={loading}>
+            <button
+              className="btn-secondary"
+              type="button"
+              onClick={() => void reload(page)}
+              disabled={loading}
+            >
               Actualiser
             </button>
           </div>
@@ -186,10 +189,10 @@ function QuotesPanel() {
 
       <form
         onSubmit={(e) => {
-          e.preventDefault()
-          const q = query.trim()
-          setActiveQuery(q)
-          void reload(1, q)
+          e.preventDefault();
+          const q = query.trim();
+          setActiveQuery(q);
+          void reload(1, q);
         }}
         className="quotes__actionsInline"
         style={{ marginTop: 8 }}
@@ -206,11 +209,11 @@ function QuotesPanel() {
         <button
           className="btn-secondary"
           type="button"
-          disabled={loading || (query === '' && activeQuery === '')}
+          disabled={loading || (query === "" && activeQuery === "")}
           onClick={() => {
-            setQuery('')
-            setActiveQuery('')
-            void reload(1, '')
+            setQuery("");
+            setActiveQuery("");
+            void reload(1, "");
           }}
         >
           Reset
@@ -242,7 +245,9 @@ function QuotesPanel() {
                 >
                   1
                 </button>
-                {pageWindow[0] > 2 && <span style={{ opacity: 0.7, padding: '0 6px' }}>...</span>}
+                {pageWindow[0] > 2 && (
+                  <span style={{ opacity: 0.7, padding: "0 6px" }}>...</span>
+                )}
               </>
             )}
 
@@ -252,7 +257,11 @@ function QuotesPanel() {
                 key={p}
                 type="button"
                 disabled={loading || p === page}
-                className={p === page ? 'btn-primary btn-primary--small' : 'btn-secondary btn-secondary--small'}
+                className={
+                  p === page
+                    ? "btn-primary btn-primary--small"
+                    : "btn-secondary btn-secondary--small"
+                }
                 onClick={() => void reload(p)}
                 title={`Aller page ${p}`}
               >
@@ -261,22 +270,23 @@ function QuotesPanel() {
             ))}
 
             {/* Derniere page + ellipsis si besoin */}
-            {pageWindow.length > 0 && pageWindow[pageWindow.length - 1] < totalPages && (
-              <>
-                {pageWindow[pageWindow.length - 1] < totalPages - 1 && (
-                  <span style={{ opacity: 0.7, padding: '0 6px' }}>...</span>
-                )}
-                <button
-                  className="btn-secondary btn-secondary--small"
-                  type="button"
-                  disabled={loading}
-                  onClick={() => void reload(totalPages)}
-                  title={`Aller page ${totalPages}`}
-                >
-                  {totalPages}
-                </button>
-              </>
-            )}
+            {pageWindow.length > 0 &&
+              pageWindow[pageWindow.length - 1] < totalPages && (
+                <>
+                  {pageWindow[pageWindow.length - 1] < totalPages - 1 && (
+                    <span style={{ opacity: 0.7, padding: "0 6px" }}>...</span>
+                  )}
+                  <button
+                    className="btn-secondary btn-secondary--small"
+                    type="button"
+                    disabled={loading}
+                    onClick={() => void reload(totalPages)}
+                    title={`Aller page ${totalPages}`}
+                  >
+                    {totalPages}
+                  </button>
+                </>
+              )}
 
             <button
               className="btn-secondary btn-secondary--small"
@@ -307,10 +317,9 @@ function QuotesPanel() {
               </tr>
             ) : (
               items.map((q) => {
-                const editing = editId === q.quoteID
+                const editing = editId === q.quoteID;
                 return (
                   <tr key={q.quoteID} className="admin__tr">
-
                     <td className="admin__td">
                       {editing ? (
                         <textarea
@@ -320,7 +329,9 @@ function QuotesPanel() {
                           rows={3}
                         />
                       ) : (
-                        <span style={{ fontStyle: 'italic' }}>« {q.content} »</span>
+                        <span style={{ fontStyle: "italic" }}>
+                          « {q.content} »
+                        </span>
                       )}
                     </td>
 
@@ -339,33 +350,51 @@ function QuotesPanel() {
                     <td className="admin__td">
                       {editing ? (
                         <div className="quotes__actionsInline">
-                          <button className="btn-primary" type="button" onClick={() => void saveEdit()} disabled={updating}>
-                            {updating ? '...' : 'Enregistrer'}
+                          <button
+                            className="btn-primary"
+                            type="button"
+                            onClick={() => void saveEdit()}
+                            disabled={updating}
+                          >
+                            {updating ? "..." : "Enregistrer"}
                           </button>
-                          <button className="btn-secondary" type="button" onClick={cancelEdit} disabled={updating}>
+                          <button
+                            className="btn-secondary"
+                            type="button"
+                            onClick={cancelEdit}
+                            disabled={updating}
+                          >
                             Annuler
                           </button>
                         </div>
                       ) : (
                         <div className="quotes__actionsInline">
-                          <button className="btn-secondary btn-secondary--small" type="button" onClick={() => startEdit(q)}>
+                          <button
+                            className="btn-secondary btn-secondary--small"
+                            type="button"
+                            onClick={() => startEdit(q)}
+                          >
                             Éditer
                           </button>
-                          <button className="btn-secondary btn-secondary--small" type="button" onClick={() => void onDelete(q)}>
+                          <button
+                            className="btn-secondary btn-secondary--small"
+                            type="button"
+                            onClick={() => void onDelete(q)}
+                          >
                             Supprimer
                           </button>
                         </div>
                       )}
                     </td>
                   </tr>
-                )
+                );
               })
             )}
           </tbody>
         </table>
       </div>
     </section>
-  )
+  );
 }
 
-export default QuotesPanel
+export default QuotesPanel;

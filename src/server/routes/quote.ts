@@ -1,29 +1,47 @@
 import { Router } from "express";
-import { Sequelize } from 'sequelize'
-import { Quote, sequelize } from '../models'
+import { Quote } from "../models";
 
-const router = Router()
+const router = Router();
 
-router.get('/quote', async (_req, res) => {
+router.get("/quote", async (_req, res) => {
   try {
-    const dialect = sequelize.getDialect()
-    const randomFn = dialect === 'mysql' || dialect === 'mariadb' ? 'RAND()' : 'RANDOM()'
+    const count = await Quote.count();
 
-    const quote = await Quote.findOne({
-      order: Sequelize.literal(randomFn),
-      attributes: ['content', 'author'],
-    })
-
-    if (!quote) {
-      res.json({ content: "L'aventure commence quand il manque une règle.", author: 'Anonyme' })
-      return
+    if (count === 0) {
+      res.status(404).json({
+        code: "NOT_FOUND",
+        message: "Aucune citation disponible",
+      });
+      return;
     }
 
-    res.json(quote)
-  } catch (err) {
-    console.error(err)
-    res.status(500).json({ code: 'ERROR', message: 'Erreur lors de la récupération de la citation' })
-  }
-})
+    const randomOffset = Math.floor(Math.random() * count);
 
-export default router
+    const quote = await Quote.findOne({
+      order: [["quoteID", "ASC"]],
+      offset: randomOffset,
+      limit: 1,
+      attributes: ["content", "author"],
+    });
+
+    if (!quote) {
+      res.status(404).json({
+        code: "NOT_FOUND",
+        message: "Aucune citation disponible",
+      });
+      return;
+    }
+
+    res.json({
+      content: quote.content,
+      author: quote.author,
+    });
+  } catch {
+    res.status(500).json({
+      code: "ERROR",
+      message: "Erreur lors de la récupération de la citation",
+    });
+  }
+});
+
+export default router;

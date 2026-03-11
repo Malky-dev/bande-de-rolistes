@@ -1,0 +1,14 @@
+/* =========================================================
+   01) BASE / RESET
+========================================================= */
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+}
+
+* {
+  box-sizing: border-box;
+}
