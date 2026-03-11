@@ -19,6 +19,10 @@ export const appViews = {
     label: "Tables JDR",
     inNavbar: true,
   },
+  rules: {
+    label: "Statuts et règlement intérieur",
+    inNavbar: false,
+  },
   login: {
     label: "Connexion",
     inNavbar: false,

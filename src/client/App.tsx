@@ -16,6 +16,7 @@ import QuotesView from "./views/QuoteView";
 import WhatIsRpg from "./views/WhatIsRpg";
 import AboutView from "./views/AboutView";
 import LocationView from "./views/LocationView";
+import RuleView from "./views/RuleView";
 
 function App() {
   const [view, setView] = useState<View>("home");
@@ -91,6 +92,8 @@ function App() {
           <LocationView onJoinTable={() => setView("rpg")} />
         )}
 
+        {view === "rules" && <RuleView />}
+
         {view === "rpg" && (
           <RpgTablesView
             session={session}
@@ -146,7 +149,7 @@ function App() {
           ))}
       </main>
 
-      <Footer />
+      <Footer onChangeView={(v) => setView(v)} />
     </div>
   );
 }
