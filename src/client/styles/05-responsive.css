@@ -3,44 +3,20 @@
 ========================================================= */
 
 @media (max-width: 900px) {
-  .hero {
-    grid-template-columns: 1fr;
-  }
-
-  .auth-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .rpg-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .about-story-grid,
+  .hero .auth-grid .rpg-grid .about-story-grid,
   .about-cards,
-  .about-values {
+  .about-values .location-place,
+  .location-features .rule-block {
     grid-template-columns: 1fr;
   }
 
-  .location-place,
-  .location-features {
-    grid-template-columns: 1fr;
-  }
-
-  .location-map {
-    min-height: 220px;
-  }
-
-  .location-map iframe {
+  .location-map .location-map iframe {
     min-height: 220px;
   }
 }
 
 @media (max-width: 640px) {
-  .inline-row {
-    grid-template-columns: 1fr;
-  }
-
-  .what-is-rpg-cards,
+  .inline-row .what-is-rpg-cards,
   .what-is-rpg-steps,
   .what-is-rpg-split {
     grid-template-columns: 1fr;
