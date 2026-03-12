@@ -43,3 +43,82 @@
   gap: 0.5rem;
   flex-wrap: wrap;
 }
+
+.quotes__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin: 1rem 0 1.25rem;
+}
+
+.quotes__toolbarSearch {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.quotes__toolbarInput {
+  min-width: 280px;
+  flex: 1;
+  max-width: 520px;
+}
+
+.quotesModal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(2, 6, 23, 0.72);
+  backdrop-filter: blur(4px);
+}
+
+.quotesModal__dialog {
+  width: min(680px, 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(15, 23, 42, 0.98);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+  padding: 1.25rem;
+}
+
+.quotesModal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.quotesModal__title {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.quotesModal__close {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.85;
+}
+
+.quotesModal__close:hover {
+  opacity: 1;
+}
+
+.quotesModal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}

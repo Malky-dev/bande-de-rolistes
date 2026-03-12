@@ -10,6 +10,8 @@ vi.mock("@/api/authApi", () => ({
 import { apiQuote } from "@/api/authApi";
 
 describe("Footer", () => {
+  const onChangeView = vi.fn();
+
   afterEach(() => {
     vi.clearAllMocks();
   });
@@ -20,7 +22,7 @@ describe("Footer", () => {
       author: "Morpheus",
     });
 
-    render(<Footer />);
+    render(<Footer onChangeView={onChangeView} />);
 
     await waitFor(() => {
       expect(screen.getByText(/Wake up, Neo\./i)).toBeInTheDocument();
@@ -31,7 +33,7 @@ describe("Footer", () => {
   it("renders the fallback quote when the API fails", async () => {
     vi.mocked(apiQuote).mockRejectedValue(new Error("boom"));
 
-    render(<Footer />);
+    render(<Footer onChangeView={onChangeView} />);
 
     await waitFor(() => {
       expect(
@@ -46,7 +48,7 @@ describe("Footer", () => {
       author: "",
     });
 
-    render(<Footer />);
+    render(<Footer onChangeView={onChangeView} />);
 
     await waitFor(() => {
       expect(screen.getByText(/\u00ab Wake up, Neo\./i)).toBeInTheDocument();
@@ -66,7 +68,7 @@ describe("Footer", () => {
         }),
     );
 
-    const { unmount } = render(<Footer />);
+    const { unmount } = render(<Footer onChangeView={onChangeView} />);
 
     unmount();
     resolveQuote?.({ content: "Late quote", author: "Ghost" });
@@ -86,7 +88,7 @@ describe("Footer", () => {
         }),
     );
 
-    const { unmount } = render(<Footer />);
+    const { unmount } = render(<Footer onChangeView={onChangeView} />);
 
     unmount();
     rejectQuote?.(new Error("boom"));

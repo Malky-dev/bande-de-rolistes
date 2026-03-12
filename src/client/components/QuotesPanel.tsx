@@ -7,7 +7,6 @@ import {
   apiQuotesUpdate,
   type QuoteAdmin,
 } from "../../api/authApi";
-
 import {
   buildQuotesPageWindow,
   getQuotesRangeLabel,
@@ -18,17 +17,15 @@ function QuotesPanel() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
-
   const [items, setItems] = useState<QuoteAdmin[]>([]);
   const [loading, setLoading] = useState(true);
-
   const [query, setQuery] = useState("");
   const [activeQuery, setActiveQuery] = useState("");
-
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Create
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newContent, setNewContent] = useState("");
   const [newAuthor, setNewAuthor] = useState("");
   const [saving, setSaving] = useState(false);
@@ -43,6 +40,7 @@ function QuotesPanel() {
     try {
       setLoading(true);
       setError(null);
+
       const data = await apiQuotesList(targetPage, QUOTES_PAGE_SIZE, q);
       setItems(data.items);
       setPage(data.page);
@@ -65,6 +63,18 @@ function QuotesPanel() {
     setTimeout(() => setSuccessMessage(null), 2000);
   }
 
+  function openCreateModal() {
+    setError(null);
+    setIsCreateModalOpen(true);
+  }
+
+  function closeCreateModal() {
+    if (saving) return;
+    setIsCreateModalOpen(false);
+    setNewContent("");
+    setNewAuthor("");
+  }
+
   const rangeLabel = useMemo(() => {
     return getQuotesRangeLabel(page, totalItems, QUOTES_PAGE_SIZE);
   }, [page, totalItems]);
@@ -73,10 +83,12 @@ function QuotesPanel() {
     e.preventDefault();
     setSaving(true);
     setError(null);
+
     try {
       await apiQuotesCreate({ content: newContent, author: newAuthor });
       setNewContent("");
       setNewAuthor("");
+      setIsCreateModalOpen(false);
       toastOk("Citation ajoutée");
       await reload(1);
     } catch (e) {
@@ -100,8 +112,10 @@ function QuotesPanel() {
 
   async function saveEdit() {
     if (editId === null) return;
+
     setUpdating(true);
     setError(null);
+
     try {
       await apiQuotesUpdate(editId, {
         content: editContent,
@@ -120,7 +134,9 @@ function QuotesPanel() {
   async function onDelete(q: QuoteAdmin) {
     const ok = window.confirm(`Supprimer la citation #${q.quoteID} ?`);
     if (!ok) return;
+
     setError(null);
+
     try {
       await apiQuotesDelete(q.quoteID);
       toastOk("Citation supprimée");
@@ -131,11 +147,7 @@ function QuotesPanel() {
   }
 
   if (loading && items.length === 0) {
-    return (
-      <div className="admin admin--loading">
-        <p className="admin__loading">Chargement...</p>
-      </div>
-    );
+    return <div className="admin admin--loading">Chargement...</div>;
   }
 
   const pageWindow = buildQuotesPageWindow(page, totalPages, 3);
@@ -154,75 +166,58 @@ function QuotesPanel() {
         </div>
       )}
 
-      <div className="admin__actions">
-        <form onSubmit={(e) => void onCreate(e)} className="quotes__form">
-          <textarea
-            className="quotes__textarea"
-            value={newContent}
-            onChange={(e) => setNewContent(e.target.value)}
-            rows={3}
-            placeholder="Texte de la citation"
-            required
-          />
+      <div className="quotes__toolbar">
+        <button className="btn-primary" type="button" onClick={openCreateModal}>
+          Ajouter une citation
+        </button>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const q = query.trim();
+            setActiveQuery(q);
+            void reload(1, q);
+          }}
+          className="quotes__toolbarSearch"
+        >
           <input
-            className="quotes__input"
-            value={newAuthor}
-            onChange={(e) => setNewAuthor(e.target.value)}
-            placeholder="Auteur (optionnel)"
+            className="quotes__input quotes__toolbarInput"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Rechercher (contenu ou auteur)..."
           />
 
-          <div className="quotes__actionsInline">
-            <button className="btn-primary" type="submit" disabled={saving}>
-              {saving ? "..." : "Ajouter"}
-            </button>
-            <button
-              className="btn-secondary"
-              type="button"
-              onClick={() => void reload(page)}
-              disabled={loading}
-            >
-              Actualiser
-            </button>
-          </div>
+          <button
+            className="btn-secondary"
+            type="button"
+            onClick={() => void reload(page)}
+            disabled={loading}
+          >
+            Actualiser
+          </button>
+
+          <button className="btn-secondary" type="submit" disabled={loading}>
+            Rechercher
+          </button>
+
+          <button
+            className="btn-secondary"
+            type="button"
+            disabled={loading || (query === "" && activeQuery === "")}
+            onClick={() => {
+              setQuery("");
+              setActiveQuery("");
+              void reload(1, "");
+            }}
+          >
+            Reset
+          </button>
         </form>
       </div>
-
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          const q = query.trim();
-          setActiveQuery(q);
-          void reload(1, q);
-        }}
-        className="quotes__actionsInline"
-        style={{ marginTop: 8 }}
-      >
-        <input
-          className="quotes__input"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Rechercher (contenu ou auteur)..."
-        />
-        <button className="btn-secondary" type="submit" disabled={loading}>
-          Rechercher
-        </button>
-        <button
-          className="btn-secondary"
-          type="button"
-          disabled={loading || (query === "" && activeQuery === "")}
-          onClick={() => {
-            setQuery("");
-            setActiveQuery("");
-            void reload(1, "");
-          }}
-        >
-          Reset
-        </button>
-      </form>
 
       <div className="admin__tableWrap">
         <div className="quotes__pagination">
           <div className="quotes__paginationInfo">{rangeLabel}</div>
+
           <div className="quotes__paginationControls">
             <button
               className="btn-secondary btn-secondary--small"
@@ -233,7 +228,6 @@ function QuotesPanel() {
               ◀
             </button>
 
-            {/* 1 + ellipsis si besoin */}
             {pageWindow.length > 0 && pageWindow[0] > 1 && (
               <>
                 <button
@@ -251,7 +245,6 @@ function QuotesPanel() {
               </>
             )}
 
-            {/* Fenetre +-3 */}
             {pageWindow.map((p) => (
               <button
                 key={p}
@@ -269,7 +262,6 @@ function QuotesPanel() {
               </button>
             ))}
 
-            {/* Derniere page + ellipsis si besoin */}
             {pageWindow.length > 0 &&
               pageWindow[pageWindow.length - 1] < totalPages && (
                 <>
@@ -307,7 +299,6 @@ function QuotesPanel() {
               <th className="admin__th">Actions</th>
             </tr>
           </thead>
-
           <tbody>
             {items.length === 0 ? (
               <tr>
@@ -318,6 +309,7 @@ function QuotesPanel() {
             ) : (
               items.map((q) => {
                 const editing = editId === q.quoteID;
+
                 return (
                   <tr key={q.quoteID} className="admin__tr">
                     <td className="admin__td">
@@ -393,6 +385,69 @@ function QuotesPanel() {
           </tbody>
         </table>
       </div>
+
+      {isCreateModalOpen && (
+        <div
+          className="quotesModal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="quotes-create-title"
+          onClick={closeCreateModal}
+        >
+          <div
+            className="quotesModal__dialog"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="quotesModal__header">
+              <h2 id="quotes-create-title" className="quotesModal__title">
+                Ajouter une citation
+              </h2>
+
+              <button
+                type="button"
+                className="quotesModal__close"
+                onClick={closeCreateModal}
+                aria-label="Fermer"
+                disabled={saving}
+              >
+                ×
+              </button>
+            </div>
+
+            <form onSubmit={(e) => void onCreate(e)} className="quotes__form">
+              <textarea
+                className="quotes__textarea"
+                value={newContent}
+                onChange={(e) => setNewContent(e.target.value)}
+                rows={4}
+                placeholder="Texte de la citation"
+                required
+              />
+
+              <input
+                className="quotes__input"
+                value={newAuthor}
+                onChange={(e) => setNewAuthor(e.target.value)}
+                placeholder="Auteur (optionnel)"
+              />
+
+              <div className="quotesModal__footer">
+                <button
+                  className="btn-secondary"
+                  type="button"
+                  onClick={closeCreateModal}
+                  disabled={saving}
+                >
+                  Annuler
+                </button>
+                <button className="btn-primary" type="submit" disabled={saving}>
+                  {saving ? "..." : "Ajouter"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

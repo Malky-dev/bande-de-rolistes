@@ -26,7 +26,7 @@ const getRoleIDFromUserJson = (userJson: unknown): number | null => {
     return null;
   }
 
-  const roleUnknown = userJson["Role"];
+  const roleUnknown = userJson["role"];
   if (!isRecord(roleUnknown)) {
     return null;
   }
@@ -52,9 +52,10 @@ const controllerCreateTable: RequestHandler<
 
     const userID = getUserID(req);
     if (!userID) {
-      res
-        .status(401)
-        .json({ code: "UNAUTHORIZED", message: "Not authenticated" });
+      res.status(401).json({
+        code: "UNAUTHORIZED",
+        message: "Not authenticated",
+      });
       return;
     }
 
@@ -90,20 +91,23 @@ const controllerCreateTable: RequestHandler<
 
     const roleIDUnknown: unknown = req.user?.role?.roleID;
     if (typeof roleIDUnknown !== "number") {
-      res
-        .status(401)
-        .json({ code: "UNAUTHORIZED", message: "Not authenticated" });
+      res.status(401).json({
+        code: "UNAUTHORIZED",
+        message: "Not authenticated",
+      });
       return;
     }
 
     const roleID = roleIDUnknown;
 
     let dmUserID: number;
-    if (roleID <= 3) {
+
+    // Les rôles 1, 2 et 3 peuvent créer une table pour eux-mêmes.
+    if (ALLOWED_CREATE.includes(roleID)) {
       dmUserID = userID;
     } else {
       if (typeof dungeonMasterUserID !== "number") {
-        badRequest(res, "dungeonMasterUserID requis (admin/orga)");
+        badRequest(res, "dungeonMasterUserID requis");
         return;
       }
       dmUserID = dungeonMasterUserID;
@@ -152,7 +156,10 @@ const controllerCreateTable: RequestHandler<
       maxPlayers: mp,
     });
 
-    res.status(201).json({ eventID: created.eventID, message: "Table créée" });
+    res.status(201).json({
+      eventID: created.eventID,
+      message: "Table créée",
+    });
   } catch (error) {
     console.error(error);
     const err = error instanceof Error ? error : new Error("Erreur serveur");

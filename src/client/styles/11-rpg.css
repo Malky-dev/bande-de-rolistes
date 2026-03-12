@@ -197,3 +197,30 @@
 .rpg-block li {
   margin: 4px 0;
 }
+
+.appModal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(2, 6, 23, 0.72);
+  backdrop-filter: blur(4px);
+}
+
+.appModal__dialog {
+  width: min(720px, 100%);
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(15, 23, 42, 0.98);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+  padding: 1.25rem;
+}
+
+.appModal__dialog--wide {
+  width: min(920px, 100%);
+}

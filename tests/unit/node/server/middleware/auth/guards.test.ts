@@ -12,6 +12,9 @@ import {
   requireAdmin,
   requireStaff,
   requireAdminOrOwner,
+  requireCreateRpgTable,
+  requireAdminOrOrga,
+  requireAdminOrOrgaOrOwnerRpgTable,
 } from "@/server/middleware/auth/guards";
 
 describe("auth guards", () => {
@@ -285,6 +288,166 @@ describe("auth guards", () => {
           userID: 42,
           nickname: "x",
           role: { roleID: 2, roleLabel: "member" },
+        },
+      });
+
+      const res = makeRes();
+      const next = makeNext();
+
+      mw(req as any, res as any, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("requireCreateRpgTable", () => {
+    it("403 si rôle pas dans 1, 2 ou 3", () => {
+      const mw = requireCreateRpgTable();
+
+      const req = makeReq({
+        user: {
+          userID: 1,
+          nickname: "x",
+          role: { roleID: 4, roleLabel: "member" },
+        },
+      });
+
+      const res = makeRes();
+      const next = makeNext();
+
+      mw(req as any, res as any, next);
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({
+        code: "FORBIDDEN",
+        message: "Accès réservé aux rôles 1, 2 ou 3",
+      });
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it("next si rôle 1, 2 ou 3", () => {
+      const mw = requireCreateRpgTable();
+
+      const req = makeReq({
+        user: {
+          userID: 1,
+          nickname: "x",
+          role: { roleID: 3, roleLabel: "member" },
+        },
+      });
+
+      const res = makeRes();
+      const next = makeNext();
+
+      mw(req as any, res as any, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(res.status).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("requireAdminOrOrga", () => {
+    it("403 si ni admin ni organisator", () => {
+      const mw = requireAdminOrOrga();
+
+      const req = makeReq({
+        user: {
+          userID: 1,
+          nickname: "x",
+          role: { roleID: 3, roleLabel: "member" },
+        },
+      });
+
+      const res = makeRes();
+      const next = makeNext();
+
+      mw(req as any, res as any, next);
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({
+        code: "FORBIDDEN",
+        message: "Accès réservé admin/organisateur",
+      });
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it("next si admin ou organisator", () => {
+      const mw = requireAdminOrOrga();
+
+      const req = makeReq({
+        user: {
+          userID: 1,
+          nickname: "x",
+          role: { roleID: 2, roleLabel: "organisator" },
+        },
+      });
+
+      const res = makeRes();
+      const next = makeNext();
+
+      mw(req as any, res as any, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("requireAdminOrOrgaOrOwnerRpgTable", () => {
+    it("next si admin", () => {
+      const getOwnerUserID = vi.fn().mockReturnValue(99);
+      const mw = requireAdminOrOrgaOrOwnerRpgTable(getOwnerUserID);
+
+      const req = makeReq({
+        user: {
+          userID: 1,
+          nickname: "x",
+          role: { roleID: 1, roleLabel: "admin" },
+        },
+      });
+
+      const res = makeRes();
+      const next = makeNext();
+
+      mw(req as any, res as any, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(getOwnerUserID).not.toHaveBeenCalled();
+    });
+
+    it("403 si rôle pas 1, 2 ou 3 et pas owner", () => {
+      const getOwnerUserID = vi.fn().mockReturnValue(99);
+      const mw = requireAdminOrOrgaOrOwnerRpgTable(getOwnerUserID);
+
+      const req = makeReq({
+        user: {
+          userID: 7,
+          nickname: "x",
+          role: { roleID: 3, roleLabel: "member" },
+        },
+      });
+
+      const res = makeRes();
+      const next = makeNext();
+
+      mw(req as any, res as any, next);
+
+      expect(getOwnerUserID).toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({
+        code: "FORBIDDEN",
+        message: "Accès refusé",
+      });
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it("next si rôle 3 et owner", () => {
+      const getOwnerUserID = vi.fn().mockReturnValue(7);
+      const mw = requireAdminOrOrgaOrOwnerRpgTable(getOwnerUserID);
+
+      const req = makeReq({
+        user: {
+          userID: 7,
+          nickname: "x",
+          role: { roleID: 3, roleLabel: "member" },
         },
       });
 

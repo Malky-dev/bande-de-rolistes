@@ -95,10 +95,12 @@ vi.mock("@/client/views/RpgTablesView", () => ({
     onCreateTable,
     onEditTable,
     onLogin,
+    reloadToken,
   }: {
     onCreateTable: () => void;
     onEditTable: (eventID: number) => void;
     onLogin: () => void;
+    reloadToken?: number;
   }) => (
     <div>
       <span>RpgTablesView</span>
@@ -160,10 +162,19 @@ vi.mock("@/client/views/ForbiddenView", () => ({
 }));
 
 vi.mock("@/client/views/rpg/UpsertRpgTableView", () => ({
-  default: ({ eventID, onBack }: { eventID?: number; onBack: () => void }) => (
+  default: ({
+    eventID,
+    onBack,
+    onDone,
+  }: {
+    eventID?: number | null;
+    onBack: () => void;
+    onDone: () => void;
+  }) => (
     <div>
       <span>{eventID ? `Upsert-${eventID}` : "Upsert-create"}</span>
       <button onClick={onBack}>upsert-back</button>
+      <button onClick={onDone}>upsert-done</button>
     </div>
   ),
 }));

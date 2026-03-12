@@ -27,6 +27,7 @@ type Props = {
   onCreateTable: () => void;
   onEditTable: (eventID: number) => void;
   onLogin: () => void;
+  reloadToken?: number;
 };
 
 function RpgTablesView({
@@ -34,6 +35,7 @@ function RpgTablesView({
   onCreateTable,
   onEditTable,
   onLogin,
+  reloadToken = 0,
 }: Props) {
   const [loading, setLoading] = useState(true);
   const [tables, setTables] = useState<RpgTableListItem[]>([]);
@@ -107,7 +109,7 @@ function RpgTablesView({
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [reloadToken]);
 
   useEffect(() => {
     if (selectedID === null) {
