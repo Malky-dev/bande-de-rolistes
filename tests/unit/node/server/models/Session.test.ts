@@ -1,7 +1,7 @@
-import { describe, expect, it, vi } from "vitest";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { Sequelize } from "sequelize";
+import { describe, expect, it, vi } from "vitest";
 
 const root = process.cwd();
 
@@ -30,8 +30,8 @@ async function load() {
   return { Session: mod.default };
 }
 
-describe("Session model", () => {
-  it("defines the expected table metadata and nullable session fields", async () => {
+describe("model Session", () => {
+  it("définit les métadonnées de table attendues et les champs de session nullables", async () => {
     const { Session } = await load();
     const attributes = Session.getAttributes();
 

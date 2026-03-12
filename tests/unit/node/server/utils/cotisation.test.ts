@@ -42,13 +42,13 @@ async function load(opts?: {
   };
 }
 
-describe("cotisation utils", () => {
+describe("utils cotisation", () => {
   afterEach(() => {
     vi.useRealTimers();
   });
 
   describe("createPaidCotisation", () => {
-    it("creates a paid cotisation from the payment date when there is no previous paid period", async () => {
+    it("crée une cotisation payée à partir de la date de paiement s’il n’existe aucune période payée précédente", async () => {
       const paidAt = new Date(2026, 0, 15, 9, 30, 0, 0);
       const createResult = { cotisationID: 12 };
 
@@ -78,7 +78,7 @@ describe("cotisation utils", () => {
       expect(result).toBe(createResult);
     });
 
-    it("extends the membership after the previous paid period when it still overlaps", async () => {
+    it("prolonge l’adhésion après la période payée précédente lorsqu’elle se chevauche encore", async () => {
       const paidAt = new Date(2026, 0, 15, 9, 30, 0, 0);
 
       const { createPaidCotisation, mocks } = await load({
@@ -101,7 +101,7 @@ describe("cotisation utils", () => {
       });
     });
 
-    it("starts a fresh period from the payment date when the previous paid period is expired", async () => {
+    it("démarre une nouvelle période à partir de la date de paiement lorsque la période payée précédente est expirée", async () => {
       const paidAt = new Date(2026, 0, 15, 9, 30, 0, 0);
 
       const { createPaidCotisation, mocks } = await load({
@@ -124,7 +124,7 @@ describe("cotisation utils", () => {
       });
     });
 
-    it("uses the current date when paidAt is omitted", async () => {
+    it("utilise la date courante si paidAt est omis", async () => {
       vi.useFakeTimers();
       vi.setSystemTime(new Date(2026, 2, 10, 12, 34, 56, 0));
 
@@ -147,7 +147,7 @@ describe("cotisation utils", () => {
   });
 
   describe("getMembershipStatus", () => {
-    it("returns not up to date when no paid cotisation exists", async () => {
+    it("retourne une adhésion non à jour lorsqu’aucune cotisation payée n’existe", async () => {
       const { getMembershipStatus, mocks } = await load({
         findOneResult: null,
       });
@@ -162,7 +162,7 @@ describe("cotisation utils", () => {
       expect(result).toEqual({ validUntil: null, isUpToDate: false });
     });
 
-    it("treats a membership ending today as up to date", async () => {
+    it("considère une adhésion se terminant aujourd’hui comme à jour", async () => {
       vi.useFakeTimers();
       vi.setSystemTime(new Date(2026, 5, 15, 8, 0, 0, 0));
 
@@ -176,7 +176,7 @@ describe("cotisation utils", () => {
       });
     });
 
-    it("marks an expired membership as not up to date", async () => {
+    it("marque une adhésion expirée comme non à jour", async () => {
       vi.useFakeTimers();
       vi.setSystemTime(new Date(2026, 5, 15, 8, 0, 0, 0));
 

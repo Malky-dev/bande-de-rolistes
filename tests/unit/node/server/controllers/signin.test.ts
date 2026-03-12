@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { makeReq } from "@/../tests/helpers/express";
 
 type LoadOpts = {
@@ -54,12 +55,12 @@ async function load(opts: LoadOpts = {}) {
   return { controllerSignin, mocks: { hashPassword, User } };
 }
 
-describe("controllerSignin", () => {
+describe("controller signin", () => {
   beforeEach(() => {
     delete process.env.NODE_ENV;
   });
 
-  it("400 si nickname n'est pas string", async () => {
+  it("retourne 400 si nickname n’est pas une chaîne", async () => {
     const { controllerSignin } = await load();
     const req = makeReq({
       body: {
@@ -80,7 +81,7 @@ describe("controllerSignin", () => {
     });
   });
 
-  it("400 si email n'est pas string", async () => {
+  it("retourne 400 si email n’est pas une chaîne", async () => {
     const { controllerSignin } = await load();
     const req = makeReq({
       body: {
@@ -101,7 +102,7 @@ describe("controllerSignin", () => {
     });
   });
 
-  it("400 si password n'est pas string", async () => {
+  it("retourne 400 si password n’est pas une chaîne", async () => {
     const { controllerSignin } = await load();
     const req = makeReq({
       body: {
@@ -122,7 +123,7 @@ describe("controllerSignin", () => {
     });
   });
 
-  it("400 si passwordCheck n'est pas string", async () => {
+  it("retourne 400 si passwordCheck n’est pas une chaîne", async () => {
     const { controllerSignin } = await load();
     const req = makeReq({
       body: {
@@ -144,7 +145,7 @@ describe("controllerSignin", () => {
     });
   });
 
-  it("400 si passwords ne correspondent pas", async () => {
+  it("retourne 400 si les mots de passe ne correspondent pas", async () => {
     const { controllerSignin } = await load();
     const req = makeReq({
       body: {
@@ -165,7 +166,7 @@ describe("controllerSignin", () => {
     });
   });
 
-  it("400 si email invalide", async () => {
+  it("retourne 400 si l’email est invalide", async () => {
     const { controllerSignin } = await load();
     const req = makeReq({
       body: {
@@ -186,7 +187,7 @@ describe("controllerSignin", () => {
     });
   });
 
-  it("400 si mot de passe trop court", async () => {
+  it("retourne 400 si le mot de passe est trop court", async () => {
     const { controllerSignin } = await load();
     const req = makeReq({
       body: {
@@ -207,7 +208,7 @@ describe("controllerSignin", () => {
     });
   });
 
-  it("400 si mot de passe trop long", async () => {
+  it("retourne 400 si le mot de passe est trop long", async () => {
     const { controllerSignin } = await load();
     const req = makeReq({
       body: {
@@ -228,7 +229,7 @@ describe("controllerSignin", () => {
     });
   });
 
-  it("400 si password identique à l'email (normalisé)", async () => {
+  it("retourne 400 si le mot de passe est identique à l’email normalisé", async () => {
     const { controllerSignin } = await load();
     const req = makeReq({
       body: {
@@ -249,7 +250,7 @@ describe("controllerSignin", () => {
     });
   });
 
-  it("400 si mot de passe trop simple (caractères répétés)", async () => {
+  it("retourne 400 si le mot de passe est trop simple avec des caractères répétés", async () => {
     const { controllerSignin } = await load();
     const pw = "a".repeat(12);
     const req = makeReq({
@@ -271,7 +272,7 @@ describe("controllerSignin", () => {
     });
   });
 
-  it("409 si user existant", async () => {
+  it("retourne 409 si l’utilisateur existe déjà", async () => {
     const { controllerSignin, mocks } = await load({
       existingUser: { userID: 1 },
     });
@@ -297,7 +298,7 @@ describe("controllerSignin", () => {
     });
   });
 
-  it("201: crée utilisateur (email normalisé + role guest)", async () => {
+  it("retourne 201 en créant l’utilisateur avec l’email normalisé et le rôle guest", async () => {
     const { controllerSignin, mocks } = await load({ hashResult: "h" });
 
     const req = makeReq({
@@ -326,7 +327,7 @@ describe("controllerSignin", () => {
     });
   });
 
-  it("400 SequelizeValidationError: concatène les messages", async () => {
+  it("retourne 400 en cas de SequelizeValidationError avec concaténation des messages", async () => {
     const err: any = new Error("nope");
     err.name = "SequelizeValidationError";
     err.errors = [{ message: "m1" }, { message: "m2" }];
@@ -355,7 +356,7 @@ describe("controllerSignin", () => {
     errSpy.mockRestore();
   });
 
-  it("400 SequelizeValidationError: fallback 'Validation error' si pas de détails", async () => {
+  it("retourne 400 en cas de SequelizeValidationError avec le message de repli 'Validation error' si aucun détail exploitable n’est présent", async () => {
     const err: any = new Error("nope");
     err.name = "SequelizeValidationError";
     err.errors = [{ message: undefined }, { message: 123 }];
@@ -384,7 +385,7 @@ describe("controllerSignin", () => {
     errSpy.mockRestore();
   });
 
-  it("400 SequelizeValidationError: fallback 'Validation error' si errors absent", async () => {
+  it("retourne 400 en cas de SequelizeValidationError avec le message de repli 'Validation error' si errors est absent", async () => {
     const err: any = new Error("nope");
     err.name = "SequelizeValidationError";
 
@@ -412,7 +413,7 @@ describe("controllerSignin", () => {
     errSpy.mockRestore();
   });
 
-  it("409 SequelizeUniqueConstraintError", async () => {
+  it("retourne 409 en cas de SequelizeUniqueConstraintError", async () => {
     const err: any = new Error("uniq");
     err.name = "SequelizeUniqueConstraintError";
 
@@ -439,7 +440,7 @@ describe("controllerSignin", () => {
     errSpy.mockRestore();
   });
 
-  it("400 SequelizeForeignKeyConstraintError", async () => {
+  it("retourne 400 en cas de SequelizeForeignKeyConstraintError", async () => {
     const err: any = new Error("fk");
     err.name = "SequelizeForeignKeyConstraintError";
 
@@ -467,7 +468,7 @@ describe("controllerSignin", () => {
     errSpy.mockRestore();
   });
 
-  it("500: Error avec message vide -> fallback 'Erreur serveur'", async () => {
+  it("retourne 500 avec le message de repli 'Erreur serveur' si une Error a un message vide", async () => {
     const err = new Error("");
     const { controllerSignin } = await load({ createError: err });
 
@@ -493,7 +494,7 @@ describe("controllerSignin", () => {
     errSpy.mockRestore();
   });
 
-  it("500: exception non-Error", async () => {
+  it("retourne 500 si une exception non-Error est levée", async () => {
     const { controllerSignin } = await load({ createError: "nope" });
     const req = makeReq({
       body: {

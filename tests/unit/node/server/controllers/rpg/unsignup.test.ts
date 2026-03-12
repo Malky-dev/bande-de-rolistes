@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from "vitest";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { describe, expect, it, vi } from "vitest";
 
 const root = process.cwd();
 
@@ -95,8 +95,8 @@ async function load(opts?: {
   };
 }
 
-describe("controllerUnsignup", () => {
-  it("403 si pas le rôle", async () => {
+describe("controller unsignup", () => {
+  it("retourne 403 si l’utilisateur n’a pas le rôle requis", async () => {
     const { controllerUnsignup, makeReq, makeTypedRes, mocks } = await load({
       hasRole: false,
     });
@@ -113,7 +113,7 @@ describe("controllerUnsignup", () => {
     expect(mocks.TableRPGPlayer.destroy).not.toHaveBeenCalled();
   });
 
-  it("401 si pas authentifié (getUserID falsy)", async () => {
+  it("retourne 401 si l’utilisateur n’est pas authentifié", async () => {
     const { controllerUnsignup, makeReq, makeTypedRes } = await load({
       userID: null,
     });
@@ -130,7 +130,7 @@ describe("controllerUnsignup", () => {
     });
   });
 
-  it("400 si eventID invalide", async () => {
+  it("retourne 400 si eventID est invalide", async () => {
     const { controllerUnsignup, makeReq, makeTypedRes, mocks } = await load({
       eventIDParsed: null,
     });
@@ -147,7 +147,7 @@ describe("controllerUnsignup", () => {
     expect(mocks.TableRPGPlayer.destroy).not.toHaveBeenCalled();
   });
 
-  it("200 json si ok (destroy appelé)", async () => {
+  it("retourne 200 avec la désinscription effectuée", async () => {
     const { controllerUnsignup, makeReq, makeTypedRes, mocks } = await load({
       userID: 7,
       eventIDParsed: 9,
@@ -164,7 +164,7 @@ describe("controllerUnsignup", () => {
     expect(json).toHaveBeenCalledWith({ message: "Désinscription effectuée" });
   });
 
-  it("500 si Error(message)", async () => {
+  it("retourne 500 avec le message de l’erreur si une Error est levée", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerUnsignup, makeReq, makeTypedRes } = await load({
       destroyReject: new Error("boom"),
@@ -181,7 +181,7 @@ describe("controllerUnsignup", () => {
     errSpy.mockRestore();
   });
 
-  it("500 si erreur non-Error", async () => {
+  it("retourne 500 avec un message serveur générique si l’erreur n’est pas une Error", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerUnsignup, makeReq, makeTypedRes } = await load({
       destroyReject: "nope",

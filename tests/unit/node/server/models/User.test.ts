@@ -1,7 +1,7 @@
-import { describe, expect, it, vi } from "vitest";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { Sequelize } from "sequelize";
+import { describe, expect, it, vi } from "vitest";
 
 const root = process.cwd();
 
@@ -30,8 +30,8 @@ async function load() {
   return { User: mod.default };
 }
 
-describe("User model", () => {
-  it("defines the expected table metadata and field defaults", async () => {
+describe("model User", () => {
+  it("définit les métadonnées de table attendues et les valeurs par défaut des champs", async () => {
     const { User } = await load();
     const attributes = User.getAttributes();
 

@@ -55,7 +55,7 @@ async function load() {
 }
 
 describe("middleware barrel", () => {
-  it("re-exports each middleware symbol from its source module", async () => {
+  it("réexporte chaque middleware depuis son module source", async () => {
     const { mod, expected } = await load();
 
     expect(mod.requireAuth).toBe(expected.requireAuth);

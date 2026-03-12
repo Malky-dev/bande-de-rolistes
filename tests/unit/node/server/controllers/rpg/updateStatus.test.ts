@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from "vitest";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { describe, expect, it, vi } from "vitest";
 
 const root = process.cwd();
 
@@ -135,8 +135,8 @@ async function load(opts?: {
   };
 }
 
-describe("controllerUpdateStatus", () => {
-  it("400 si eventID invalide", async () => {
+describe("controller updateStatus", () => {
+  it("retourne 400 si eventID est invalide", async () => {
     const { controllerUpdateStatus, makeReq, makeTypedRes, mocks } = await load(
       {
         eventIDParsed: null,
@@ -155,7 +155,7 @@ describe("controllerUpdateStatus", () => {
     expect(mocks.TableRPG.findByPk).not.toHaveBeenCalled();
   });
 
-  it("401 si pas authentifié (userID falsy)", async () => {
+  it("retourne 401 si l’utilisateur n’est pas authentifié", async () => {
     const { controllerUpdateStatus, makeReq, makeTypedRes } = await load({
       userID: null,
       roleID: 3,
@@ -173,7 +173,7 @@ describe("controllerUpdateStatus", () => {
     });
   });
 
-  it("401 si roleID pas number", async () => {
+  it("retourne 401 si roleID n’est pas un nombre", async () => {
     const { controllerUpdateStatus, makeReq, makeTypedRes } = await load({
       userID: 7,
       roleID: "3",
@@ -191,7 +191,7 @@ describe("controllerUpdateStatus", () => {
     });
   });
 
-  it("400 si status invalide", async () => {
+  it("retourne 400 si status est invalide", async () => {
     const { controllerUpdateStatus, makeReq, makeTypedRes, mocks } = await load(
       {
         status: "BROKEN",
@@ -210,7 +210,7 @@ describe("controllerUpdateStatus", () => {
     expect(mocks.TableRPG.findByPk).not.toHaveBeenCalled();
   });
 
-  it("404 si table introuvable", async () => {
+  it("retourne 404 si la table est introuvable", async () => {
     const { controllerUpdateStatus, makeReq, makeTypedRes, mocks } = await load(
       {
         tableFound: false,
@@ -229,7 +229,7 @@ describe("controllerUpdateStatus", () => {
     );
   });
 
-  it("403 si ni admin/orga ni owner", async () => {
+  it("retourne 403 si l’utilisateur n’est ni admin ou organisateur, ni propriétaire de la table", async () => {
     const { controllerUpdateStatus, makeReq, makeTypedRes, mocks } = await load(
       {
         hasRole: false,
@@ -251,7 +251,7 @@ describe("controllerUpdateStatus", () => {
     expect(mocks.tableSave).not.toHaveBeenCalled();
   });
 
-  it("200 json si owner DM", async () => {
+  it("retourne 200 si le maître du jeu propriétaire met à jour le statut", async () => {
     const { controllerUpdateStatus, makeReq, makeTypedRes, mocks } = await load(
       {
         hasRole: false,
@@ -271,7 +271,7 @@ describe("controllerUpdateStatus", () => {
     expect(json).toHaveBeenCalledWith({ message: "Statut mis à jour" });
   });
 
-  it("200 json si admin/orga", async () => {
+  it("retourne 200 si un admin ou un organisateur met à jour le statut", async () => {
     const { controllerUpdateStatus, makeReq, makeTypedRes, mocks } = await load(
       {
         hasRole: true,
@@ -291,7 +291,7 @@ describe("controllerUpdateStatus", () => {
     expect(json).toHaveBeenCalledWith({ message: "Statut mis à jour" });
   });
 
-  it("500 si Error(message)", async () => {
+  it("retourne 500 avec le message de l’erreur si une Error est levée", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerUpdateStatus, makeReq, makeTypedRes } = await load({
       findReject: new Error("boom"),
@@ -308,7 +308,7 @@ describe("controllerUpdateStatus", () => {
     errSpy.mockRestore();
   });
 
-  it("500 si erreur non-Error", async () => {
+  it("retourne 500 avec un message serveur générique si l’erreur n’est pas une Error", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerUpdateStatus, makeReq, makeTypedRes } = await load({
       saveReject: "nope",

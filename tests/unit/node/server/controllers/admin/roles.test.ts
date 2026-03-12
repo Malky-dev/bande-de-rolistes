@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from "vitest";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { describe, expect, it, vi } from "vitest";
 
 const root = process.cwd();
 
@@ -58,8 +58,8 @@ async function load(opts?: {
   return { controllerAdminRoles, makeReq, makeTypedRes, mocks: { Role } };
 }
 
-describe("controllerAdminRoles", () => {
-  it("200 json: liste des rôles (tri ASC)", async () => {
+describe("controller admin roles", () => {
+  it("retourne 200 avec la liste des rôles triée par ordre croissant", async () => {
     const { controllerAdminRoles, makeReq, makeTypedRes, mocks } = await load({
       findAllResult: [
         { roleID: 2, roleLabel: "admin" },
@@ -82,7 +82,7 @@ describe("controllerAdminRoles", () => {
     ]);
   });
 
-  it("500 si Error(message)", async () => {
+  it("retourne 500 avec le message de l’erreur si une Error est levée", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerAdminRoles, makeReq, makeTypedRes } = await load({
       findAllReject: new Error("boom"),
@@ -99,7 +99,7 @@ describe("controllerAdminRoles", () => {
     errSpy.mockRestore();
   });
 
-  it("500 si erreur non-Error", async () => {
+  it("retourne 500 avec un message serveur générique si l’erreur n’est pas une Error", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerAdminRoles, makeReq, makeTypedRes } = await load({
       findAllReject: "nope",

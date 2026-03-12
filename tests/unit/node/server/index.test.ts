@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 const flushPromises = () => new Promise<void>((r) => setImmediate(() => r()));
 
-describe("server/index.ts bootstrap", () => {
+describe("initialisation du serveur", () => {
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();
@@ -13,7 +13,7 @@ describe("server/index.ts bootstrap", () => {
     delete process.env.FRONTEND_URL;
   });
 
-  it("branche success: initDatabase OK -> listen est appelé et routes montées", async () => {
+  it("prend la branche de succès : initDatabase réussit, listen est appelé et les routes sont montées", async () => {
     process.env.PORT = "4242";
     process.env.FRONTEND_URL = "http://frontend.test";
 
@@ -122,7 +122,7 @@ describe("server/index.ts bootstrap", () => {
     exitSpy.mockRestore();
   });
 
-  it("branche error: initDatabase KO -> console.error + process.exit(1)", async () => {
+  it("prend la branche d’erreur : initDatabase échoue, console.error et process.exit(1) sont appelés", async () => {
     process.env.PORT = "3001";
 
     const appUse = vi.fn();

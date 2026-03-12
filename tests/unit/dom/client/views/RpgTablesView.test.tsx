@@ -1,13 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/api/rpgApi", () => ({
-  apiGetRpgTable: vi.fn(),
-  apiListRpgTables: vi.fn(),
-  apiSignupRpg: vi.fn(),
-  apiUnsignupRpg: vi.fn(),
-}));
-
 import RpgTablesView from "@/client/views/RpgTablesView";
 import {
   formatDate,
@@ -16,13 +9,19 @@ import {
   statusClass,
   statusLabel,
 } from "@/client/views/rpgTablesView.helpers";
-
 import {
   apiGetRpgTable,
   apiListRpgTables,
   apiSignupRpg,
   apiUnsignupRpg,
 } from "@/api/rpgApi";
+
+vi.mock("@/api/rpgApi", () => ({
+  apiGetRpgTable: vi.fn(),
+  apiListRpgTables: vi.fn(),
+  apiSignupRpg: vi.fn(),
+  apiUnsignupRpg: vi.fn(),
+}));
 
 const listItem = {
   eventID: 10,
@@ -54,10 +53,10 @@ describe("RpgTablesView", () => {
     vi.resetAllMocks();
   });
 
-  it("rpg view helper functions derive labels, dates, selection, and signup buckets", () => {
+  it("calcule les libellés, les dates, la sélection et les groupes d’inscription de la vue JDR", () => {
     expect(formatDate("invalid")).toBe("invalid");
     expect(statusLabel("OPEN")).toBe("Inscription Ouverte");
-    expect(statusLabel("CANCELLED")).toBe("Table Annul\u00e9e");
+    expect(statusLabel("CANCELLED")).toBe("Table Annulée");
     expect(statusClass("CLOSED")).toBe("rpg-status rpg-status--closed");
     expect(getSelectedTableID(null, [])).toBeNull();
     expect(getSelectedTableID(null, [listItem])).toBe(10);
@@ -107,7 +106,7 @@ describe("RpgTablesView", () => {
     expect(getMySignupBucket(details, null)).toBeNull();
   });
 
-  it("shows the load error when the table list request fails", async () => {
+  it("affiche l’erreur de chargement quand la requête de liste des tables échoue", async () => {
     vi.mocked(apiListRpgTables).mockRejectedValue(new Error("Load failed"));
 
     render(
@@ -124,7 +123,7 @@ describe("RpgTablesView", () => {
     });
   });
 
-  it("renders the empty state when there are no tables", async () => {
+  it("affiche l’état vide quand aucune table n’est disponible", async () => {
     vi.mocked(apiListRpgTables).mockResolvedValue([]);
 
     render(
@@ -137,14 +136,12 @@ describe("RpgTablesView", () => {
     );
 
     await waitFor(() => {
-      expect(
-        screen.getByText("Aucune table \u00e0 venir."),
-      ).toBeInTheDocument();
+      expect(screen.getByText("Aucune table à venir.")).toBeInTheDocument();
     });
-    expect(screen.getByText("S\u00e9lectionne une table.")).toBeInTheDocument();
+    expect(screen.getByText("Sélectionne une table.")).toBeInTheDocument();
   });
 
-  it("renders create and edit actions for permitted users", async () => {
+  it("affiche les actions de création et de modification pour les utilisateurs autorisés", async () => {
     const onCreateTable = vi.fn();
     const onEditTable = vi.fn();
     vi.mocked(apiListRpgTables).mockResolvedValue([listItem]);
@@ -166,19 +163,17 @@ describe("RpgTablesView", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("Cr\u00e9er une table")).toBeInTheDocument();
+      expect(screen.getByText("Créer une table")).toBeInTheDocument();
     });
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Cr\u00e9er une table" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Créer une table" }));
     fireEvent.click(screen.getByRole("button", { name: "Modifier" }));
 
     expect(onCreateTable).toHaveBeenCalledTimes(1);
     expect(onEditTable).toHaveBeenCalledWith(10);
   });
 
-  it("shows login actions for guests and supports keyboard selection", async () => {
+  it("affiche les actions de connexion pour les invités et permet la sélection au clavier", async () => {
     const onLogin = vi.fn();
     vi.mocked(apiListRpgTables).mockResolvedValue([
       { ...listItem, eventDate: "invalid" },
@@ -210,7 +205,7 @@ describe("RpgTablesView", () => {
     expect(onLogin).toHaveBeenCalledTimes(1);
   });
 
-  it("supports selecting another table and redirects guests to discord", async () => {
+  it("permet de sélectionner une autre table et redirige les invités vers Discord", async () => {
     Object.defineProperty(window, "location", {
       configurable: true,
       value: { href: "http://localhost/" },
@@ -259,7 +254,7 @@ describe("RpgTablesView", () => {
     expect(window.location.href).toBe("/api/discord/init");
   });
 
-  it("signs up for authenticated users", async () => {
+  it("inscrit les utilisateurs authentifiés", async () => {
     vi.mocked(apiListRpgTables)
       .mockResolvedValueOnce([listItem])
       .mockResolvedValueOnce([listItem]);
@@ -294,12 +289,10 @@ describe("RpgTablesView", () => {
     await waitFor(() => {
       expect(apiSignupRpg).toHaveBeenCalledWith(10);
     });
-    expect(
-      screen.getByText("Inscription enregistr\u00e9e."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Inscription enregistrée.")).toBeInTheDocument();
   });
 
-  it("signs out for authenticated users already in the confirmed list", async () => {
+  it("désinscrit les utilisateurs authentifiés déjà présents dans la liste confirmée", async () => {
     vi.mocked(apiListRpgTables)
       .mockResolvedValueOnce([listItem])
       .mockResolvedValueOnce([listItem]);
@@ -334,23 +327,19 @@ describe("RpgTablesView", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole("button", { name: /Se d\u00e9sinscrire/i }),
+        screen.getByRole("button", { name: /Se désinscrire/i }),
       ).toBeInTheDocument();
     });
 
-    fireEvent.click(
-      screen.getByRole("button", { name: /Se d\u00e9sinscrire/i }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: /Se désinscrire/i }));
 
     await waitFor(() => {
       expect(apiUnsignupRpg).toHaveBeenCalledWith(10);
     });
-    expect(
-      screen.getByText("D\u00e9sinscription effectu\u00e9e."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Désinscription effectuée.")).toBeInTheDocument();
   });
 
-  it("shows action errors", async () => {
+  it("affiche les erreurs d’action", async () => {
     vi.mocked(apiListRpgTables).mockResolvedValue([listItem]);
     vi.mocked(apiGetRpgTable).mockResolvedValue(details);
     vi.mocked(apiSignupRpg).mockRejectedValue(new Error("Signup failed"));
@@ -381,7 +370,7 @@ describe("RpgTablesView", () => {
     });
   });
 
-  it("shows generic fallback messages for non-Error detail and unsignup failures", async () => {
+  it("affiche les messages génériques de secours pour les échecs non Error de détail et de désinscription", async () => {
     vi.mocked(apiListRpgTables).mockResolvedValue([
       listItem,
       {
@@ -437,22 +426,18 @@ describe("RpgTablesView", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole("button", { name: /Se d\u00e9sinscrire/i }),
+        screen.getByRole("button", { name: /Se désinscrire/i }),
       ).toBeInTheDocument();
     });
 
-    fireEvent.click(
-      screen.getByRole("button", { name: /Se d\u00e9sinscrire/i }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: /Se désinscrire/i }));
 
     await waitFor(() => {
-      expect(
-        screen.getByText("D\u00e9sinscription impossible"),
-      ).toBeInTheDocument();
+      expect(screen.getByText("Désinscription impossible")).toBeInTheDocument();
     });
   });
 
-  it("renders closed tables and waitlist entries without signup actions", async () => {
+  it("affiche les tables fermées et les entrées en liste d’attente sans action d’inscription", async () => {
     vi.mocked(apiListRpgTables).mockResolvedValue([
       { ...listItem, status: "CLOSED" },
     ]);
@@ -484,8 +469,8 @@ describe("RpgTablesView", () => {
     );
 
     await waitFor(() => {
-      expect(screen.queryByText("Table Annul\u00e9e")).toBeNull();
-      expect(screen.getByText("Inscription Ferm\u00e9e")).toBeInTheDocument();
+      expect(screen.queryByText("Table Annulée")).toBeNull();
+      expect(screen.getByText("Inscription Fermée")).toBeInTheDocument();
     });
 
     expect(screen.queryByRole("button", { name: "S'inscrire" })).toBeNull();
@@ -494,7 +479,7 @@ describe("RpgTablesView", () => {
     });
   });
 
-  it("renders cancelled tables without guest action buttons", async () => {
+  it("affiche les tables annulées sans boutons d’action invité", async () => {
     vi.mocked(apiListRpgTables).mockResolvedValue([
       { ...listItem, status: "CANCELLED" },
     ]);
@@ -513,9 +498,7 @@ describe("RpgTablesView", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getAllByText("Table Annul\u00e9e").length).toBeGreaterThan(
-        0,
-      );
+      expect(screen.getAllByText("Table Annulée").length).toBeGreaterThan(0);
     });
 
     expect(screen.queryByRole("button", { name: "Se connecter" })).toBeNull();

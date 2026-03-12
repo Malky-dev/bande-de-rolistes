@@ -124,8 +124,8 @@ async function load(opts?: {
   };
 }
 
-describe("controllerSignup", () => {
-  it("403 si pas le rôle", async () => {
+describe("controller signup", () => {
+  it("retourne 403 si l’utilisateur n’a pas le rôle requis", async () => {
     const { controllerSignup, makeReq, makeTypedRes, mocks } = await load({
       hasRole: false,
     });
@@ -140,7 +140,7 @@ describe("controllerSignup", () => {
     expect(mocks.TableRPGPlayer.create).not.toHaveBeenCalled();
   });
 
-  it("401 si pas authentifié (getUserID falsy)", async () => {
+  it("retourne 401 si l’utilisateur n’est pas authentifié (getUserID falsy)", async () => {
     const { controllerSignup, makeReq, makeTypedRes } = await load({
       userID: null,
     });

@@ -9,7 +9,7 @@ import {
 } from "@/client/views/rpg/rpgTableFormModel";
 
 describe("rpgTableFormModel", () => {
-  it("returns the default create values", () => {
+  it("renvoie les valeurs par défaut de création", () => {
     expect(defaultCreateValues()).toEqual({
       eventDate: null,
       location: "",
@@ -19,7 +19,7 @@ describe("rpgTableFormModel", () => {
     });
   });
 
-  it("maps table values and handles invalid dates", () => {
+  it("mappe les valeurs de table et gère les dates invalides", () => {
     expect(
       valuesFromTable({
         eventID: 1,
@@ -44,7 +44,7 @@ describe("rpgTableFormModel", () => {
     });
   });
 
-  it("falls back for missing location, game, comments, and max players", () => {
+  it("retombe sur des valeurs par défaut quand le lieu, le jeu, les commentaires et le nombre maximum de joueurs sont absents", () => {
     expect(
       valuesFromTable({
         eventID: 1,
@@ -69,7 +69,7 @@ describe("rpgTableFormModel", () => {
     });
   });
 
-  it("validates each field", () => {
+  it("valide chaque champ", () => {
     expect(
       validateRpgTable({
         eventDate: null,
@@ -131,7 +131,7 @@ describe("rpgTableFormModel", () => {
     ).toBeNull();
   });
 
-  it("converts form values to API payloads", () => {
+  it("convertit les valeurs du formulaire en payloads API", () => {
     const values = {
       eventDate: new Date("2026-01-01T00:00:00.000Z"),
       location: " Paris ",

@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { createRouterMock } from "./_routerMock";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { makeReq, makeRes } from "@/../tests/helpers/express";
+import { createRouterMock } from "./_routerMock";
 
 const router = createRouterMock();
 
@@ -37,12 +38,12 @@ async function load() {
   };
 }
 
-describe("routes/quote", () => {
+describe("routes quote", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("GET /quote: returns one public quote", async () => {
+  it("GET /quote retourne une citation publique", async () => {
     const { getQuote } = await load();
 
     Quote.count.mockResolvedValue(1);
@@ -71,7 +72,7 @@ describe("routes/quote", () => {
     });
   });
 
-  it("GET /quote: returns 404 when no quote exists", async () => {
+  it("GET /quote retourne 404 si aucune citation n’existe", async () => {
     const { getQuote } = await load();
 
     Quote.count.mockResolvedValue(0);
@@ -89,7 +90,7 @@ describe("routes/quote", () => {
     });
   });
 
-  it("GET /quote: returns 404 when count > 0 but findOne returns null", async () => {
+  it("GET /quote retourne 404 si count est supérieur à 0 mais que findOne renvoie null", async () => {
     const { getQuote } = await load();
 
     Quote.count.mockResolvedValue(1);
@@ -107,7 +108,7 @@ describe("routes/quote", () => {
     });
   });
 
-  it("GET /quote: catch -> 500", async () => {
+  it("GET /quote retourne 500 en cas d’erreur", async () => {
     const { getQuote } = await load();
 
     Quote.count.mockRejectedValue(new Error("boom"));

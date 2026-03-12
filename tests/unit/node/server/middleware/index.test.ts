@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
-import type { Request, Response, NextFunction } from "express";
+import type { NextFunction, Request, Response } from "express";
+import { describe, expect, it, vi } from "vitest";
 
 const makeReq = () =>
   ({
@@ -18,7 +18,7 @@ const makeRes = () => {
 const makeNext = () => vi.fn() as unknown as NextFunction;
 
 describe("requireAuth", () => {
-  it("401 si token absent", async () => {
+  it("retourne 401 si le token est absent", async () => {
     vi.resetModules();
 
     vi.doMock("@/server/middleware/auth/token", () => ({
@@ -44,7 +44,7 @@ describe("requireAuth", () => {
     });
   });
 
-  it("401 si token invalide (session null)", async () => {
+  it("retourne 401 si le token est invalide car la session est introuvable", async () => {
     vi.resetModules();
 
     vi.doMock("@/server/middleware/auth/token", () => ({
@@ -70,7 +70,7 @@ describe("requireAuth", () => {
     });
   });
 
-  it("500 si user.role manquant", async () => {
+  it("retourne 500 si user.role est manquant", async () => {
     vi.resetModules();
 
     vi.doMock("@/server/middleware/auth/token", () => ({
@@ -104,7 +104,7 @@ describe("requireAuth", () => {
     });
   });
 
-  it("200: set req.user + req.session + next()", async () => {
+  it("renseigne req.user et req.session puis appelle next si l’authentification réussit", async () => {
     vi.resetModules();
 
     vi.doMock("@/server/middleware/auth/token", () => ({
@@ -141,7 +141,7 @@ describe("requireAuth", () => {
     expect(next).toHaveBeenCalled();
   });
 
-  it("500 si erreur non-Error", async () => {
+  it("retourne 500 avec un message serveur générique si l’erreur n’est pas une Error", async () => {
     vi.resetModules();
 
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});

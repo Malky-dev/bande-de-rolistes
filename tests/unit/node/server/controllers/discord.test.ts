@@ -1,7 +1,7 @@
-import { describe, it, expect, vi } from "vitest";
+import type { NextFunction } from "express";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import type { NextFunction } from "express";
+import { describe, expect, it, vi } from "vitest";
 
 type ReqGet = {
   (name: "set-cookie"): string[] | undefined;
@@ -237,8 +237,8 @@ async function load(opts?: {
   };
 }
 
-describe("discord controllers", () => {
-  it("controllerDiscordInit: redirect vers url oauth", async () => {
+describe("controllers discord", () => {
+  it("controllerDiscordInit redirige vers l’URL OAuth", async () => {
     const { controllerDiscordInit, makeReqInit, makeResInit, makeNext, mocks } =
       await load();
 
@@ -252,7 +252,7 @@ describe("discord controllers", () => {
     expect(fns.redirect).toHaveBeenCalledWith("http://discord.auth/url");
   });
 
-  it("controllerDiscordInit: 500 si erreur", async () => {
+  it("controllerDiscordInit retourne 500 si une Error est levée", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerDiscordInit, makeReqInit, makeResInit, makeNext } =
       await load({
@@ -271,7 +271,7 @@ describe("discord controllers", () => {
     errSpy.mockRestore();
   });
 
-  it("controllerDiscordInit: 500 si erreur non-Error", async () => {
+  it("controllerDiscordInit retourne 500 avec un message serveur générique si l’erreur n’est pas une Error", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerDiscordInit, makeReqInit, makeResInit, makeNext } =
       await load({
@@ -293,7 +293,7 @@ describe("discord controllers", () => {
     errSpy.mockRestore();
   });
 
-  it("controllerDiscordInit: state par défaut si query.state n'est pas une string", async () => {
+  it("controllerDiscordInit utilise l’état par défaut si query.state n’est pas une chaîne", async () => {
     const { controllerDiscordInit, makeReqInit, makeResInit, makeNext, mocks } =
       await load();
 
@@ -309,7 +309,7 @@ describe("discord controllers", () => {
     });
   });
 
-  it("controllerDiscordCallback: 400 si code manquant", async () => {
+  it("controllerDiscordCallback retourne 400 si le code est manquant", async () => {
     const { controllerDiscordCallback, makeReqCb, makeResCb, makeNext } =
       await load();
 
@@ -326,7 +326,7 @@ describe("discord controllers", () => {
     });
   });
 
-  it("controllerDiscordCallback: 400 si discord user sans id", async () => {
+  it("controllerDiscordCallback retourne 400 si l’utilisateur Discord n’a pas d’id", async () => {
     const { controllerDiscordCallback, makeReqCb, makeResCb, makeNext } =
       await load({
         getUserResult: { email: "a@b.c" },
@@ -345,7 +345,7 @@ describe("discord controllers", () => {
     });
   });
 
-  it("controllerDiscordCallback: user trouvé par discordId -> session + redirect", async () => {
+  it("controllerDiscordCallback crée une session et redirige si l’utilisateur est trouvé par discordId", async () => {
     const user = { userID: 7 } as unknown;
 
     const { controllerDiscordCallback, makeReqCb, makeResCb, makeNext, mocks } =
@@ -366,7 +366,7 @@ describe("discord controllers", () => {
     expect(fns.redirect).toHaveBeenCalledWith("http://frontend.local");
   });
 
-  it("controllerDiscordCallback: sans user-agent -> device et browser null", async () => {
+  it("controllerDiscordCallback utilise device et browser à null en l’absence de user-agent", async () => {
     const user = { userID: 7 } as unknown;
 
     const { controllerDiscordCallback, makeReqCb, makeResCb, makeNext, mocks } =
@@ -392,7 +392,7 @@ describe("discord controllers", () => {
     );
   });
 
-  it("controllerDiscordCallback: user trouvé par email -> save -> session + redirect", async () => {
+  it("controllerDiscordCallback met à jour l’utilisateur trouvé par email, puis crée une session et redirige", async () => {
     const savedUser = {
       userID: 9,
       discordId: undefined as unknown,
@@ -422,7 +422,7 @@ describe("discord controllers", () => {
     expect(fns.redirect).toHaveBeenCalledWith("http://frontend.local");
   });
 
-  it("controllerDiscordCallback: crée user si inexistant -> session + redirect", async () => {
+  it("controllerDiscordCallback crée un utilisateur inexistant, puis crée une session et redirige", async () => {
     const createdUser = { userID: 42 } as unknown;
 
     const { controllerDiscordCallback, makeReqCb, makeResCb, makeNext, mocks } =
@@ -451,7 +451,7 @@ describe("discord controllers", () => {
     expect(fns.redirect).toHaveBeenCalledWith("http://frontend.local");
   });
 
-  it("controllerDiscordCallback: crée un user avec fallback username/email", async () => {
+  it("controllerDiscordCallback crée un utilisateur avec des valeurs de repli pour username et email", async () => {
     const createdUser = { userID: 77 } as unknown;
     const hashedValue = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
@@ -482,7 +482,7 @@ describe("discord controllers", () => {
     });
   });
 
-  it("controllerDiscordCallback: 500 si erreur Error(message)", async () => {
+  it("controllerDiscordCallback retourne 500 avec le message de l’erreur si une Error est levée", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerDiscordCallback, makeReqCb, makeResCb, makeNext } =
       await load({
@@ -501,7 +501,7 @@ describe("discord controllers", () => {
     errSpy.mockRestore();
   });
 
-  it("controllerDiscordCallback: 500 si erreur non-Error", async () => {
+  it("controllerDiscordCallback retourne 500 avec un message serveur générique si l’erreur n’est pas une Error", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerDiscordCallback, makeReqCb, makeResCb, makeNext } =
       await load({
@@ -524,8 +524,8 @@ describe("discord controllers", () => {
   });
 });
 
-describe("discord controller module init", () => {
-  it("throws when a required Discord environment variable is missing", async () => {
+describe("module controller discord", () => {
+  it("lève une erreur si une variable d’environnement Discord requise est absente", async () => {
     vi.resetModules();
     vi.clearAllMocks();
 

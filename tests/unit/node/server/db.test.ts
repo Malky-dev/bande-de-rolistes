@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 
-describe("server/db", () => {
-  it("log le succès si authenticate resolve", async () => {
+describe("connexion à la base de données", () => {
+  it("récupère le succès si authenticate réussit", async () => {
     vi.resetModules();
 
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
@@ -27,7 +27,7 @@ describe("server/db", () => {
     logSpy.mockRestore();
   });
 
-  it("log l'erreur si authenticate reject", async () => {
+  it("récupère l’erreur si authenticate échoue", async () => {
     vi.resetModules();
 
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});

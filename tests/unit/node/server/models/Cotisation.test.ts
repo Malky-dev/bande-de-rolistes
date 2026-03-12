@@ -1,7 +1,7 @@
-import { describe, expect, it, vi } from "vitest";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { DataTypes, Sequelize } from "sequelize";
+import { describe, expect, it, vi } from "vitest";
 
 const root = process.cwd();
 
@@ -30,8 +30,8 @@ async function load() {
   return { Cotisation: mod.default };
 }
 
-describe("Cotisation model", () => {
-  it("defines the expected metadata, enum default, and indexes", async () => {
+describe("model Cotisation", () => {
+  it("définit les métadonnées attendues, la valeur par défaut de l’enum et les index", async () => {
     const { Cotisation } = await load();
     const attributes = Cotisation.getAttributes();
     const indexes = Cotisation.options.indexes ?? [];

@@ -1,6 +1,18 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import RpgTableForm from "@/client/views/rpg/RpgTableForm";
+import {
+  loadAvailableRpgStatuses,
+  resolveNextRpgTableStatus,
+} from "@/client/views/rpg/RpgTableForm.helpers";
+import {
+  apiCreateRpgTable,
+  apiListRpgStatuses,
+  apiUpdateRpgTable,
+  apiUpdateRpgTableStatus,
+} from "@/api/rpgApi";
+
 vi.mock("react-datepicker", () => ({
   default: ({
     id,
@@ -30,25 +42,12 @@ vi.mock("@/api/rpgApi", () => ({
   apiUpdateRpgTableStatus: vi.fn(),
 }));
 
-import RpgTableForm from "@/client/views/rpg/RpgTableForm";
-import {
-  loadAvailableRpgStatuses,
-  resolveNextRpgTableStatus,
-} from "@/client/views/rpg/RpgTableForm.helpers";
-
-import {
-  apiCreateRpgTable,
-  apiListRpgStatuses,
-  apiUpdateRpgTable,
-  apiUpdateRpgTableStatus,
-} from "@/api/rpgApi";
-
 describe("RpgTableForm", () => {
   afterEach(() => {
     vi.clearAllMocks();
   });
 
-  it("rpg table form helper functions resolve statuses", async () => {
+  it("résout les statuts via les helpers du formulaire de table JDR", async () => {
     await expect(
       loadAvailableRpgStatuses(async () => ["OPEN", "CLOSED"]),
     ).resolves.toEqual(["OPEN", "CLOSED"]);
@@ -62,7 +61,7 @@ describe("RpgTableForm", () => {
     expect(resolveNextRpgTableStatus("CLOSED", "OPEN")).toBe("CLOSED");
   });
 
-  it("returns null when submission is not allowed", () => {
+  it("renvoie null quand la soumission n’est pas autorisée", () => {
     const { container } = render(
       <RpgTableForm
         mode="create"
@@ -75,7 +74,7 @@ describe("RpgTableForm", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("validates the create form before submitting", async () => {
+  it("valide le formulaire de création avant soumission", async () => {
     render(
       <RpgTableForm
         mode="create"
@@ -91,14 +90,14 @@ describe("RpgTableForm", () => {
     fireEvent.change(screen.getByLabelText(/Choisir l'endroit/i), {
       target: { value: "Salle Oxford" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Cr\u00e9er" }));
+    fireEvent.click(screen.getByRole("button", { name: "Créer" }));
 
     await waitFor(() => {
       expect(screen.getByText("La date/heure est requise")).toBeInTheDocument();
     });
   });
 
-  it("creates a table and calls onDone with the created event id", async () => {
+  it("crée une table et appelle onDone avec l’identifiant d’événement créé", async () => {
     const onDone = vi.fn();
     vi.mocked(apiCreateRpgTable).mockResolvedValue({
       eventID: 12,
@@ -127,7 +126,7 @@ describe("RpgTableForm", () => {
     fireEvent.change(screen.getByLabelText(/Commentaire/i), {
       target: { value: "Bring dice" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Cr\u00e9er" }));
+    fireEvent.click(screen.getByRole("button", { name: "Créer" }));
 
     await waitFor(() => {
       expect(apiCreateRpgTable).toHaveBeenCalled();
@@ -135,7 +134,7 @@ describe("RpgTableForm", () => {
     expect(onDone).toHaveBeenCalledWith(12);
   });
 
-  it("loads statuses in edit mode, updates the table, and updates the status when changed", async () => {
+  it("charge les statuts en mode édition, met à jour la table puis le statut quand il change", async () => {
     const onDone = vi.fn();
     vi.mocked(apiListRpgStatuses).mockResolvedValue(["OPEN", "CLOSED"]);
     vi.mocked(apiUpdateRpgTable).mockResolvedValue();
@@ -188,7 +187,7 @@ describe("RpgTableForm", () => {
     expect(onDone).toHaveBeenCalled();
   });
 
-  it("falls back to the default statuses and surfaces submission errors", async () => {
+  it("retombe sur les statuts par défaut et affiche les erreurs de soumission", async () => {
     vi.mocked(apiListRpgStatuses).mockRejectedValue(new Error("status failed"));
     vi.mocked(apiUpdateRpgTable).mockRejectedValue(new Error("update failed"));
 
@@ -228,7 +227,7 @@ describe("RpgTableForm", () => {
     });
   });
 
-  it("does not update the status when it is unchanged and supports back navigation", async () => {
+  it("ne met pas à jour le statut quand il ne change pas et permet le retour arrière", async () => {
     const onBack = vi.fn();
     vi.mocked(apiListRpgStatuses).mockResolvedValue(["OPEN", "CLOSED"]);
     vi.mocked(apiUpdateRpgTable).mockResolvedValue();
@@ -272,7 +271,7 @@ describe("RpgTableForm", () => {
     expect(apiUpdateRpgTableStatus).not.toHaveBeenCalled();
   });
 
-  it("shows the generic error message for non-Error submissions", async () => {
+  it("affiche le message d’erreur générique pour les soumissions non Error", async () => {
     vi.mocked(apiCreateRpgTable).mockRejectedValue("boom");
 
     render(
@@ -292,7 +291,7 @@ describe("RpgTableForm", () => {
       target: { value: "Salle Oxford" },
     });
     fireEvent.submit(
-      screen.getByRole("button", { name: "Cr\u00e9er" }).closest("form")!,
+      screen.getByRole("button", { name: "Créer" }).closest("form")!,
     );
 
     await waitFor(() => {
@@ -300,7 +299,7 @@ describe("RpgTableForm", () => {
     });
   });
 
-  it("falls back to the raw status label when an unknown status is returned", async () => {
+  it("retombe sur le libellé brut du statut quand un statut inconnu est renvoyé", async () => {
     vi.mocked(apiListRpgStatuses).mockResolvedValue([
       "OPEN",
       "PAUSED" as unknown as "OPEN",

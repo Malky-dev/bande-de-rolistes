@@ -1,6 +1,9 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import UpsertRpgTableView from "@/client/views/rpg/UpsertRpgTableView";
+import { apiGetRpgTable } from "@/api/rpgApi";
+
 vi.mock("@/api/rpgApi", () => ({
   apiGetRpgTable: vi.fn(),
 }));
@@ -21,17 +24,15 @@ vi.mock("@/client/views/rpg/RpgTableForm", () => ({
   ),
 }));
 
-import UpsertRpgTableView from "@/client/views/rpg/UpsertRpgTableView";
-import { apiGetRpgTable } from "@/api/rpgApi";
-
 describe("UpsertRpgTableView", () => {
   afterEach(() => {
     vi.clearAllMocks();
   });
 
-  it("renders the create form when no event id is provided", () => {
+  it("affiche le formulaire de création quand aucun identifiant d’événement n’est fourni", () => {
     const onBack = vi.fn();
     const onDone = vi.fn();
+
     render(
       <UpsertRpgTableView
         session={{
@@ -53,7 +54,7 @@ describe("UpsertRpgTableView", () => {
     expect(onBack).not.toHaveBeenCalled();
   });
 
-  it("renders the loading, error, and not-found edit states", async () => {
+  it("affiche les états chargement, erreur et introuvable en mode édition", async () => {
     const { rerender } = render(
       <UpsertRpgTableView
         session={{
@@ -69,7 +70,7 @@ describe("UpsertRpgTableView", () => {
       />,
     );
 
-    expect(screen.getByText("Chargement\u2026")).toBeInTheDocument();
+    expect(screen.getByText("Chargement…")).toBeInTheDocument();
 
     vi.mocked(apiGetRpgTable).mockRejectedValueOnce(new Error("Load failed"));
     rerender(
@@ -112,7 +113,7 @@ describe("UpsertRpgTableView", () => {
     });
   });
 
-  it("shows the generic load error for non-Error failures", async () => {
+  it("affiche l’erreur de chargement générique pour les échecs non Error", async () => {
     vi.mocked(apiGetRpgTable).mockRejectedValue("boom");
 
     render(
@@ -137,7 +138,7 @@ describe("UpsertRpgTableView", () => {
     });
   });
 
-  it("renders the edit form and computes canSubmit from the loaded table", async () => {
+  it("affiche le formulaire d’édition et calcule canSubmit à partir de la table chargée", async () => {
     vi.mocked(apiGetRpgTable).mockResolvedValue({
       eventID: 10,
       eventDate: "2026-01-01T12:00:00.000Z",

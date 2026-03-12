@@ -15,7 +15,7 @@ describe("AuthForms", () => {
     vi.clearAllMocks();
   });
 
-  it("renders the login flow and calls onLoginSuccess", async () => {
+  it("affiche le parcours de connexion et appelle onLoginSuccess", async () => {
     const onLoginSuccess = vi.fn();
     vi.mocked(apiLogin).mockResolvedValue();
     vi.mocked(apiSession).mockResolvedValue({
@@ -56,7 +56,7 @@ describe("AuthForms", () => {
     expect(apiLogin).toHaveBeenCalledWith("neo@matrix.tld", "Password12345");
   });
 
-  it("blocks signup when the passwords do not match", async () => {
+  it("bloque l’inscription quand les mots de passe ne correspondent pas", async () => {
     const { container } = render(
       <AuthForms
         view="signup"
@@ -79,9 +79,7 @@ describe("AuthForms", () => {
     fireEvent.change(inputs[3], {
       target: { value: "Password54321" },
     });
-    fireEvent.click(
-      screen.getByRole("button", { name: "Cr\u00e9er mon compte" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Créer mon compte" }));
 
     expect(
       screen.getByText("Les mots de passe ne correspondent pas"),
@@ -89,7 +87,7 @@ describe("AuthForms", () => {
     expect(apiSignin).not.toHaveBeenCalled();
   });
 
-  it("runs the signup then login flow", async () => {
+  it("enchaîne l’inscription puis la connexion", async () => {
     const onLoginSuccess = vi.fn();
     vi.mocked(apiSignin).mockResolvedValue();
     vi.mocked(apiLogin).mockResolvedValue();
@@ -123,9 +121,7 @@ describe("AuthForms", () => {
     fireEvent.change(inputs[3], {
       target: { value: "Password12345" },
     });
-    fireEvent.click(
-      screen.getByRole("button", { name: "Cr\u00e9er mon compte" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Créer mon compte" }));
 
     await waitFor(() => {
       expect(onLoginSuccess).toHaveBeenCalled();
@@ -142,7 +138,7 @@ describe("AuthForms", () => {
     );
   });
 
-  it("shows the API error when submission fails", async () => {
+  it("affiche l’erreur de l’API quand la soumission échoue", async () => {
     vi.mocked(apiLogin).mockRejectedValue(new Error("Bad credentials"));
 
     const { container } = render(
@@ -168,7 +164,7 @@ describe("AuthForms", () => {
     });
   });
 
-  it("switches view and redirects to discord", () => {
+  it("change de vue et redirige vers Discord", () => {
     const onSwitchView = vi.fn();
     Object.defineProperty(window, "location", {
       configurable: true,
@@ -191,7 +187,7 @@ describe("AuthForms", () => {
     expect(window.location.href).toBe("/api/discord/init");
   });
 
-  it("switches from signup back to login and shows the generic error for non-Error failures", async () => {
+  it("revient de l’inscription vers la connexion et affiche l’erreur générique pour un échec non Error", async () => {
     vi.mocked(apiSignin).mockRejectedValue("boom");
     const onSwitchView = vi.fn();
     const { container } = render(
@@ -220,9 +216,7 @@ describe("AuthForms", () => {
     fireEvent.click(screen.getByRole("button", { name: /Se connecter/i }));
     expect(onSwitchView).toHaveBeenCalledWith("login");
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Cr\u00e9er mon compte" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Créer mon compte" }));
 
     await waitFor(() => {
       expect(screen.getByText("Une erreur est survenue")).toBeInTheDocument();

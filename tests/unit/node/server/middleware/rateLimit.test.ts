@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const rateLimitMock = vi.fn((opts: any) => opts);
 
@@ -6,13 +6,13 @@ vi.mock("express-rate-limit", () => ({
   default: rateLimitMock,
 }));
 
-describe("rateLimit middleware", () => {
+describe("middleware rateLimit", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.resetModules();
   });
 
-  it("configure requestLimiter et authLimiter avec les bonnes options", async () => {
+  it("configure requestLimiter et authLimiter avec les options attendues", async () => {
     const constants = await import("@/server/constants");
     const mod = await import("@/server/middleware/rateLimit");
 

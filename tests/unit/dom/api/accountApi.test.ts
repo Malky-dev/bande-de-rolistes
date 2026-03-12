@@ -28,7 +28,7 @@ describe("accountApi", () => {
     vi.unstubAllGlobals();
   });
 
-  it("apiGetAccount returns the parsed account", async () => {
+  it("apiGetAccount renvoie le compte parsé", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       makeResponse({
         ok: true,
@@ -54,7 +54,7 @@ describe("accountApi", () => {
     });
   });
 
-  it("apiGetAccount throws the API message on error", async () => {
+  it("apiGetAccount relance le message de l’API en cas d’erreur", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -70,7 +70,7 @@ describe("accountApi", () => {
     await expect(apiGetAccount()).rejects.toThrow("Denied");
   });
 
-  it("apiGetAccount throws when the payload shape is invalid", async () => {
+  it("apiGetAccount lance une erreur quand la forme de la réponse est invalide", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -84,7 +84,7 @@ describe("accountApi", () => {
     await expect(apiGetAccount()).rejects.toThrow("Invalid account payload");
   });
 
-  it("apiGetAccount throws when the JSON payload is not an object", async () => {
+  it("apiGetAccount lance une erreur quand la réponse JSON n’est pas un objet", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -98,7 +98,7 @@ describe("accountApi", () => {
     await expect(apiGetAccount()).rejects.toThrow("Invalid JSON payload");
   });
 
-  it("apiUpdateAccount fetches the csrf token and sends the update payload", async () => {
+  it("apiUpdateAccount récupère le token CSRF puis envoie la mise à jour", async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(
@@ -147,7 +147,7 @@ describe("accountApi", () => {
     });
   });
 
-  it("apiUpdateAccount falls back to the status message when the error body is invalid", async () => {
+  it("apiUpdateAccount utilise le message de statut quand le corps d’erreur est invalide", async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(
@@ -172,7 +172,7 @@ describe("accountApi", () => {
     );
   });
 
-  it("apiUpdateAccount throws when the csrf payload is invalid", async () => {
+  it("apiUpdateAccount lance une erreur quand la réponse CSRF est invalide", async () => {
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     vi.stubGlobal(
@@ -186,14 +186,14 @@ describe("accountApi", () => {
     );
 
     await expect(apiUpdateAccount({ nickname: "Neo" })).rejects.toThrow(
-      "Token CSRF invalide re\u00e7u du serveur",
+      "Token CSRF invalide reçu du serveur",
     );
     expect(errorSpy).toHaveBeenCalled();
 
     errorSpy.mockRestore();
   });
 
-  it("apiUpdateAccount throws the csrf fallback message when the csrf endpoint fails", async () => {
+  it("apiUpdateAccount lance le message de secours CSRF quand l’endpoint CSRF échoue", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -207,11 +207,11 @@ describe("accountApi", () => {
     );
 
     await expect(apiUpdateAccount({ nickname: "Neo" })).rejects.toThrow(
-      "Impossible de r\u00e9cup\u00e9rer le token CSRF",
+      "Impossible de récupérer le token CSRF",
     );
   });
 
-  it("apiUpdateAccount throws when the updated account payload is invalid", async () => {
+  it("apiUpdateAccount lance une erreur quand la réponse du compte mis à jour est invalide", async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(

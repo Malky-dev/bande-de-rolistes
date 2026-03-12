@@ -1,6 +1,11 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import AccountView from "@/client/views/AccountView";
+
+import { apiSession } from "@/api/authApi";
+import { apiGetAccount, apiUpdateAccount } from "@/api/accountApi";
+
 vi.mock("@/api/authApi", () => ({
   apiSession: vi.fn(),
 }));
@@ -10,16 +15,12 @@ vi.mock("@/api/accountApi", () => ({
   apiUpdateAccount: vi.fn(),
 }));
 
-import AccountView from "@/client/views/AccountView";
-import { apiSession } from "@/api/authApi";
-import { apiGetAccount, apiUpdateAccount } from "@/api/accountApi";
-
 describe("AccountView", () => {
   afterEach(() => {
     vi.clearAllMocks();
   });
 
-  it("loads and renders the account", async () => {
+  it("charge et affiche le compte", async () => {
     vi.mocked(apiGetAccount).mockResolvedValue({
       userID: 1,
       nickname: "Neo",
@@ -36,7 +37,7 @@ describe("AccountView", () => {
     expect(screen.getByText(/Inscrit via Discord : Oui/i)).toBeInTheDocument();
   });
 
-  it("shows the loading error when the account cannot be loaded", async () => {
+  it("affiche l’erreur de chargement quand le compte ne peut pas être chargé", async () => {
     vi.mocked(apiGetAccount).mockRejectedValue(new Error("Load failed"));
 
     render(<AccountView onBackHome={vi.fn()} onSessionRefresh={vi.fn()} />);
@@ -46,7 +47,7 @@ describe("AccountView", () => {
     });
   });
 
-  it("saves the nickname, refreshes the session, and supports back navigation", async () => {
+  it("enregistre le pseudo, rafraîchit la session et permet de revenir en arrière", async () => {
     const onBackHome = vi.fn();
     const onSessionRefresh = vi.fn();
     vi.mocked(apiGetAccount).mockResolvedValue({
@@ -88,7 +89,7 @@ describe("AccountView", () => {
     fireEvent.click(screen.getByRole("button", { name: "Enregistrer" }));
 
     await waitFor(() => {
-      expect(screen.getByText("Infos mises \u00e0 jour.")).toBeInTheDocument();
+      expect(screen.getByText("Infos mises à jour.")).toBeInTheDocument();
     });
     expect(apiUpdateAccount).toHaveBeenCalledWith({ nickname: "Trinity" });
     expect(onSessionRefresh).toHaveBeenCalledWith({
@@ -103,7 +104,7 @@ describe("AccountView", () => {
     expect(onBackHome).toHaveBeenCalledTimes(1);
   });
 
-  it("shows the save error when the update fails", async () => {
+  it("affiche l’erreur d’enregistrement quand la mise à jour échoue", async () => {
     vi.mocked(apiGetAccount).mockResolvedValue({
       userID: 1,
       nickname: "Neo",
@@ -125,7 +126,7 @@ describe("AccountView", () => {
     });
   });
 
-  it("shows fallback messages for non-Error load and save failures", async () => {
+  it("affiche les messages de secours pour les échecs de chargement et d’enregistrement non Error", async () => {
     vi.mocked(apiGetAccount).mockRejectedValueOnce("boom");
 
     const firstRender = render(

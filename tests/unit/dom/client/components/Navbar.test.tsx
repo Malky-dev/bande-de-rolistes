@@ -8,7 +8,7 @@ vi.mock("@/assets/img/LogoBDR_creme-removebg.png", () => ({
 }));
 
 describe("Navbar", () => {
-  it("renders guest actions when no session is present", () => {
+  it("affiche les actions invité quand aucune session n’est présente", () => {
     const onChangeView = vi.fn();
 
     render(
@@ -21,7 +21,7 @@ describe("Navbar", () => {
       />,
     );
 
-    fireEvent.click(screen.getByText("Bande de R\u00f4listes"));
+    fireEvent.click(screen.getByText("Bande de Rôlistes"));
     fireEvent.click(screen.getByRole("button", { name: "Connexion" }));
     fireEvent.click(screen.getByRole("button", { name: "Inscription" }));
 
@@ -30,7 +30,7 @@ describe("Navbar", () => {
     expect(onChangeView).toHaveBeenNthCalledWith(3, "signup");
   });
 
-  it("renders session actions for admin users", () => {
+  it("affiche les actions de session pour un admin", () => {
     const onChangeView = vi.fn();
     const onLogout = vi.fn();
 
@@ -51,11 +51,9 @@ describe("Navbar", () => {
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Citations" }));
-    fireEvent.click(
-      screen.getByRole("button", { name: "Privil\u00e8ges Admin" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Privilèges Admin" }));
     fireEvent.click(screen.getByRole("button", { name: /Mon compte - Neo/i }));
-    fireEvent.click(screen.getByRole("button", { name: "D\u00e9connexion" }));
+    fireEvent.click(screen.getByRole("button", { name: "Déconnexion" }));
 
     expect(onChangeView).toHaveBeenCalledWith("quotes");
     expect(onChangeView).toHaveBeenCalledWith("admin");
@@ -63,7 +61,7 @@ describe("Navbar", () => {
     expect(onLogout).toHaveBeenCalledTimes(1);
   });
 
-  it("renders the quotes shortcut for organisator users", () => {
+  it("affiche le raccourci vers les citations pour un organisateur", () => {
     render(
       <Navbar
         view="quotes"
@@ -84,11 +82,11 @@ describe("Navbar", () => {
       screen.getByRole("button", { name: "Citations" }),
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: /Privil\u00e8ges Admin/i }),
+      screen.queryByRole("button", { name: /Privilèges Admin/i }),
     ).toBeNull();
   });
 
-  it("marks the rpg view as active and hides guest actions while checking the session", () => {
+  it("marque la vue JDR comme active et masque les actions invité pendant la vérification de session", () => {
     const onChangeView = vi.fn();
 
     render(
@@ -115,7 +113,7 @@ describe("Navbar", () => {
     expect(onChangeView).toHaveBeenNthCalledWith(2, "rpg");
   });
 
-  it("marks signup and account views as active", () => {
+  it("marque les vues inscription et compte comme actives", () => {
     const { rerender } = render(
       <Navbar
         view="signup"
@@ -151,7 +149,7 @@ describe("Navbar", () => {
     ).toContain("navbar-link-active");
   });
 
-  it("marks the login view as active and keeps static links visible", () => {
+  it("marque la vue connexion comme active et garde les liens statiques visibles", () => {
     render(
       <Navbar
         view="login"

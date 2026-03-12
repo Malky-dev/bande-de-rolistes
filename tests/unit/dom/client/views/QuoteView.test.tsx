@@ -24,18 +24,16 @@ vi.mock("@/client/views/ForbiddenView", () => ({
 }));
 
 describe("QuoteView", () => {
-  it("renders the login-required forbidden view when there is no session", () => {
+  it("affiche la vue interdite de connexion requise quand aucune session n’est présente", () => {
     render(<QuoteView session={null} onBackHome={vi.fn()} />);
 
     expect(screen.getByText("Connexion requise")).toBeInTheDocument();
     expect(
-      screen.getByText(
-        /Vous devez \u00eatre connect\u00e9 pour g\u00e9rer les citations/i,
-      ),
+      screen.getByText(/Vous devez être connecté pour gérer les citations/i),
     ).toBeInTheDocument();
   });
 
-  it("renders the forbidden view when the role cannot manage quotes", () => {
+  it("affiche la vue interdite quand le rôle ne peut pas gérer les citations", () => {
     render(
       <QuoteView
         session={{
@@ -49,15 +47,15 @@ describe("QuoteView", () => {
       />,
     );
 
-    expect(screen.getByText("Acc\u00e8s interdit")).toBeInTheDocument();
+    expect(screen.getByText("Accès interdit")).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Seuls les admins et organisateurs peuvent g\u00e9rer les citations/i,
+        /Seuls les admins et organisateurs peuvent gérer les citations/i,
       ),
     ).toBeInTheDocument();
   });
 
-  it("renders the quotes panel for admin and organisator sessions", () => {
+  it("affiche le panneau des citations pour les sessions admin et organisateur", () => {
     const { rerender } = render(
       <QuoteView
         session={{

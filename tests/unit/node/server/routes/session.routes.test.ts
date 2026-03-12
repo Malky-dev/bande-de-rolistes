@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { createRouterMock } from "./_routerMock";
 
 const router = createRouterMock();
@@ -17,7 +18,7 @@ vi.mock("@/server/controllers/session", () => ({ default: sessionController }));
 const requestLimiter = vi.fn();
 vi.mock("@/server/middleware/rateLimit", () => ({ requestLimiter }));
 
-describe("routes/session", () => {
+describe("routes session", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     router.get.mockClear();

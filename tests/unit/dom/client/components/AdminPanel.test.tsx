@@ -20,7 +20,7 @@ describe("AdminPanel", () => {
     vi.resetAllMocks();
   });
 
-  it("loads and renders users and roles", async () => {
+  it("charge et affiche les utilisateurs et les rôles", async () => {
     vi.mocked(apiAdminUsers).mockResolvedValue([
       {
         userID: 1,
@@ -42,10 +42,10 @@ describe("AdminPanel", () => {
       expect(screen.getByText("Neo")).toBeInTheDocument();
     });
     expect(screen.getAllByText("admin")).toHaveLength(2);
-    expect(screen.getByText("\u2713")).toBeInTheDocument();
+    expect(screen.getByText("✓")).toBeInTheDocument();
   });
 
-  it("shows the reconnect message for authorization failures", async () => {
+  it("affiche le message de reconnexion en cas d’échec d’autorisation", async () => {
     vi.mocked(apiAdminUsers).mockRejectedValue(new Error("FORBIDDEN"));
     vi.mocked(apiAdminRoles).mockResolvedValue([]);
 
@@ -58,7 +58,7 @@ describe("AdminPanel", () => {
     });
   });
 
-  it("shows generic fallback messages for non-Error failures", async () => {
+  it("affiche les messages génériques de secours pour les échecs non Error", async () => {
     vi.mocked(apiAdminUsers).mockRejectedValueOnce("boom");
     vi.mocked(apiAdminRoles).mockResolvedValueOnce([]);
 
@@ -66,7 +66,7 @@ describe("AdminPanel", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("Erreur lors du chargement des donn\u00e9es"),
+        screen.getByText("Erreur lors du chargement des données"),
       ).toBeInTheDocument();
     });
 
@@ -100,25 +100,23 @@ describe("AdminPanel", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("Erreur lors de la modification du r\u00f4le"),
+        screen.getByText("Erreur lors de la modification du rôle"),
       ).toBeInTheDocument();
     });
   });
 
-  it("renders the empty state when there are no users", async () => {
+  it("affiche l’état vide quand aucun utilisateur n’est présent", async () => {
     vi.mocked(apiAdminUsers).mockResolvedValue([]);
     vi.mocked(apiAdminRoles).mockResolvedValue([]);
 
     render(<AdminPanel />);
 
     await waitFor(() => {
-      expect(
-        screen.getByText("Aucun utilisateur trouv\u00e9"),
-      ).toBeInTheDocument();
+      expect(screen.getByText("Aucun utilisateur trouvé")).toBeInTheDocument();
     });
   });
 
-  it("updates a user role", async () => {
+  it("met à jour le rôle d’un utilisateur", async () => {
     vi.mocked(apiAdminUsers).mockResolvedValue([
       {
         userID: 1,
@@ -162,13 +160,13 @@ describe("AdminPanel", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(/R\u00f4le de Neo mis \u00e0 jour avec succ\u00e8s/i),
+        screen.getByText(/Rôle de Neo mis à jour avec succès/i),
       ).toBeInTheDocument();
     });
     expect(screen.getByText("Trinity")).toBeInTheDocument();
   });
 
-  it("shows the update error and supports reload", async () => {
+  it("affiche l’erreur de mise à jour et permet de recharger", async () => {
     vi.mocked(apiAdminUsers).mockResolvedValue([
       {
         userID: 1,
