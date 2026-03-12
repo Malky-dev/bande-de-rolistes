@@ -13,7 +13,7 @@ import AccountView from "./views/AccountView";
 import ForbiddenView from "./views/ForbiddenView";
 import UpsertRpgTableView from "./views/rpg/UpsertRpgTableView";
 import QuotesView from "./views/QuoteView";
-import WhatIsRpg from "./views/WhatIsRpg";
+import WhatIsRpg from "./views/WhatIsRpgView";
 import AboutView from "./views/AboutView";
 import LocationView from "./views/LocationView";
 import RuleView from "./views/RuleView";

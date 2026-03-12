@@ -18,12 +18,6 @@ function WhatIsRpgView({ onJoinTable }: WhatIsRpgViewProps) {
             Une aventure racontée à plusieurs, où chacun incarne un personnage
             dans un univers partagé.
           </p>
-
-          <div className="hero-actions">
-            <button className="btn-primary" type="button" onClick={onJoinTable}>
-              Voir les tables
-            </button>
-          </div>
         </div>
 
         <div className="hero-right">

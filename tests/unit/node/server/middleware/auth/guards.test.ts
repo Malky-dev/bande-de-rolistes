@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-
 import { makeReq, makeRes, makeNext } from "@/../tests/helpers/express";
 
 vi.mock("@/server/middleware/auth/requireAuth", () => ({
@@ -35,7 +34,6 @@ describe("auth guards", () => {
           role: { roleID: 2, roleLabel: "member" },
         },
       });
-
       const res = makeRes();
       const next = makeNext();
 
@@ -60,7 +58,6 @@ describe("auth guards", () => {
           role: { roleID: 1, roleLabel: "admin" },
         },
       });
-
       const res = makeRes();
       const next = makeNext();
 
@@ -84,7 +81,6 @@ describe("auth guards", () => {
           role: { roleID: 2, roleLabel: "organisator" },
         },
       });
-
       const res = makeRes();
       const next = makeNext();
 
@@ -108,7 +104,6 @@ describe("auth guards", () => {
           role: { roleID: 1, roleLabel: "admin" },
         },
       });
-
       const res = makeRes();
       const next = makeNext();
 
@@ -131,7 +126,29 @@ describe("auth guards", () => {
           role: { roleID: 3, roleLabel: "member" },
         },
       });
+      const res = makeRes();
+      const next = makeNext();
 
+      mw(req as any, res as any, next);
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({
+        code: "FORBIDDEN",
+        message: "Accès réservé admin/organisateur",
+      });
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it("403 si roleID est absent ou invalide", () => {
+      const mw = requireStaff();
+
+      const req = makeReq({
+        user: {
+          userID: 1,
+          nickname: "x",
+          role: { roleID: "2" as any, roleLabel: "organisator" },
+        },
+      });
       const res = makeRes();
       const next = makeNext();
 
@@ -155,7 +172,6 @@ describe("auth guards", () => {
           role: { roleID: 1, roleLabel: "admin" },
         },
       });
-
       const res = makeRes();
       const next = makeNext();
 
@@ -174,7 +190,6 @@ describe("auth guards", () => {
           role: { roleID: 2, roleLabel: "organisator" },
         },
       });
-
       const res = makeRes();
       const next = makeNext();
 
@@ -196,7 +211,6 @@ describe("auth guards", () => {
           role: { roleID: 2, roleLabel: "member" },
         },
       });
-
       const res = makeRes();
       const next = makeNext();
 
@@ -206,6 +220,30 @@ describe("auth guards", () => {
       expect(res.json).toHaveBeenCalledWith({
         code: "BAD_USER_ID",
         message: "Invalid userID",
+      });
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it("401 si userID de session n'est pas un number", () => {
+      const mw = requireAdminOrOwner();
+
+      const req = makeReq({
+        params: { userID: "10" } as any,
+        user: {
+          userID: "10" as any,
+          nickname: "x",
+          role: { roleID: 2, roleLabel: "member" },
+        },
+      });
+      const res = makeRes();
+      const next = makeNext();
+
+      mw(req as any, res as any, next);
+
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({
+        code: "UNAUTHORIZED",
+        message: "Not authenticated",
       });
       expect(next).not.toHaveBeenCalled();
     });
@@ -221,7 +259,6 @@ describe("auth guards", () => {
           role: { roleID: 2, roleLabel: "member" },
         },
       });
-
       const res = makeRes();
       const next = makeNext();
 
@@ -246,7 +283,6 @@ describe("auth guards", () => {
           role: { roleID: 1, roleLabel: "admin" },
         },
       });
-
       const res = makeRes();
       const next = makeNext();
 
@@ -268,7 +304,6 @@ describe("auth guards", () => {
           role: { roleID: 2, roleLabel: "member" },
         },
       });
-
       const res = makeRes();
       const next = makeNext();
 
@@ -290,7 +325,6 @@ describe("auth guards", () => {
           role: { roleID: 2, roleLabel: "member" },
         },
       });
-
       const res = makeRes();
       const next = makeNext();
 
@@ -311,7 +345,6 @@ describe("auth guards", () => {
           role: { roleID: 4, roleLabel: "member" },
         },
       });
-
       const res = makeRes();
       const next = makeNext();
 
@@ -325,7 +358,30 @@ describe("auth guards", () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it("next si rôle 1, 2 ou 3", () => {
+    it("403 si roleID n'est pas un number", () => {
+      const mw = requireCreateRpgTable();
+
+      const req = makeReq({
+        user: {
+          userID: 1,
+          nickname: "x",
+          role: { roleID: "3" as any, roleLabel: "member" },
+        },
+      });
+      const res = makeRes();
+      const next = makeNext();
+
+      mw(req as any, res as any, next);
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({
+        code: "FORBIDDEN",
+        message: "Accès réservé aux rôles 1, 2 ou 3",
+      });
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it("next si rôle 3", () => {
       const mw = requireCreateRpgTable();
 
       const req = makeReq({
@@ -335,7 +391,6 @@ describe("auth guards", () => {
           role: { roleID: 3, roleLabel: "member" },
         },
       });
-
       const res = makeRes();
       const next = makeNext();
 
@@ -343,6 +398,42 @@ describe("auth guards", () => {
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(res.status).not.toHaveBeenCalled();
+    });
+
+    it("next si rôle 1", () => {
+      const mw = requireCreateRpgTable();
+
+      const req = makeReq({
+        user: {
+          userID: 1,
+          nickname: "x",
+          role: { roleID: 1, roleLabel: "admin" },
+        },
+      });
+      const res = makeRes();
+      const next = makeNext();
+
+      mw(req as any, res as any, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+    });
+
+    it("next si rôle 2", () => {
+      const mw = requireCreateRpgTable();
+
+      const req = makeReq({
+        user: {
+          userID: 1,
+          nickname: "x",
+          role: { roleID: 2, roleLabel: "organisator" },
+        },
+      });
+      const res = makeRes();
+      const next = makeNext();
+
+      mw(req as any, res as any, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -357,7 +448,6 @@ describe("auth guards", () => {
           role: { roleID: 3, roleLabel: "member" },
         },
       });
-
       const res = makeRes();
       const next = makeNext();
 
@@ -371,7 +461,25 @@ describe("auth guards", () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it("next si admin ou organisator", () => {
+    it("next si admin", () => {
+      const mw = requireAdminOrOrga();
+
+      const req = makeReq({
+        user: {
+          userID: 1,
+          nickname: "x",
+          role: { roleID: 1, roleLabel: "admin" },
+        },
+      });
+      const res = makeRes();
+      const next = makeNext();
+
+      mw(req as any, res as any, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+    });
+
+    it("next si organisator", () => {
       const mw = requireAdminOrOrga();
 
       const req = makeReq({
@@ -381,7 +489,6 @@ describe("auth guards", () => {
           role: { roleID: 2, roleLabel: "organisator" },
         },
       });
-
       const res = makeRes();
       const next = makeNext();
 
@@ -392,6 +499,31 @@ describe("auth guards", () => {
   });
 
   describe("requireAdminOrOrgaOrOwnerRpgTable", () => {
+    it("401 si userID de session n'est pas un number", () => {
+      const getOwnerUserID = vi.fn().mockReturnValue(7);
+      const mw = requireAdminOrOrgaOrOwnerRpgTable(getOwnerUserID);
+
+      const req = makeReq({
+        user: {
+          userID: "7" as any,
+          nickname: "x",
+          role: { roleID: 3, roleLabel: "member" },
+        },
+      });
+      const res = makeRes();
+      const next = makeNext();
+
+      mw(req as any, res as any, next);
+
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({
+        code: "UNAUTHORIZED",
+        message: "Not authenticated",
+      });
+      expect(getOwnerUserID).not.toHaveBeenCalled();
+      expect(next).not.toHaveBeenCalled();
+    });
+
     it("next si admin", () => {
       const getOwnerUserID = vi.fn().mockReturnValue(99);
       const mw = requireAdminOrOrgaOrOwnerRpgTable(getOwnerUserID);
@@ -403,7 +535,6 @@ describe("auth guards", () => {
           role: { roleID: 1, roleLabel: "admin" },
         },
       });
-
       const res = makeRes();
       const next = makeNext();
 
@@ -413,7 +544,52 @@ describe("auth guards", () => {
       expect(getOwnerUserID).not.toHaveBeenCalled();
     });
 
-    it("403 si rôle pas 1, 2 ou 3 et pas owner", () => {
+    it("next si organisator", () => {
+      const getOwnerUserID = vi.fn().mockReturnValue(99);
+      const mw = requireAdminOrOrgaOrOwnerRpgTable(getOwnerUserID);
+
+      const req = makeReq({
+        user: {
+          userID: 2,
+          nickname: "x",
+          role: { roleID: 2, roleLabel: "organisator" },
+        },
+      });
+      const res = makeRes();
+      const next = makeNext();
+
+      mw(req as any, res as any, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(getOwnerUserID).not.toHaveBeenCalled();
+    });
+
+    it("403 si rôle différent de 3 pour un non admin/non orga", () => {
+      const getOwnerUserID = vi.fn().mockReturnValue(7);
+      const mw = requireAdminOrOrgaOrOwnerRpgTable(getOwnerUserID);
+
+      const req = makeReq({
+        user: {
+          userID: 7,
+          nickname: "x",
+          role: { roleID: 4, roleLabel: "member" },
+        },
+      });
+      const res = makeRes();
+      const next = makeNext();
+
+      mw(req as any, res as any, next);
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({
+        code: "FORBIDDEN",
+        message: "Accès refusé",
+      });
+      expect(getOwnerUserID).not.toHaveBeenCalled();
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it("403 si rôle 3 mais pas owner", () => {
       const getOwnerUserID = vi.fn().mockReturnValue(99);
       const mw = requireAdminOrOrgaOrOwnerRpgTable(getOwnerUserID);
 
@@ -424,13 +600,37 @@ describe("auth guards", () => {
           role: { roleID: 3, roleLabel: "member" },
         },
       });
-
       const res = makeRes();
       const next = makeNext();
 
       mw(req as any, res as any, next);
 
-      expect(getOwnerUserID).toHaveBeenCalled();
+      expect(getOwnerUserID).toHaveBeenCalledTimes(1);
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({
+        code: "FORBIDDEN",
+        message: "Accès refusé",
+      });
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it("403 si ownerUserID est null", () => {
+      const getOwnerUserID = vi.fn().mockReturnValue(null);
+      const mw = requireAdminOrOrgaOrOwnerRpgTable(getOwnerUserID);
+
+      const req = makeReq({
+        user: {
+          userID: 7,
+          nickname: "x",
+          role: { roleID: 3, roleLabel: "member" },
+        },
+      });
+      const res = makeRes();
+      const next = makeNext();
+
+      mw(req as any, res as any, next);
+
+      expect(getOwnerUserID).toHaveBeenCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(403);
       expect(res.json).toHaveBeenCalledWith({
         code: "FORBIDDEN",
@@ -450,7 +650,6 @@ describe("auth guards", () => {
           role: { roleID: 3, roleLabel: "member" },
         },
       });
-
       const res = makeRes();
       const next = makeNext();
 

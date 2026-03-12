@@ -19,12 +19,6 @@ function LocationView({ onJoinTable }: LocationViewProps) {
             campagnes, nos découvertes et tout ce qui fait la vie de
             l&apos;association.
           </p>
-
-          <div className="hero-actions">
-            <button className="btn-primary" type="button" onClick={onJoinTable}>
-              Voir les tables
-            </button>
-          </div>
         </div>
 
         <div className="hero-right">
