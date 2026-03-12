@@ -567,6 +567,28 @@ describe("App", () => {
     expect(screen.getByText("Upsert-create")).toBeInTheDocument();
   });
 
+  it("revient à l’accueil depuis la vue compte", async () => {
+    vi.mocked(apiSession).mockResolvedValue({
+      userID: 1,
+      nickname: "Neo",
+      roleID: 1,
+      role: "admin",
+      isVerified: true,
+    });
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText("HomeView")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText("go-account"));
+    expect(screen.getByText("AccountView")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("account-back"));
+    expect(screen.getByText("HomeView")).toBeInTheDocument();
+  });
+
   it("incrémente le reload token JDR quand la modale est validée", async () => {
     vi.mocked(apiSession).mockRejectedValue(new Error("no session"));
 
