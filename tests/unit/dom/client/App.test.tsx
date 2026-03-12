@@ -529,6 +529,44 @@ describe("App", () => {
     expect(screen.getByText("Upsert-42")).toBeInTheDocument();
   });
 
+  it("ferme la modale JDR quand on clique sur l’overlay", async () => {
+    vi.mocked(apiSession).mockRejectedValue(new Error("no session"));
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText("HomeView")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText("go-rpg"));
+    fireEvent.click(screen.getByText("rpg-create"));
+
+    expect(screen.getByText("Upsert-create")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("rpg-modal-overlay"));
+
+    expect(screen.queryByText("Upsert-create")).not.toBeInTheDocument();
+  });
+
+  it("ne ferme pas la modale JDR quand on clique dans son contenu", async () => {
+    vi.mocked(apiSession).mockRejectedValue(new Error("no session"));
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText("HomeView")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText("go-rpg"));
+    fireEvent.click(screen.getByText("rpg-create"));
+
+    expect(screen.getByText("Upsert-create")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("rpg-modal-content"));
+
+    expect(screen.getByText("Upsert-create")).toBeInTheDocument();
+  });
+
   it("incrémente le reload token JDR quand la modale est validée", async () => {
     vi.mocked(apiSession).mockRejectedValue(new Error("no session"));
 

@@ -133,10 +133,12 @@ function App() {
                 className="appModal"
                 role="dialog"
                 aria-modal="true"
+                data-testid="rpg-modal-overlay"
                 onClick={closeRpgModal}
               >
                 <div
                   className="appModal__dialog appModal__dialog--wide"
+                  data-testid="rpg-modal-content"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <UpsertRpgTableView

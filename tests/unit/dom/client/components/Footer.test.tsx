@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import Footer from "@/client/components/Footer";
+import { fireEvent } from "@testing-library/react";
 
 vi.mock("@/api/authApi", () => ({
   apiQuote: vi.fn(),
@@ -54,6 +55,19 @@ describe("Footer", () => {
       expect(screen.getByText(/\u00ab Wake up, Neo\./i)).toBeInTheDocument();
     });
     expect(screen.queryByText(/Wake up, Neo\..*Morpheus/i)).toBeNull();
+  });
+
+  it("appelle onChangeView avec rules au clic sur le lien du footer", async () => {
+    vi.mocked(apiQuote).mockRejectedValue(new Error("boom"));
+    const onChangeView = vi.fn();
+
+    render(<Footer onChangeView={onChangeView} />);
+
+    const link = await screen.findByText(/Statuts et règlement intérieur/i);
+    fireEvent.click(link);
+
+    expect(onChangeView).toHaveBeenCalledTimes(1);
+    expect(onChangeView).toHaveBeenCalledWith("rules");
   });
 
   it("ignores a late quote response after unmount", async () => {
