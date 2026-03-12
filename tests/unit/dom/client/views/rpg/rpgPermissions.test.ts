@@ -6,7 +6,7 @@ import {
 } from "@/client/views/rpg/rpgPermissions";
 
 describe("rpgPermissions", () => {
-  it("canCreateRpgTable allows only role IDs 1, 2, and 3", () => {
+  it("canCreateRpgTable autorise uniquement les rôles 1, 2 et 3", () => {
     expect(canCreateRpgTable(null)).toBe(false);
     expect(
       canCreateRpgTable({
@@ -28,7 +28,7 @@ describe("rpgPermissions", () => {
     ).toBe(false);
   });
 
-  it("canEditRpgTable allows admin, organisator, or the dungeon master", () => {
+  it("canEditRpgTable autorise un admin, un organisateur ou le maître du jeu", () => {
     const table = {
       eventID: 1,
       eventDate: "2026-01-01T00:00:00.000Z",

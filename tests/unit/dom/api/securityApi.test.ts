@@ -25,7 +25,7 @@ describe("fetchCsrfToken", () => {
     vi.unstubAllGlobals();
   });
 
-  it("returns the token when the payload is valid", async () => {
+  it("renvoie le token quand la réponse est valide", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       makeResponse({
         ok: true,
@@ -41,7 +41,7 @@ describe("fetchCsrfToken", () => {
     });
   });
 
-  it("throws when the endpoint returns an error status", async () => {
+  it("lance une erreur quand l’endpoint renvoie un statut en erreur", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -56,7 +56,7 @@ describe("fetchCsrfToken", () => {
     await expect(fetchCsrfToken()).rejects.toThrow("CSRF endpoint error: 403");
   });
 
-  it("throws when the payload does not contain a token", async () => {
+  it("lance une erreur quand la réponse ne contient pas de token", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -70,7 +70,7 @@ describe("fetchCsrfToken", () => {
     await expect(fetchCsrfToken()).rejects.toThrow("Invalid CSRF response");
   });
 
-  it("throws when the token is empty", async () => {
+  it("lance une erreur quand le token est vide", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(

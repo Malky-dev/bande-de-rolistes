@@ -1,7 +1,7 @@
-import { describe, expect, it, vi } from "vitest";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { Sequelize } from "sequelize";
+import { describe, expect, it, vi } from "vitest";
 
 const root = process.cwd();
 
@@ -30,8 +30,8 @@ async function load() {
   return { TableRPGPlayer: mod.default };
 }
 
-describe("TableRPGPlayer model", () => {
-  it("defines the expected metadata and composite indexes", async () => {
+describe("model TableRPGPlayer", () => {
+  it("définit les métadonnées attendues et les index composites", async () => {
     const { TableRPGPlayer } = await load();
     const attributes = TableRPGPlayer.getAttributes();
     const indexes = TableRPGPlayer.options.indexes ?? [];

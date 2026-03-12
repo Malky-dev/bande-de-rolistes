@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
 import type { NextFunction } from "express";
+import { describe, expect, it, vi } from "vitest";
 
 type ReqGet = {
   (name: "set-cookie"): string[] | undefined;
@@ -74,8 +74,8 @@ async function load(opts?: {
   };
 }
 
-describe("controllerSession", () => {
-  it("401 si pas de Cookie header", async () => {
+describe("controller session", () => {
+  it("retourne 401 s’il n’y a pas d’en-tête Cookie", async () => {
     const { controllerSession, makeReq, makeRes, makeNext } = await load({
       token: undefined,
     });
@@ -93,7 +93,7 @@ describe("controllerSession", () => {
     });
   });
 
-  it("401 si getCookieValue ne trouve pas le token", async () => {
+  it("retourne 401 si getCookieValue ne trouve pas le token", async () => {
     const { controllerSession, makeReq, makeRes, makeNext, mocks } = await load(
       {
         token: undefined,
@@ -117,7 +117,7 @@ describe("controllerSession", () => {
     });
   });
 
-  it("401 si Session.findOne retourne null", async () => {
+  it("retourne 401 si Session.findOne renvoie null", async () => {
     const { controllerSession, makeReq, makeRes, makeNext, mocks } = await load(
       {
         token: "t",
@@ -139,7 +139,7 @@ describe("controllerSession", () => {
     });
   });
 
-  it("401 si Session.findOne retourne une session sans user", async () => {
+  it("retourne 401 si Session.findOne renvoie une session sans utilisateur", async () => {
     const { controllerSession, makeReq, makeRes, makeNext } = await load({
       token: "t",
       sessionResult: { user: undefined },
@@ -158,7 +158,7 @@ describe("controllerSession", () => {
     });
   });
 
-  it("200: rôle par défaut si user.role absent", async () => {
+  it("retourne 200 avec le rôle par défaut si user.role est absent", async () => {
     const { controllerSession, makeReq, makeRes, makeNext } = await load({
       token: "t",
       sessionResult: {
@@ -181,7 +181,7 @@ describe("controllerSession", () => {
     });
   });
 
-  it("200: rôle présent", async () => {
+  it("retourne 200 avec le rôle de l’utilisateur s’il est présent", async () => {
     const { controllerSession, makeReq, makeRes, makeNext } = await load({
       token: "t",
       sessionResult: {
@@ -209,7 +209,7 @@ describe("controllerSession", () => {
     });
   });
 
-  it("500 si Session.findOne rejette avec Error(message)", async () => {
+  it("retourne 500 avec le message de l’erreur si Session.findOne rejette avec une Error", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerSession, makeReq, makeRes, makeNext } = await load({
       token: "t",
@@ -228,7 +228,7 @@ describe("controllerSession", () => {
     errSpy.mockRestore();
   });
 
-  it("500 si erreur non-Error", async () => {
+  it("retourne 500 avec un message serveur générique si l’erreur n’est pas une Error", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerSession, makeReq, makeRes, makeNext } = await load({
       token: "t",

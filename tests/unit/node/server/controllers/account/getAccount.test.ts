@@ -62,7 +62,7 @@ async function load(opts?: {
   return { controllerGetAccount, makeReq, makeTypedRes, mocks: { User } };
 }
 
-describe("controllerGetAccount", () => {
+describe("controller getAccount", () => {
   it("401 si pas authentifié", async () => {
     const { controllerGetAccount, makeReq, makeTypedRes } = await load();
 
@@ -96,7 +96,7 @@ describe("controllerGetAccount", () => {
     });
   });
 
-  it("200 payload si ok", async () => {
+  it("200 et payload si ok", async () => {
     const user = {
       userID: 7,
       nickname: "Neo",

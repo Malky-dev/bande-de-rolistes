@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { createRouterMock } from "./_routerMock";
 
 const router = createRouterMock();
@@ -53,7 +54,7 @@ vi.mock("@/server/middleware", () => ({
   verifyCsrf,
 }));
 
-describe("routes/rpg", () => {
+describe("routes rpg", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     router.get.mockClear();

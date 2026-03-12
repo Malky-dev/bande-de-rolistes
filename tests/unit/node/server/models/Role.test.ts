@@ -1,7 +1,7 @@
-import { describe, expect, it, vi } from "vitest";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { Sequelize } from "sequelize";
+import { describe, expect, it, vi } from "vitest";
 
 const root = process.cwd();
 
@@ -30,8 +30,8 @@ async function load() {
   return { Role: mod.default };
 }
 
-describe("Role model", () => {
-  it("defines the expected table metadata and role fields", async () => {
+describe("model Role", () => {
+  it("définit les métadonnées de table attendues et les champs du rôle", async () => {
     const { Role } = await load();
     const attributes = Role.getAttributes();
 

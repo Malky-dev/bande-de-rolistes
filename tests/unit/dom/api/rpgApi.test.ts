@@ -42,7 +42,7 @@ describe("rpgApi", () => {
     vi.clearAllMocks();
   });
 
-  it("rpgApi helper functions validate payloads and malformed errors", async () => {
+  it("valide les helpers rpgApi et les erreurs mal formées", async () => {
     expect(isRecord({})).toBe(true);
     expect(isRecord(null)).toBe(false);
     expect(isApiErrorPayload({ message: "boom" })).toBe(true);
@@ -94,7 +94,7 @@ describe("rpgApi", () => {
     ).resolves.toBe("fallback");
   });
 
-  it("apiListRpgTables returns the parsed list", async () => {
+  it("apiListRpgTables renvoie la liste parsée", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -119,7 +119,7 @@ describe("rpgApi", () => {
     ]);
   });
 
-  it("apiListRpgTables throws when the payload is invalid", async () => {
+  it("apiListRpgTables lance une erreur quand la réponse est invalide", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -133,7 +133,7 @@ describe("rpgApi", () => {
     await expect(apiListRpgTables()).rejects.toThrow("Invalid tables payload");
   });
 
-  it("apiListRpgTables rejects invalid status and invalid comments types", async () => {
+  it("apiListRpgTables rejette les statuts invalides et les types de commentaires invalides", async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(
@@ -155,7 +155,7 @@ describe("rpgApi", () => {
     await expect(apiListRpgTables()).rejects.toThrow("Invalid tables payload");
   });
 
-  it("apiListRpgTables throws the backend message on failure", async () => {
+  it("apiListRpgTables relance le message backend en cas d’échec", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -169,7 +169,7 @@ describe("rpgApi", () => {
     await expect(apiListRpgTables()).rejects.toThrow("Tables failed");
   });
 
-  it("apiListRpgTables falls back to the default message when the error body is malformed", async () => {
+  it("apiListRpgTables utilise le message par défaut quand le corps d’erreur est mal formé", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -185,7 +185,7 @@ describe("rpgApi", () => {
     );
   });
 
-  it("apiGetRpgTable returns the parsed details", async () => {
+  it("apiGetRpgTable renvoie les détails parsés", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -211,7 +211,7 @@ describe("rpgApi", () => {
     });
   });
 
-  it("apiGetRpgTable throws when the details payload is invalid", async () => {
+  it("apiGetRpgTable lance une erreur quand les détails sont invalides", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -225,7 +225,7 @@ describe("rpgApi", () => {
     await expect(apiGetRpgTable(1)).rejects.toThrow("Invalid table payload");
   });
 
-  it("apiGetRpgTable rejects invalid confirmedCap and signup items", async () => {
+  it("apiGetRpgTable rejette les confirmedCap et les inscriptions invalides", async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(
@@ -254,7 +254,7 @@ describe("rpgApi", () => {
     await expect(apiGetRpgTable(1)).rejects.toThrow("Invalid table payload");
   });
 
-  it("apiGetRpgTable falls back to the default message when the error body is malformed", async () => {
+  it("apiGetRpgTable utilise le message par défaut quand le corps d’erreur est mal formé", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -270,7 +270,7 @@ describe("rpgApi", () => {
     );
   });
 
-  it("apiSignupRpg posts with the csrf token", async () => {
+  it("apiSignupRpg envoie la requête avec le token CSRF", async () => {
     vi.mocked(fetchCsrfToken).mockResolvedValue("csrf-1");
     const fetchMock = vi
       .fn()
@@ -285,7 +285,7 @@ describe("rpgApi", () => {
     });
   });
 
-  it("apiSignupRpg throws the fallback error message", async () => {
+  it("apiSignupRpg lance le message d’erreur de secours", async () => {
     vi.mocked(fetchCsrfToken).mockResolvedValue("csrf-1");
     vi.stubGlobal(
       "fetch",
@@ -295,7 +295,7 @@ describe("rpgApi", () => {
     await expect(apiSignupRpg(5)).rejects.toThrow("Inscription impossible");
   });
 
-  it("apiUnsignupRpg throws the fallback error message", async () => {
+  it("apiUnsignupRpg lance le message d’erreur de secours", async () => {
     vi.mocked(fetchCsrfToken).mockResolvedValue("csrf-1");
     vi.stubGlobal(
       "fetch",
@@ -303,11 +303,11 @@ describe("rpgApi", () => {
     );
 
     await expect(apiUnsignupRpg(5)).rejects.toThrow(
-      "D\u00e9sinscription impossible",
+      "Désinscription impossible",
     );
   });
 
-  it("apiUnsignupRpg posts with the csrf token", async () => {
+  it("apiUnsignupRpg envoie la requête avec le token CSRF", async () => {
     vi.mocked(fetchCsrfToken).mockResolvedValue("csrf-1");
     const fetchMock = vi
       .fn()
@@ -322,7 +322,7 @@ describe("rpgApi", () => {
     });
   });
 
-  it("apiCreateRpgTable returns the created payload", async () => {
+  it("apiCreateRpgTable renvoie la réponse de création", async () => {
     vi.mocked(fetchCsrfToken).mockResolvedValue("csrf-1");
     const fetchMock = vi.fn().mockResolvedValue(
       makeResponse({
@@ -345,7 +345,7 @@ describe("rpgApi", () => {
     });
   });
 
-  it("apiCreateRpgTable throws when the create payload is invalid", async () => {
+  it("apiCreateRpgTable lance une erreur quand la réponse de création est invalide", async () => {
     vi.mocked(fetchCsrfToken).mockResolvedValue("csrf-1");
     vi.stubGlobal(
       "fetch",
@@ -366,7 +366,7 @@ describe("rpgApi", () => {
     ).rejects.toThrow("Invalid create payload");
   });
 
-  it("apiCreateRpgTable throws when the create payload body is not an object", async () => {
+  it("apiCreateRpgTable lance une erreur quand le corps de la réponse de création n’est pas un objet", async () => {
     vi.mocked(fetchCsrfToken).mockResolvedValue("csrf-1");
     vi.stubGlobal(
       "fetch",
@@ -387,7 +387,7 @@ describe("rpgApi", () => {
     ).rejects.toThrow("Invalid create payload");
   });
 
-  it("apiCreateRpgTable falls back to the default error when the body is malformed", async () => {
+  it("apiCreateRpgTable utilise l’erreur par défaut quand le corps est mal formé", async () => {
     vi.mocked(fetchCsrfToken).mockResolvedValue("csrf-1");
     vi.stubGlobal(
       "fetch",
@@ -405,10 +405,10 @@ describe("rpgApi", () => {
         location: "Paris",
         game: "D&D",
       }),
-    ).rejects.toThrow("Cr\u00e9ation impossible");
+    ).rejects.toThrow("Création impossible");
   });
 
-  it("apiUpdateRpgTable sends the update payload", async () => {
+  it("apiUpdateRpgTable envoie la charge utile de mise à jour", async () => {
     vi.mocked(fetchCsrfToken).mockResolvedValue("csrf-1");
     const fetchMock = vi
       .fn()
@@ -429,7 +429,7 @@ describe("rpgApi", () => {
     });
   });
 
-  it("apiUpdateRpgTable throws the backend message on error", async () => {
+  it("apiUpdateRpgTable relance le message backend en cas d’erreur", async () => {
     vi.mocked(fetchCsrfToken).mockResolvedValue("csrf-1");
     vi.stubGlobal(
       "fetch",
@@ -446,7 +446,7 @@ describe("rpgApi", () => {
     );
   });
 
-  it("apiUpdateRpgTable falls back to the default error when the body is malformed", async () => {
+  it("apiUpdateRpgTable utilise l’erreur par défaut quand le corps est mal formé", async () => {
     vi.mocked(fetchCsrfToken).mockResolvedValue("csrf-1");
     vi.stubGlobal(
       "fetch",
@@ -459,11 +459,11 @@ describe("rpgApi", () => {
     );
 
     await expect(apiUpdateRpgTable(10, { location: "Paris" })).rejects.toThrow(
-      "Mise \u00e0 jour impossible",
+      "Mise à jour impossible",
     );
   });
 
-  it("apiUpdateRpgTableStatus sends the status payload", async () => {
+  it("apiUpdateRpgTableStatus envoie la charge utile du statut", async () => {
     vi.mocked(fetchCsrfToken).mockResolvedValue("csrf-1");
     const fetchMock = vi
       .fn()
@@ -484,7 +484,7 @@ describe("rpgApi", () => {
     });
   });
 
-  it("apiUpdateRpgTableStatus throws the fallback message on malformed errors", async () => {
+  it("apiUpdateRpgTableStatus utilise le message de secours en cas d’erreur mal formée", async () => {
     vi.mocked(fetchCsrfToken).mockResolvedValue("csrf-1");
     vi.stubGlobal(
       "fetch",
@@ -497,11 +497,11 @@ describe("rpgApi", () => {
     );
 
     await expect(apiUpdateRpgTableStatus(10, "CLOSED")).rejects.toThrow(
-      "Mise \u00e0 jour du statut impossible",
+      "Mise à jour du statut impossible",
     );
   });
 
-  it("apiListRpgStatuses returns the parsed statuses", async () => {
+  it("apiListRpgStatuses renvoie les statuts parsés", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -519,7 +519,7 @@ describe("rpgApi", () => {
     ]);
   });
 
-  it("apiListRpgStatuses throws when the payload is invalid", async () => {
+  it("apiListRpgStatuses lance une erreur quand la réponse est invalide", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -535,7 +535,7 @@ describe("rpgApi", () => {
     );
   });
 
-  it("apiListRpgStatuses falls back to the default message on malformed errors", async () => {
+  it("apiListRpgStatuses utilise le message par défaut en cas d’erreur mal formée", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(

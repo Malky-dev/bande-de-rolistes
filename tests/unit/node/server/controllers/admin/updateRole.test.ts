@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from "vitest";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { describe, expect, it, vi } from "vitest";
 
 const root = process.cwd();
 
@@ -140,8 +140,8 @@ async function load(opts?: {
   };
 }
 
-describe("controllerAdminUpdateRole", () => {
-  it("400 si userID ou roleID invalide", async () => {
+describe("controller admin updateRole", () => {
+  it("retourne 400 si userID ou roleID est invalide", async () => {
     const { controllerAdminUpdateRole, makeReq, makeTypedRes } = await load();
 
     const req = makeReq({ params: { userID: "x" }, body: { roleID: "y" } });
@@ -156,7 +156,7 @@ describe("controllerAdminUpdateRole", () => {
     });
   });
 
-  it("400 si userID est un tableau vide", async () => {
+  it("retourne 400 si userID est fourni sous forme de tableau vide", async () => {
     const { controllerAdminUpdateRole, makeReq, makeTypedRes } = await load();
 
     const req = makeReq({ params: { userID: [] }, body: { roleID: "2" } });
@@ -171,7 +171,7 @@ describe("controllerAdminUpdateRole", () => {
     });
   });
 
-  it("404 si rôle introuvable", async () => {
+  it("retourne 404 si le rôle est introuvable", async () => {
     const { controllerAdminUpdateRole, makeReq, makeTypedRes, mocks } =
       await load({
         roleFindByPkResult: null,
@@ -189,7 +189,7 @@ describe("controllerAdminUpdateRole", () => {
     });
   });
 
-  it("404 si user introuvable", async () => {
+  it("retourne 404 si l’utilisateur est introuvable", async () => {
     const { controllerAdminUpdateRole, makeReq, makeTypedRes, mocks } =
       await load({
         userFindByPkFirstResult: null,
@@ -207,7 +207,7 @@ describe("controllerAdminUpdateRole", () => {
     });
   });
 
-  it("403 si tentative de modifier son propre rôle", async () => {
+  it("retourne 403 en cas de tentative de modification de son propre rôle", async () => {
     const { controllerAdminUpdateRole, makeReq, makeTypedRes, mocks } =
       await load({
         userFindByPkFirstResult: {
@@ -233,7 +233,7 @@ describe("controllerAdminUpdateRole", () => {
     });
   });
 
-  it("200 json si ok", async () => {
+  it("retourne 200 avec l’utilisateur mis à jour", async () => {
     const userUpdate = vi.fn().mockResolvedValue(undefined);
 
     const { controllerAdminUpdateRole, makeReq, makeTypedRes, mocks } =
@@ -271,7 +271,7 @@ describe("controllerAdminUpdateRole", () => {
     });
   });
 
-  it("200 json si userID et roleID sont fournis sous forme de tableaux", async () => {
+  it("retourne 200 si userID et roleID sont fournis sous forme de tableaux", async () => {
     const userUpdate = vi.fn().mockResolvedValue(undefined);
 
     const { controllerAdminUpdateRole, makeReq, makeTypedRes, mocks } =
@@ -309,7 +309,7 @@ describe("controllerAdminUpdateRole", () => {
     });
   });
 
-  it("200 json avec fallback roleLabel='guest' si roleLabel absent", async () => {
+  it("retourne 200 avec roleLabel à 'guest' par défaut si roleLabel est absent", async () => {
     const userUpdate = vi.fn().mockResolvedValue(undefined);
 
     const { controllerAdminUpdateRole, makeReq, makeTypedRes } = await load({
@@ -344,7 +344,7 @@ describe("controllerAdminUpdateRole", () => {
     });
   });
 
-  it("404 si user reload introuvable ou sans role", async () => {
+  it("retourne 404 si le rechargement de l’utilisateur échoue ou si son rôle est absent", async () => {
     const userUpdate = vi.fn().mockResolvedValue(undefined);
 
     const { controllerAdminUpdateRole, makeReq, makeTypedRes } = await load({
@@ -367,7 +367,7 @@ describe("controllerAdminUpdateRole", () => {
     });
   });
 
-  it("500 si Error(message)", async () => {
+  it("retourne 500 avec le message de l’erreur si une Error est levée", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerAdminUpdateRole, makeReq, makeTypedRes } = await load({
       roleFindByPkReject: new Error("boom"),
@@ -384,7 +384,7 @@ describe("controllerAdminUpdateRole", () => {
     errSpy.mockRestore();
   });
 
-  it("500 si erreur non-Error", async () => {
+  it("retourne 500 avec un message serveur générique si l’erreur n’est pas une Error", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerAdminUpdateRole, makeReq, makeTypedRes } = await load({
       roleFindByPkReject: "nope",

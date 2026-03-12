@@ -1,7 +1,7 @@
-import { describe, it, expect, vi } from "vitest";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { Op } from "sequelize";
+import { describe, expect, it, vi } from "vitest";
 
 const root = process.cwd();
 
@@ -71,8 +71,8 @@ async function load(opts?: {
   };
 }
 
-describe("controllerListTables", () => {
-  it("200: findAll args + map ok (Date + string + number) + comments coerced", async () => {
+describe("controller listTables", () => {
+  it("retourne 200 avec les bons paramètres findAll et une liste mappée correctement", async () => {
     const rows = [
       makeRow({
         eventID: 7,
@@ -164,7 +164,7 @@ describe("controllerListTables", () => {
     ]);
   });
 
-  it("500 si row.toJSON non-record", async () => {
+  it("retourne 500 si row.toJSON ne renvoie pas un objet exploitable", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerListTables, makeReq, makeTypedRes } = await load({
       findAllResult: [makeRow("nope")],
@@ -184,7 +184,7 @@ describe("controllerListTables", () => {
     errSpy.mockRestore();
   });
 
-  it("500 si eventID invalide", async () => {
+  it("retourne 500 si eventID est invalide", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerListTables, makeReq, makeTypedRes } = await load({
       findAllResult: [
@@ -215,7 +215,7 @@ describe("controllerListTables", () => {
     errSpy.mockRestore();
   });
 
-  it("500 si eventDate invalide (Date NaN)", async () => {
+  it("retourne 500 si eventDate est invalide avec une Date NaN", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerListTables, makeReq, makeTypedRes } = await load({
       findAllResult: [
@@ -246,7 +246,7 @@ describe("controllerListTables", () => {
     errSpy.mockRestore();
   });
 
-  it("500 si eventDate invalide (type object)", async () => {
+  it("retourne 500 si eventDate est invalide avec une valeur de type objet", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerListTables, makeReq, makeTypedRes } = await load({
       findAllResult: [
@@ -277,7 +277,7 @@ describe("controllerListTables", () => {
     errSpy.mockRestore();
   });
 
-  it("500 si eventDate invalide (string)", async () => {
+  it("retourne 500 si eventDate est invalide sous forme de chaîne", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerListTables, makeReq, makeTypedRes } = await load({
       findAllResult: [
@@ -308,7 +308,7 @@ describe("controllerListTables", () => {
     errSpy.mockRestore();
   });
 
-  it("500 si location invalide", async () => {
+  it("retourne 500 si location est invalide", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerListTables, makeReq, makeTypedRes } = await load({
       findAllResult: [
@@ -339,7 +339,7 @@ describe("controllerListTables", () => {
     errSpy.mockRestore();
   });
 
-  it("500 si game invalide", async () => {
+  it("retourne 500 si game est invalide", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerListTables, makeReq, makeTypedRes } = await load({
       findAllResult: [
@@ -370,7 +370,7 @@ describe("controllerListTables", () => {
     errSpy.mockRestore();
   });
 
-  it("500 si status invalide", async () => {
+  it("retourne 500 si status est invalide", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerListTables, makeReq, makeTypedRes } = await load({
       findAllResult: [
@@ -401,7 +401,7 @@ describe("controllerListTables", () => {
     errSpy.mockRestore();
   });
 
-  it("500 si maxPlayers invalide (non finie)", async () => {
+  it("retourne 500 si maxPlayers est invalide car non fini", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerListTables, makeReq, makeTypedRes } = await load({
       findAllResult: [
@@ -432,7 +432,7 @@ describe("controllerListTables", () => {
     errSpy.mockRestore();
   });
 
-  it("500 si dungeonMaster invalide (pas record)", async () => {
+  it("retourne 500 si dungeonMaster est invalide car ce n’est pas un objet exploitable", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerListTables, makeReq, makeTypedRes } = await load({
       findAllResult: [
@@ -463,7 +463,7 @@ describe("controllerListTables", () => {
     errSpy.mockRestore();
   });
 
-  it("500 si dungeonMaster.userID invalide", async () => {
+  it("retourne 500 si dungeonMaster.userID est invalide", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerListTables, makeReq, makeTypedRes } = await load({
       findAllResult: [
@@ -494,7 +494,7 @@ describe("controllerListTables", () => {
     errSpy.mockRestore();
   });
 
-  it("500 si dungeonMaster.nickname invalide", async () => {
+  it("retourne 500 si dungeonMaster.nickname est invalide", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerListTables, makeReq, makeTypedRes } = await load({
       findAllResult: [
@@ -525,7 +525,7 @@ describe("controllerListTables", () => {
     errSpy.mockRestore();
   });
 
-  it("500 si Error(message) findAll", async () => {
+  it("retourne 500 avec le message de l’erreur si findAll lève une Error", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerListTables, makeReq, makeTypedRes } = await load({
       findAllReject: new Error("boom"),
@@ -542,7 +542,7 @@ describe("controllerListTables", () => {
     errSpy.mockRestore();
   });
 
-  it("500 si erreur non-Error", async () => {
+  it("retourne 500 avec un message serveur générique si l’erreur n’est pas une Error", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerListTables, makeReq, makeTypedRes } = await load({
       findAllReject: "nope",

@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { makeReq } from "@/../tests/helpers/express";
 
 type LoadOpts = {
@@ -82,12 +83,12 @@ async function load(opts: LoadOpts = {}) {
   };
 }
 
-describe("controllerLogin", () => {
+describe("controller login", () => {
   beforeEach(() => {
     delete process.env.NODE_ENV;
   });
 
-  it("400 si email n'est pas string", async () => {
+  it("retourne 400 si email n’est pas une chaîne", async () => {
     const { controllerLogin } = await load();
 
     const req = makeReq({ body: { email: 123, password: "x" } });
@@ -102,7 +103,7 @@ describe("controllerLogin", () => {
     });
   });
 
-  it("400 si password n'est pas string", async () => {
+  it("retourne 400 si password n’est pas une chaîne", async () => {
     const { controllerLogin } = await load();
 
     const req = makeReq({ body: { email: "a@b.c", password: 123 } });
@@ -117,7 +118,7 @@ describe("controllerLogin", () => {
     });
   });
 
-  it("404 si user introuvable", async () => {
+  it("retourne 404 si l’utilisateur est introuvable", async () => {
     const { controllerLogin } = await load({ user: null });
 
     const req = makeReq({ body: { email: "a@b.c", password: "pw" } });
@@ -132,7 +133,7 @@ describe("controllerLogin", () => {
     });
   });
 
-  it("404 si user shape invalide", async () => {
+  it("retourne 404 si la structure de l’utilisateur est invalide", async () => {
     const { controllerLogin } = await load({ user: { userID: 1 } });
 
     const req = makeReq({ body: { email: "a@b.c", password: "pw" } });
@@ -147,7 +148,7 @@ describe("controllerLogin", () => {
     });
   });
 
-  it("404 si password incorrect", async () => {
+  it("retourne 404 si le mot de passe est incorrect", async () => {
     const { controllerLogin, mocks } = await load({
       user: { userID: 1, password: "hash" },
       compareOk: false,
@@ -166,7 +167,7 @@ describe("controllerLogin", () => {
     });
   });
 
-  it("200: crée session + cookie + json", async () => {
+  it("retourne 200 en créant la session, le cookie et la réponse JSON", async () => {
     const { controllerLogin, mocks } = await load({
       user: { userID: 7, password: "hash" },
       compareOk: true,
@@ -203,7 +204,7 @@ describe("controllerLogin", () => {
     expect(res.json).toHaveBeenCalledWith({ token: "tok123" });
   });
 
-  it("200: secure=true en production + device/browser", async () => {
+  it("retourne 200 avec secure=true en production et renseigne device/browser", async () => {
     const { controllerLogin, mocks } = await load({
       nodeEnv: "production",
       user: { userID: 7, password: "hash" },
@@ -231,7 +232,7 @@ describe("controllerLogin", () => {
     expect(cookieOpts.secure).toBe(true);
   });
 
-  it("200: req.get absent -> User-Agent vide", async () => {
+  it("retourne 200 avec un User-Agent vide si req.get est absent", async () => {
     const { controllerLogin, mocks } = await load({
       user: { userID: 7, password: "hash" },
       compareOk: true,
@@ -248,7 +249,7 @@ describe("controllerLogin", () => {
     expect(res.json).toHaveBeenCalledWith({ token: "tok789" });
   });
 
-  it("500 si exception Error", async () => {
+  it("retourne 500 avec le message de l’erreur si une Error est levée", async () => {
     const { controllerLogin } = await load({
       userFindOneError: new Error("boom"),
     });
@@ -267,7 +268,7 @@ describe("controllerLogin", () => {
     errSpy.mockRestore();
   });
 
-  it("500 si exception non-Error", async () => {
+  it("retourne 500 avec un message générique si l’erreur n’est pas une Error", async () => {
     const { controllerLogin } = await load({ userFindOneError: "nope" });
 
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});

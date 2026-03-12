@@ -14,7 +14,7 @@ vi.mock("@/client/views/ForbiddenView", () => ({
 }));
 
 describe("AdminView", () => {
-  it("renders the forbidden view when the session is not admin", () => {
+  it("affiche la vue interdite quand la session n’est pas admin", () => {
     render(
       <AdminView
         session={{
@@ -33,7 +33,7 @@ describe("AdminView", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders the admin panel for an admin session", () => {
+  it("affiche le panneau d’administration pour une session admin", () => {
     render(
       <AdminView
         session={{

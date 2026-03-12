@@ -1,13 +1,13 @@
-import { describe, it, expect, vi } from "vitest";
 import type { Response } from "express";
-import type { ApiError } from "@/types/api/errors";
+import { describe, expect, it, vi } from "vitest";
 
+import type { ApiError } from "@/types/api/errors";
 import {
+  badRequest,
+  forbid,
   getRoleID,
   getUserID,
   hasRole,
-  forbid,
-  badRequest,
   notFound,
   parseIntParam,
 } from "@/server/controllers/rpg/helpers";
@@ -26,8 +26,8 @@ const makeRes = () => {
 const reqNoUser = <TReq>(): TReq => ({ user: undefined }) as unknown as TReq;
 const reqUser = <TReq>(u: unknown): TReq => ({ user: u }) as unknown as TReq;
 
-describe("rpg/helpers", () => {
-  it("getRoleID: undefined si pas de user/role", () => {
+describe("helpers rpg", () => {
+  it("getRoleID retourne undefined s’il n’y a pas d’utilisateur ou de rôle", () => {
     expect(getRoleID(reqNoUser<ReqForGetRoleID>())).toBeUndefined();
     expect(getRoleID(reqUser<ReqForGetRoleID>({}))).toBeUndefined();
     expect(
@@ -36,22 +36,22 @@ describe("rpg/helpers", () => {
     expect(getRoleID(reqUser<ReqForGetRoleID>({ role: {} }))).toBeUndefined();
   });
 
-  it("getRoleID: renvoie roleID si présent", () => {
+  it("getRoleID retourne roleID s’il est présent", () => {
     const u = { userID: 7, nickname: "Neo", role: { roleID: 3 } };
     expect(getRoleID(reqUser<ReqForGetRoleID>(u))).toBe(3);
   });
 
-  it("getUserID: undefined si pas de user/userID", () => {
+  it("getUserID retourne undefined s’il n’y a pas d’utilisateur ou de userID", () => {
     expect(getUserID(reqNoUser<ReqForGetUserID>())).toBeUndefined();
     expect(getUserID(reqUser<ReqForGetUserID>({}))).toBeUndefined();
   });
 
-  it("getUserID: renvoie userID si présent", () => {
+  it("getUserID retourne userID s’il est présent", () => {
     const u = { userID: 7, nickname: "Neo" };
     expect(getUserID(reqUser<ReqForGetUserID>(u))).toBe(7);
   });
 
-  it("hasRole: false si roleID manquant ou pas number", () => {
+  it("hasRole retourne false si roleID est absent ou n’est pas un nombre", () => {
     expect(hasRole(reqNoUser<ReqForHasRole>(), [1, 2, 3])).toBe(false);
     expect(hasRole(reqUser<ReqForHasRole>({}), [1, 2, 3])).toBe(false);
     expect(hasRole(reqUser<ReqForHasRole>({ role: {} }), [1, 2, 3])).toBe(
@@ -62,17 +62,17 @@ describe("rpg/helpers", () => {
     expect(hasRole(reqUser<ReqForHasRole>(u), [2])).toBe(false);
   });
 
-  it("hasRole: true si roleID autorisé", () => {
+  it("hasRole retourne true si roleID est autorisé", () => {
     const u = { userID: 7, nickname: "Neo", role: { roleID: 2 } };
     expect(hasRole(reqUser<ReqForHasRole>(u), [1, 2, 3])).toBe(true);
   });
 
-  it("hasRole: false si roleID non autorisé", () => {
+  it("hasRole retourne false si roleID n’est pas autorisé", () => {
     const u = { userID: 7, nickname: "Neo", role: { roleID: 4 } };
     expect(hasRole(reqUser<ReqForHasRole>(u), [1, 2, 3])).toBe(false);
   });
 
-  it("forbid: 403 + payload", () => {
+  it("forbid retourne 403 avec le payload attendu", () => {
     const { res, status, json } = makeRes();
 
     forbid(res, "nope");
@@ -81,7 +81,7 @@ describe("rpg/helpers", () => {
     expect(json).toHaveBeenCalledWith({ code: "FORBIDDEN", message: "nope" });
   });
 
-  it("badRequest: 400 + payload", () => {
+  it("badRequest retourne 400 avec le payload attendu", () => {
     const { res, status, json } = makeRes();
 
     badRequest(res, "invalid");
@@ -93,7 +93,7 @@ describe("rpg/helpers", () => {
     });
   });
 
-  it("notFound: 404 + payload", () => {
+  it("notFound retourne 404 avec le payload attendu", () => {
     const { res, status, json } = makeRes();
 
     notFound(res, "missing");
@@ -105,7 +105,7 @@ describe("rpg/helpers", () => {
     });
   });
 
-  it("parseIntParam: null si non numérique", () => {
+  it("parseIntParam retourne null si la valeur n’est pas numérique", () => {
     expect(parseIntParam("")).toBeNull();
     expect(parseIntParam(" 1")).toBeNull();
     expect(parseIntParam("1 ")).toBeNull();
@@ -116,14 +116,14 @@ describe("rpg/helpers", () => {
     expect(parseIntParam("1.2")).toBeNull();
   });
 
-  it("parseIntParam: number si digits only", () => {
+  it("parseIntParam retourne un nombre si la valeur ne contient que des chiffres", () => {
     expect(parseIntParam("0")).toBe(0);
     expect(parseIntParam("7")).toBe(7);
     expect(parseIntParam("007")).toBe(7);
     expect(parseIntParam("42")).toBe(42);
   });
 
-  it("parseIntParam: null si Number() non-finie", () => {
+  it("parseIntParam retourne null si Number() renvoie une valeur non finie", () => {
     expect(parseIntParam("1".repeat(400))).toBeNull();
   });
 });

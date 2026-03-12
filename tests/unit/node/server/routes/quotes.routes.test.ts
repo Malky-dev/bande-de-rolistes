@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { createRouterMock } from "./_routerMock";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { makeReq, makeRes } from "@/../tests/helpers/express";
+import { createRouterMock } from "./_routerMock";
 
 const router = createRouterMock();
 
@@ -77,12 +78,12 @@ async function load() {
   };
 }
 
-describe("routes/quotes", () => {
+describe("routes quotes", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("GET /quotes: where undefined, pagination default, success", async () => {
+  it("GET /quotes retourne la liste avec where à undefined, la pagination par défaut et le payload attendu", async () => {
     const { getQuotes } = await load();
 
     Quote.findAndCountAll.mockResolvedValue({
@@ -114,7 +115,7 @@ describe("routes/quotes", () => {
     });
   });
 
-  it("GET /quotes: clamp page/limit + escape q + where défini", async () => {
+  it("GET /quotes borne page et limit, échappe q et définit where", async () => {
     const { getQuotes } = await load();
 
     Quote.findAndCountAll.mockResolvedValue({ rows: [], count: 120 });
@@ -142,7 +143,7 @@ describe("routes/quotes", () => {
     expect(payload.q).toBe("%_\\abc");
   });
 
-  it("GET /quotes: fallback page/limit si valeurs invalides", async () => {
+  it("GET /quotes utilise les valeurs de repli pour page et limit si elles sont invalides", async () => {
     const { getQuotes } = await load();
 
     Quote.findAndCountAll.mockResolvedValue({ rows: [], count: 0 });
@@ -162,7 +163,7 @@ describe("routes/quotes", () => {
     expect(args.offset).toBe(0);
   });
 
-  it("GET /quotes: catch -> 500", async () => {
+  it("GET /quotes retourne 500 en cas d’erreur", async () => {
     const { getQuotes } = await load();
 
     Quote.findAndCountAll.mockRejectedValue(new Error("boom"));
@@ -179,7 +180,7 @@ describe("routes/quotes", () => {
     });
   });
 
-  it("POST /quotes: 400 si contenu invalide", async () => {
+  it("POST /quotes retourne 400 si le contenu est invalide", async () => {
     const { postQuotes } = await load();
 
     const req = makeReq({ body: { content: "  " } });
@@ -195,7 +196,7 @@ describe("routes/quotes", () => {
     expect(Quote.create).not.toHaveBeenCalled();
   });
 
-  it("POST /quotes: 201 + author défaut", async () => {
+  it("POST /quotes retourne 201 avec l’auteur par défaut", async () => {
     const { postQuotes } = await load();
 
     Quote.create.mockResolvedValue({ quoteID: 1 });
@@ -213,7 +214,7 @@ describe("routes/quotes", () => {
     expect(res.json).toHaveBeenCalledWith({ quoteID: 1 });
   });
 
-  it("POST /quotes: 201 + author trim", async () => {
+  it("POST /quotes retourne 201 avec l’auteur nettoyé", async () => {
     const { postQuotes } = await load();
 
     Quote.create.mockResolvedValue({ quoteID: 2 });
@@ -230,7 +231,7 @@ describe("routes/quotes", () => {
     expect(res.status).toHaveBeenCalledWith(201);
   });
 
-  it("POST /quotes: catch -> 500", async () => {
+  it("POST /quotes retourne 500 en cas d’erreur", async () => {
     const { postQuotes } = await load();
 
     Quote.create.mockRejectedValue(new Error("boom"));
@@ -247,7 +248,7 @@ describe("routes/quotes", () => {
     });
   });
 
-  it("PUT /quotes/:quoteID: 400 si ID invalide", async () => {
+  it("PUT /quotes/:quoteID retourne 400 si l’ID est invalide", async () => {
     const { putQuote } = await load();
 
     const req = makeReq({
@@ -265,7 +266,7 @@ describe("routes/quotes", () => {
     });
   });
 
-  it("PUT /quotes/:quoteID: 400 si contenu invalide", async () => {
+  it("PUT /quotes/:quoteID retourne 400 si le contenu est invalide", async () => {
     const { putQuote } = await load();
 
     const req = makeReq({ params: { quoteID: "1" }, body: { content: "a" } });
@@ -280,7 +281,7 @@ describe("routes/quotes", () => {
     });
   });
 
-  it("PUT /quotes/:quoteID: 404 si introuvable", async () => {
+  it("PUT /quotes/:quoteID retourne 404 si la citation est introuvable", async () => {
     const { putQuote } = await load();
 
     Quote.findByPk.mockResolvedValue(null);
@@ -297,7 +298,7 @@ describe("routes/quotes", () => {
     });
   });
 
-  it("PUT /quotes/:quoteID: success -> save + json (author défaut)", async () => {
+  it("PUT /quotes/:quoteID met à jour puis retourne la citation avec l’auteur par défaut", async () => {
     const { putQuote } = await load();
 
     const quote = {
@@ -321,7 +322,7 @@ describe("routes/quotes", () => {
     expect(res.json).toHaveBeenCalledWith(quote);
   });
 
-  it("PUT /quotes/:quoteID: success -> save + json (author trim)", async () => {
+  it("PUT /quotes/:quoteID met à jour puis retourne la citation avec l’auteur nettoyé", async () => {
     const { putQuote } = await load();
 
     const quote = {
@@ -345,7 +346,7 @@ describe("routes/quotes", () => {
     expect(res.json).toHaveBeenCalledWith(quote);
   });
 
-  it("PUT /quotes/:quoteID: catch -> 500", async () => {
+  it("PUT /quotes/:quoteID retourne 500 en cas d’erreur", async () => {
     const { putQuote } = await load();
 
     Quote.findByPk.mockRejectedValue(new Error("boom"));
@@ -362,7 +363,7 @@ describe("routes/quotes", () => {
     });
   });
 
-  it("DELETE /quotes/:quoteID: 400 si ID invalide", async () => {
+  it("DELETE /quotes/:quoteID retourne 400 si l’ID est invalide", async () => {
     const { deleteQuote } = await load();
 
     const req = makeReq({ params: { quoteID: "NaN" } });
@@ -377,7 +378,7 @@ describe("routes/quotes", () => {
     });
   });
 
-  it("DELETE /quotes/:quoteID: 404 si rien supprimé", async () => {
+  it("DELETE /quotes/:quoteID retourne 404 si aucune citation n’est supprimée", async () => {
     const { deleteQuote } = await load();
 
     Quote.destroy.mockResolvedValue(0);
@@ -394,7 +395,7 @@ describe("routes/quotes", () => {
     });
   });
 
-  it("DELETE /quotes/:quoteID: 204 si supprimé", async () => {
+  it("DELETE /quotes/:quoteID retourne 204 si la citation est supprimée", async () => {
     const { deleteQuote } = await load();
 
     Quote.destroy.mockResolvedValue(1);
@@ -408,7 +409,7 @@ describe("routes/quotes", () => {
     expect(res.send).toHaveBeenCalledTimes(1);
   });
 
-  it("DELETE /quotes/:quoteID: catch -> 500", async () => {
+  it("DELETE /quotes/:quoteID retourne 500 en cas d’erreur", async () => {
     const { deleteQuote } = await load();
 
     Quote.destroy.mockRejectedValue(new Error("boom"));

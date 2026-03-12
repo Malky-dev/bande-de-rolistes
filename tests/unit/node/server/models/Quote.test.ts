@@ -1,7 +1,7 @@
-import { describe, expect, it, vi } from "vitest";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { Sequelize } from "sequelize";
+import { describe, expect, it, vi } from "vitest";
 
 const root = process.cwd();
 
@@ -30,8 +30,8 @@ async function load() {
   return { Quote: mod.default };
 }
 
-describe("Quote model", () => {
-  it("defines the expected table metadata and author default", async () => {
+describe("model Quote", () => {
+  it("définit les métadonnées de table attendues et la valeur par défaut de l’auteur", async () => {
     const { Quote } = await load();
     const attributes = Quote.getAttributes();
 

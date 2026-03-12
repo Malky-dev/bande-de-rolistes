@@ -46,7 +46,7 @@ describe("authApi", () => {
     vi.restoreAllMocks();
   });
 
-  it("authApi helper functions validate payloads and fall back on malformed errors", async () => {
+  it("valide les helpers authApi et utilise le message de secours pour les erreurs mal formées", async () => {
     expect(isApiErrorPayload({})).toBe(true);
     expect(isApiErrorPayload({ message: 1 })).toBe(false);
 
@@ -79,7 +79,7 @@ describe("authApi", () => {
     ).resolves.toBe("fallback");
   });
 
-  it("apiSignin posts the signup payload with a csrf token", async () => {
+  it("apiSignin envoie les données d’inscription avec un token CSRF", async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(
@@ -109,7 +109,7 @@ describe("authApi", () => {
     });
   });
 
-  it("apiSignin throws the response message on failure", async () => {
+  it("apiSignin relance le message de la réponse en cas d’échec", async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(
@@ -129,7 +129,7 @@ describe("authApi", () => {
     ).rejects.toThrow("Signup failed");
   });
 
-  it("apiSignin throws when the csrf payload is invalid", async () => {
+  it("apiSignin lance une erreur quand la réponse CSRF est invalide", async () => {
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     vi.stubGlobal(
@@ -139,11 +139,11 @@ describe("authApi", () => {
 
     await expect(
       apiSignin("Neo", "neo@matrix.tld", "Password12345", "Password12345"),
-    ).rejects.toThrow("Token CSRF invalide re\u00e7u du serveur");
+    ).rejects.toThrow("Token CSRF invalide reçu du serveur");
     expect(errorSpy).toHaveBeenCalled();
   });
 
-  it("apiLogin posts the login payload", async () => {
+  it("apiLogin envoie les données de connexion", async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(
@@ -170,7 +170,7 @@ describe("authApi", () => {
     });
   });
 
-  it("apiLogin falls back to the generic message when the error payload is invalid", async () => {
+  it("apiLogin utilise le message générique quand la réponse d’erreur est invalide", async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(
@@ -185,7 +185,7 @@ describe("authApi", () => {
     );
   });
 
-  it("apiSession falls back to the default unauthenticated message when the error body is malformed", async () => {
+  it("apiSession utilise le message non authentifié par défaut quand le corps d’erreur est mal formé", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(makeResponse({ ok: false, text: "not-json" })),
@@ -194,7 +194,7 @@ describe("authApi", () => {
     await expect(apiSession()).rejects.toThrow("Not authenticated");
   });
 
-  it("apiSession returns the parsed session", async () => {
+  it("apiSession renvoie la session parsée", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -220,7 +220,7 @@ describe("authApi", () => {
     });
   });
 
-  it("apiSession throws when the session payload is invalid", async () => {
+  it("apiSession lance une erreur quand la réponse de session est invalide", async () => {
     vi.stubGlobal(
       "fetch",
       vi
@@ -231,7 +231,7 @@ describe("authApi", () => {
     await expect(apiSession()).rejects.toThrow("Invalid session payload");
   });
 
-  it("apiSession throws the backend error for an unauthenticated response", async () => {
+  it("apiSession relance l’erreur backend pour une réponse non authentifiée", async () => {
     vi.stubGlobal(
       "fetch",
       vi
@@ -244,7 +244,7 @@ describe("authApi", () => {
     await expect(apiSession()).rejects.toThrow("No session");
   });
 
-  it("apiLogout returns the parsed payload", async () => {
+  it("apiLogout renvoie la réponse parsée", async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(
@@ -259,7 +259,7 @@ describe("authApi", () => {
     await expect(apiLogout()).resolves.toEqual({ success: true });
   });
 
-  it("apiLogout throws when the logout payload is invalid", async () => {
+  it("apiLogout lance une erreur quand la réponse de déconnexion est invalide", async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(
@@ -272,7 +272,7 @@ describe("authApi", () => {
     await expect(apiLogout()).rejects.toThrow("Invalid logout payload");
   });
 
-  it("apiLogout throws the csrf fallback message when the csrf endpoint fails", async () => {
+  it("apiLogout lance le message de secours CSRF quand l’endpoint CSRF échoue", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -286,11 +286,11 @@ describe("authApi", () => {
     );
 
     await expect(apiLogout()).rejects.toThrow(
-      "Impossible de r\u00e9cup\u00e9rer le token CSRF",
+      "Impossible de récupérer le token CSRF",
     );
   });
 
-  it("apiQuote returns the parsed quote", async () => {
+  it("apiQuote renvoie la citation parsée", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -307,7 +307,7 @@ describe("authApi", () => {
     });
   });
 
-  it("apiQuote throws when the payload is invalid", async () => {
+  it("apiQuote lance une erreur quand la réponse est invalide", async () => {
     vi.stubGlobal(
       "fetch",
       vi
@@ -318,7 +318,7 @@ describe("authApi", () => {
     await expect(apiQuote()).rejects.toThrow("Invalid quote payload");
   });
 
-  it("apiQuote throws when the payload is not an object", async () => {
+  it("apiQuote lance une erreur quand la réponse n’est pas un objet", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(makeResponse({ ok: true, text: '"hello"' })),
@@ -327,7 +327,7 @@ describe("authApi", () => {
     await expect(apiQuote()).rejects.toThrow("Invalid JSON payload");
   });
 
-  it("apiQuote falls back to the default error when the body is malformed", async () => {
+  it("apiQuote utilise l’erreur par défaut quand le corps est mal formé", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -339,11 +339,11 @@ describe("authApi", () => {
     );
 
     await expect(apiQuote()).rejects.toThrow(
-      "Erreur lors de la r\u00e9cup\u00e9ration de la citation",
+      "Erreur lors de la récupération de la citation",
     );
   });
 
-  it("apiQuotesList builds the query and returns the parsed page", async () => {
+  it("apiQuotesList construit la requête et renvoie la page parsée", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       makeResponse({
         ok: true,
@@ -374,7 +374,7 @@ describe("authApi", () => {
     );
   });
 
-  it("apiQuotesList throws when the paginated payload is invalid", async () => {
+  it("apiQuotesList lance une erreur quand la réponse paginée est invalide", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -388,7 +388,7 @@ describe("authApi", () => {
     await expect(apiQuotesList()).rejects.toThrow("Invalid quotes payload");
   });
 
-  it("apiQuotesCreate posts the payload and returns the created quote", async () => {
+  it("apiQuotesCreate envoie la charge utile et renvoie la citation créée", async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(
@@ -410,7 +410,7 @@ describe("authApi", () => {
     });
   });
 
-  it("apiQuotesCreate throws when the created quote payload is invalid", async () => {
+  it("apiQuotesCreate lance une erreur quand la citation créée est invalide", async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(
@@ -430,7 +430,7 @@ describe("authApi", () => {
     );
   });
 
-  it("apiQuotesCreate falls back to the default error when the body is malformed", async () => {
+  it("apiQuotesCreate utilise l’erreur par défaut quand le corps est mal formé", async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(
@@ -450,7 +450,7 @@ describe("authApi", () => {
     );
   });
 
-  it("apiQuotesUpdate returns the updated quote", async () => {
+  it("apiQuotesUpdate renvoie la citation mise à jour", async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(
@@ -475,7 +475,7 @@ describe("authApi", () => {
     });
   });
 
-  it("apiQuotesUpdate throws when the updated quote payload is invalid", async () => {
+  it("apiQuotesUpdate lance une erreur quand la citation mise à jour est invalide", async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(
@@ -495,7 +495,7 @@ describe("authApi", () => {
     );
   });
 
-  it("apiQuotesDelete throws with the response message", async () => {
+  it("apiQuotesDelete lance une erreur avec le message de la réponse", async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(
@@ -513,7 +513,7 @@ describe("authApi", () => {
     await expect(apiQuotesDelete(1)).rejects.toThrow("Delete failed");
   });
 
-  it("apiQuotesDelete falls back to the default error when the body is malformed", async () => {
+  it("apiQuotesDelete utilise l’erreur par défaut quand le corps est mal formé", async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(
@@ -533,7 +533,7 @@ describe("authApi", () => {
     );
   });
 
-  it("apiAdminUsers logs and throws when the request fails", async () => {
+  it("apiAdminUsers journalise puis lance une erreur quand la requête échoue", async () => {
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     vi.stubGlobal(
@@ -552,7 +552,7 @@ describe("authApi", () => {
     expect(errorSpy).toHaveBeenCalled();
   });
 
-  it("apiAdminUsers returns the parsed users", async () => {
+  it("apiAdminUsers renvoie les utilisateurs parsés", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -575,7 +575,7 @@ describe("authApi", () => {
     ]);
   });
 
-  it("apiAdminUsers throws when the success payload is invalid", async () => {
+  it("apiAdminUsers lance une erreur quand la réponse de succès est invalide", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -591,7 +591,7 @@ describe("authApi", () => {
     );
   });
 
-  it("apiAdminRoles returns the parsed roles", async () => {
+  it("apiAdminRoles renvoie les rôles parsés", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -607,7 +607,7 @@ describe("authApi", () => {
     ]);
   });
 
-  it("apiAdminRoles logs and throws when the payload is invalid", async () => {
+  it("apiAdminRoles journalise puis lance une erreur quand la requête échoue", async () => {
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     vi.stubGlobal(
@@ -626,7 +626,7 @@ describe("authApi", () => {
     expect(errorSpy).toHaveBeenCalled();
   });
 
-  it("apiAdminRoles throws when the success payload is invalid", async () => {
+  it("apiAdminRoles lance une erreur quand la réponse de succès est invalide", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -642,7 +642,7 @@ describe("authApi", () => {
     );
   });
 
-  it("apiAdminUpdateRole posts the payload and returns the updated user", async () => {
+  it("apiAdminUpdateRole envoie la charge utile et renvoie l’utilisateur mis à jour", async () => {
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const fetchMock = vi
       .fn()
@@ -669,7 +669,7 @@ describe("authApi", () => {
     expect(errorSpy).not.toHaveBeenCalled();
   });
 
-  it("apiAdminUpdateRole logs and throws on failure", async () => {
+  it("apiAdminUpdateRole journalise puis lance une erreur en cas d’échec", async () => {
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const fetchMock = vi
       .fn()
@@ -691,7 +691,7 @@ describe("authApi", () => {
     expect(errorSpy).toHaveBeenCalled();
   });
 
-  it("apiAdminUpdateRole throws when the updated user payload is invalid", async () => {
+  it("apiAdminUpdateRole lance une erreur quand la réponse de l’utilisateur mis à jour est invalide", async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(

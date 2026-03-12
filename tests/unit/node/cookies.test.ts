@@ -22,7 +22,7 @@ describe("getCookieValue", () => {
     expect(getCookieValue("a=1; sid=abc; sid2=def", "sid2")).toBe("def");
   });
 
-  it("decode les valeurs encodées", () => {
+  it("décode les valeurs encodées", () => {
     expect(getCookieValue("name=Jean%20Claude; x=1", "name")).toBe(
       "Jean Claude",
     );

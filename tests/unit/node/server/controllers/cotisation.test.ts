@@ -1,7 +1,7 @@
-import { describe, it, expect, vi } from "vitest";
 import type { NextFunction } from "express";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { describe, expect, it, vi } from "vitest";
 
 type Fn = ReturnType<typeof vi.fn>;
 
@@ -146,8 +146,8 @@ async function load(opts?: {
   };
 }
 
-describe("cotisation controllers", () => {
-  it("createCotisation: 400 si userID invalide", async () => {
+describe("controllers cotisation", () => {
+  it("createCotisation retourne 400 si userID est invalide", async () => {
     const { createCotisation, makeReqCreate, makeResCreate } = await load();
 
     const req = makeReqCreate({ params: { userID: "0" }, body: {} });
@@ -163,7 +163,7 @@ describe("cotisation controllers", () => {
     });
   });
 
-  it("createCotisation: 400 si amountCents invalide", async () => {
+  it("createCotisation retourne 400 si amountCents est invalide", async () => {
     const { createCotisation, makeReqCreate, makeResCreate } = await load();
 
     const req = makeReqCreate({
@@ -182,7 +182,7 @@ describe("cotisation controllers", () => {
     });
   });
 
-  it("createCotisation: 400 si paidAt invalide", async () => {
+  it("createCotisation retourne 400 si paidAt est invalide", async () => {
     const { createCotisation, makeReqCreate, makeResCreate } = await load();
 
     const req = makeReqCreate({
@@ -201,7 +201,7 @@ describe("cotisation controllers", () => {
     });
   });
 
-  it("createCotisation: 400 si body n'est pas un record", async () => {
+  it("createCotisation retourne 400 si body n’est pas un objet exploitable", async () => {
     const { createCotisation, makeReqCreate, makeResCreate } = await load();
 
     const req = makeReqCreate({
@@ -220,7 +220,7 @@ describe("cotisation controllers", () => {
     });
   });
 
-  it("createCotisation: 400 si paidAt est un Date invalide", async () => {
+  it("createCotisation retourne 400 si paidAt est une Date invalide", async () => {
     const { createCotisation, makeReqCreate, makeResCreate } = await load();
 
     const req = makeReqCreate({
@@ -239,7 +239,7 @@ describe("cotisation controllers", () => {
     });
   });
 
-  it("createCotisation: 400 si paidAt number est invalide", async () => {
+  it("createCotisation retourne 400 si paidAt est un nombre invalide", async () => {
     const { createCotisation, makeReqCreate, makeResCreate } = await load();
 
     const req = makeReqCreate({
@@ -258,7 +258,7 @@ describe("cotisation controllers", () => {
     });
   });
 
-  it("createCotisation: 400 si paidAt string est invalide", async () => {
+  it("createCotisation retourne 400 si paidAt est une chaîne invalide", async () => {
     const { createCotisation, makeReqCreate, makeResCreate } = await load();
 
     const req = makeReqCreate({
@@ -277,7 +277,7 @@ describe("cotisation controllers", () => {
     });
   });
 
-  it("createCotisation: 201 + payload si ok", async () => {
+  it("createCotisation retourne 201 avec le payload attendu", async () => {
     const { createCotisation, makeReqCreate, makeResCreate, mocks } =
       await load({
         createPaidCotisationResult: {
@@ -305,7 +305,7 @@ describe("cotisation controllers", () => {
     expect(json).toHaveBeenCalled();
   });
 
-  it("createCotisation: accepte paidAt Date valide", async () => {
+  it("createCotisation accepte un paidAt de type Date valide", async () => {
     const { createCotisation, makeReqCreate, makeResCreate, mocks } =
       await load({
         createPaidCotisationResult: {
@@ -337,7 +337,7 @@ describe("cotisation controllers", () => {
     expect(status).toHaveBeenCalledWith(201);
   });
 
-  it("createCotisation: accepte paidAt number", async () => {
+  it("createCotisation accepte un paidAt de type number", async () => {
     const { createCotisation, makeReqCreate, makeResCreate, mocks } =
       await load({
         createPaidCotisationResult: {
@@ -369,7 +369,7 @@ describe("cotisation controllers", () => {
     expect(status).toHaveBeenCalledWith(201);
   });
 
-  it("createCotisation: accepte paidAt string ISO", async () => {
+  it("createCotisation accepte un paidAt de type chaîne ISO", async () => {
     const { createCotisation, makeReqCreate, makeResCreate, mocks } =
       await load({
         createPaidCotisationResult: {
@@ -400,7 +400,7 @@ describe("cotisation controllers", () => {
     expect(status).toHaveBeenCalledWith(201);
   });
 
-  it("createCotisation: next(err) si erreur", async () => {
+  it("createCotisation transmet l’erreur à next en cas d’échec", async () => {
     const err = new Error("boom");
     const { createCotisation, makeReqCreate, makeResCreate } = await load({
       createPaidCotisationReject: err,
@@ -418,7 +418,7 @@ describe("cotisation controllers", () => {
     expect(next).toHaveBeenCalledWith(err);
   });
 
-  it("getCotisationStatus: 400 si userID invalide", async () => {
+  it("getCotisationStatus retourne 400 si userID est invalide", async () => {
     const { getCotisationStatus, makeReqStatus, makeResStatus } = await load();
 
     const req = makeReqStatus({ params: { userID: "NaN" } });
@@ -434,7 +434,7 @@ describe("cotisation controllers", () => {
     });
   });
 
-  it("getCotisationStatus: 200 + status", async () => {
+  it("getCotisationStatus retourne 200 avec le statut d’adhésion", async () => {
     const { getCotisationStatus, makeReqStatus, makeResStatus, mocks } =
       await load({
         getMembershipStatusResult: { isMember: false },
@@ -451,7 +451,7 @@ describe("cotisation controllers", () => {
     expect(json).toHaveBeenCalledWith({ isMember: false });
   });
 
-  it("getCotisationStatus: next(err) si erreur", async () => {
+  it("getCotisationStatus transmet l’erreur à next en cas d’échec", async () => {
     const err = new Error("boom");
     const { getCotisationStatus, makeReqStatus, makeResStatus } = await load({
       getMembershipStatusReject: err,
@@ -466,7 +466,7 @@ describe("cotisation controllers", () => {
     expect(next).toHaveBeenCalledWith(err);
   });
 
-  it("listCotisations: 200 + items", async () => {
+  it("listCotisations retourne 200 avec la liste des cotisations", async () => {
     const { listCotisations, makeReqList, makeResList, mocks } = await load({
       findAllResult: [{ cotisationID: 1 }, { cotisationID: 2 }],
     });
@@ -485,7 +485,7 @@ describe("cotisation controllers", () => {
     ]);
   });
 
-  it("listCotisations: 400 si userID invalide", async () => {
+  it("listCotisations retourne 400 si userID est invalide", async () => {
     const { listCotisations, makeReqList, makeResList, mocks } = await load();
 
     const req = makeReqList({ params: { userID: "NaN" } });
@@ -502,7 +502,7 @@ describe("cotisation controllers", () => {
     expect(mocks.Cotisation.findAll).not.toHaveBeenCalled();
   });
 
-  it("listCotisations: next(err) si erreur", async () => {
+  it("listCotisations transmet l’erreur à next en cas d’échec", async () => {
     const err = new Error("boom");
     const { listCotisations, makeReqList, makeResList } = await load({
       findAllReject: err,

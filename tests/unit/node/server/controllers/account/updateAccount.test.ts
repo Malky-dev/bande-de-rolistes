@@ -153,7 +153,7 @@ describe("controllerUpdateAccount", () => {
     });
   });
 
-  it("200: update nickname (trim) + save + payload", async () => {
+  it("200 si le nickname est mis à jour avec trim, save et payload", async () => {
     const user = {
       userID: 7,
       nickname: "Neo",
@@ -190,7 +190,7 @@ describe("controllerUpdateAccount", () => {
     });
   });
 
-  it("200: nickname absent => save + payload inchangé", async () => {
+  it("200 si nickname absent avec save et payload inchangé", async () => {
     const user = {
       userID: 7,
       nickname: "Neo",

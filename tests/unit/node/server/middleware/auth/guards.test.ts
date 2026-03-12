@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { makeReq, makeRes, makeNext } from "@/../tests/helpers/express";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { makeNext, makeReq, makeRes } from "@/../tests/helpers/express";
 
 vi.mock("@/server/middleware/auth/requireAuth", () => ({
   default: vi.fn((_req: any, _res: any, next: any) => next()),
@@ -7,16 +8,16 @@ vi.mock("@/server/middleware/auth/requireAuth", () => ({
 
 import requireAuth from "@/server/middleware/auth/requireAuth";
 import {
-  requireRole,
   requireAdmin,
-  requireStaff,
-  requireAdminOrOwner,
-  requireCreateRpgTable,
   requireAdminOrOrga,
   requireAdminOrOrgaOrOwnerRpgTable,
+  requireAdminOrOwner,
+  requireCreateRpgTable,
+  requireRole,
+  requireStaff,
 } from "@/server/middleware/auth/guards";
 
-describe("auth guards", () => {
+describe("guards auth", () => {
   const requireAuthMock = vi.mocked(requireAuth);
 
   beforeEach(() => {
@@ -24,7 +25,7 @@ describe("auth guards", () => {
   });
 
   describe("requireRole", () => {
-    it("403 si le rôle ne correspond pas", () => {
+    it("retourne 403 si le rôle ne correspond pas", () => {
       const mw = requireRole("admin");
 
       const req = makeReq({
@@ -48,7 +49,7 @@ describe("auth guards", () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it("next si le rôle correspond", () => {
+    it("appelle next si le rôle correspond", () => {
       const mw = requireRole("admin");
 
       const req = makeReq({
@@ -71,7 +72,7 @@ describe("auth guards", () => {
   });
 
   describe("requireAdmin", () => {
-    it("403 si pas admin", () => {
+    it("retourne 403 si l’utilisateur n’est pas admin", () => {
       const mw = requireAdmin();
 
       const req = makeReq({
@@ -94,7 +95,7 @@ describe("auth guards", () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it("next si admin", () => {
+    it("appelle next si l’utilisateur est admin", () => {
       const mw = requireAdmin();
 
       const req = makeReq({
@@ -116,7 +117,7 @@ describe("auth guards", () => {
   });
 
   describe("requireStaff", () => {
-    it("403 si ni admin ni organisator", () => {
+    it("retourne 403 si l’utilisateur n’est ni admin ni organisateur", () => {
       const mw = requireStaff();
 
       const req = makeReq({
@@ -139,7 +140,7 @@ describe("auth guards", () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it("403 si roleID est absent ou invalide", () => {
+    it("retourne 403 si roleID est absent ou invalide", () => {
       const mw = requireStaff();
 
       const req = makeReq({
@@ -162,7 +163,7 @@ describe("auth guards", () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it("next si admin", () => {
+    it("appelle next si l’utilisateur est admin", () => {
       const mw = requireStaff();
 
       const req = makeReq({
@@ -180,7 +181,7 @@ describe("auth guards", () => {
       expect(next).toHaveBeenCalledTimes(1);
     });
 
-    it("next si organisator", () => {
+    it("appelle next si l’utilisateur est organisateur", () => {
       const mw = requireStaff();
 
       const req = makeReq({
@@ -200,7 +201,7 @@ describe("auth guards", () => {
   });
 
   describe("requireAdminOrOwner", () => {
-    it("400 si param userID invalide (non entier / <= 0)", () => {
+    it("retourne 400 si le paramètre userID est invalide", () => {
       const mw = requireAdminOrOwner();
 
       const req = makeReq({
@@ -224,7 +225,7 @@ describe("auth guards", () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it("401 si userID de session n'est pas un number", () => {
+    it("retourne 401 si le userID de session n’est pas un nombre", () => {
       const mw = requireAdminOrOwner();
 
       const req = makeReq({
@@ -248,7 +249,7 @@ describe("auth guards", () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it("403 si ni admin ni owner", () => {
+    it("retourne 403 si l’utilisateur n’est ni admin ni propriétaire", () => {
       const mw = requireAdminOrOwner();
 
       const req = makeReq({
@@ -272,7 +273,7 @@ describe("auth guards", () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it("next si admin (même si pas owner)", () => {
+    it("appelle next si l’utilisateur est admin même s’il n’est pas propriétaire", () => {
       const mw = requireAdminOrOwner();
 
       const req = makeReq({
@@ -293,7 +294,7 @@ describe("auth guards", () => {
       expect(res.json).not.toHaveBeenCalled();
     });
 
-    it("next si owner (même si pas admin)", () => {
+    it("appelle next si l’utilisateur est propriétaire même s’il n’est pas admin", () => {
       const mw = requireAdminOrOwner();
 
       const req = makeReq({
@@ -314,7 +315,7 @@ describe("auth guards", () => {
       expect(res.json).not.toHaveBeenCalled();
     });
 
-    it("utilise le paramName custom", () => {
+    it("utilise le nom de paramètre personnalisé", () => {
       const mw = requireAdminOrOwner("id");
 
       const req = makeReq({
@@ -335,7 +336,7 @@ describe("auth guards", () => {
   });
 
   describe("requireCreateRpgTable", () => {
-    it("403 si rôle pas dans 1, 2 ou 3", () => {
+    it("retourne 403 si le rôle n’est ni 1, ni 2, ni 3", () => {
       const mw = requireCreateRpgTable();
 
       const req = makeReq({
@@ -358,7 +359,7 @@ describe("auth guards", () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it("403 si roleID n'est pas un number", () => {
+    it("retourne 403 si roleID n’est pas un nombre", () => {
       const mw = requireCreateRpgTable();
 
       const req = makeReq({
@@ -381,7 +382,7 @@ describe("auth guards", () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it("next si rôle 3", () => {
+    it("appelle next si le rôle est 3", () => {
       const mw = requireCreateRpgTable();
 
       const req = makeReq({
@@ -400,7 +401,7 @@ describe("auth guards", () => {
       expect(res.status).not.toHaveBeenCalled();
     });
 
-    it("next si rôle 1", () => {
+    it("appelle next si le rôle est 1", () => {
       const mw = requireCreateRpgTable();
 
       const req = makeReq({
@@ -418,7 +419,7 @@ describe("auth guards", () => {
       expect(next).toHaveBeenCalledTimes(1);
     });
 
-    it("next si rôle 2", () => {
+    it("appelle next si le rôle est 2", () => {
       const mw = requireCreateRpgTable();
 
       const req = makeReq({
@@ -438,7 +439,7 @@ describe("auth guards", () => {
   });
 
   describe("requireAdminOrOrga", () => {
-    it("403 si ni admin ni organisator", () => {
+    it("retourne 403 si l’utilisateur n’est ni admin ni organisateur", () => {
       const mw = requireAdminOrOrga();
 
       const req = makeReq({
@@ -461,7 +462,7 @@ describe("auth guards", () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it("next si admin", () => {
+    it("appelle next si l’utilisateur est admin", () => {
       const mw = requireAdminOrOrga();
 
       const req = makeReq({
@@ -479,7 +480,7 @@ describe("auth guards", () => {
       expect(next).toHaveBeenCalledTimes(1);
     });
 
-    it("next si organisator", () => {
+    it("appelle next si l’utilisateur est organisateur", () => {
       const mw = requireAdminOrOrga();
 
       const req = makeReq({
@@ -499,7 +500,7 @@ describe("auth guards", () => {
   });
 
   describe("requireAdminOrOrgaOrOwnerRpgTable", () => {
-    it("401 si userID de session n'est pas un number", () => {
+    it("retourne 401 si le userID de session n’est pas un nombre", () => {
       const getOwnerUserID = vi.fn().mockReturnValue(7);
       const mw = requireAdminOrOrgaOrOwnerRpgTable(getOwnerUserID);
 
@@ -524,7 +525,7 @@ describe("auth guards", () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it("next si admin", () => {
+    it("appelle next si l’utilisateur est admin", () => {
       const getOwnerUserID = vi.fn().mockReturnValue(99);
       const mw = requireAdminOrOrgaOrOwnerRpgTable(getOwnerUserID);
 
@@ -544,7 +545,7 @@ describe("auth guards", () => {
       expect(getOwnerUserID).not.toHaveBeenCalled();
     });
 
-    it("next si organisator", () => {
+    it("appelle next si l’utilisateur est organisateur", () => {
       const getOwnerUserID = vi.fn().mockReturnValue(99);
       const mw = requireAdminOrOrgaOrOwnerRpgTable(getOwnerUserID);
 
@@ -564,7 +565,7 @@ describe("auth guards", () => {
       expect(getOwnerUserID).not.toHaveBeenCalled();
     });
 
-    it("403 si rôle différent de 3 pour un non admin/non orga", () => {
+    it("retourne 403 si le rôle est différent de 3 pour un utilisateur ni admin ni organisateur", () => {
       const getOwnerUserID = vi.fn().mockReturnValue(7);
       const mw = requireAdminOrOrgaOrOwnerRpgTable(getOwnerUserID);
 
@@ -589,7 +590,7 @@ describe("auth guards", () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it("403 si rôle 3 mais pas owner", () => {
+    it("retourne 403 si le rôle est 3 mais que l’utilisateur n’est pas propriétaire", () => {
       const getOwnerUserID = vi.fn().mockReturnValue(99);
       const mw = requireAdminOrOrgaOrOwnerRpgTable(getOwnerUserID);
 
@@ -614,7 +615,7 @@ describe("auth guards", () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it("403 si ownerUserID est null", () => {
+    it("retourne 403 si ownerUserID est null", () => {
       const getOwnerUserID = vi.fn().mockReturnValue(null);
       const mw = requireAdminOrOrgaOrOwnerRpgTable(getOwnerUserID);
 
@@ -639,7 +640,7 @@ describe("auth guards", () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it("next si rôle 3 et owner", () => {
+    it("appelle next si le rôle est 3 et que l’utilisateur est propriétaire", () => {
       const getOwnerUserID = vi.fn().mockReturnValue(7);
       const mw = requireAdminOrOrgaOrOwnerRpgTable(getOwnerUserID);
 

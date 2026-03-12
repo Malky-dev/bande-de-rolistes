@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { createRouterMock } from "./_routerMock";
 
 const router = createRouterMock();
@@ -22,7 +23,7 @@ vi.mock("@/server/controllers/discord", () => ({
 const requestLimiter = vi.fn();
 vi.mock("@/server/middleware/rateLimit", () => ({ requestLimiter }));
 
-describe("routes/discord", () => {
+describe("routes discord", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     router.get.mockClear();

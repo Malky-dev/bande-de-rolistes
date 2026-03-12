@@ -29,7 +29,7 @@ describe("QuotesPanel", () => {
     vi.unstubAllGlobals();
   });
 
-  it("quotes helper functions compute page windows and labels", () => {
+  it("calcule les fenêtres de pagination et les libellés des citations", () => {
     expect(buildQuotesPageWindow(5, 10)).toEqual([2, 3, 4, 5, 6, 7, 8]);
     expect(buildQuotesPageWindow(1, 2)).toEqual([1, 2]);
     expect(getQuotesRangeLabel(1, 0, 10)).toBe("0-0 / 0");
@@ -38,7 +38,7 @@ describe("QuotesPanel", () => {
     expect(getQuotesReloadPageAfterDelete(2, 2)).toBe(2);
   });
 
-  it("loads and renders quotes", async () => {
+  it("charge et affiche les citations", async () => {
     vi.mocked(apiQuotesList).mockResolvedValue({
       items: [{ quoteID: 1, content: "Hello", author: "Morpheus" }],
       page: 1,
@@ -55,7 +55,7 @@ describe("QuotesPanel", () => {
     expect(screen.getByText("1-1 / 1")).toBeInTheDocument();
   });
 
-  it("shows the loading error", async () => {
+  it("affiche l’erreur de chargement", async () => {
     vi.mocked(apiQuotesList).mockRejectedValue(new Error("Load failed"));
 
     render(<QuotesPanel />);
@@ -65,7 +65,7 @@ describe("QuotesPanel", () => {
     });
   });
 
-  it("shows the generic loading error for non-Error failures", async () => {
+  it("affiche l’erreur de chargement générique pour les échecs non Error", async () => {
     vi.mocked(apiQuotesList).mockRejectedValue("boom");
 
     render(<QuotesPanel />);
@@ -75,7 +75,7 @@ describe("QuotesPanel", () => {
     });
   });
 
-  it("creates a quote and reloads page one", async () => {
+  it("crée une citation et recharge la première page", async () => {
     vi.mocked(apiQuotesList)
       .mockResolvedValueOnce({
         items: [],
@@ -124,7 +124,7 @@ describe("QuotesPanel", () => {
     fireEvent.click(screen.getByRole("button", { name: "Ajouter" }));
 
     await waitFor(() => {
-      expect(screen.getByText("Citation ajout\u00e9e")).toBeInTheDocument();
+      expect(screen.getByText("Citation ajoutée")).toBeInTheDocument();
     });
     expect(apiQuotesCreate).toHaveBeenCalledWith({
       content: "Hello",
@@ -133,7 +133,7 @@ describe("QuotesPanel", () => {
     expect(apiQuotesList).toHaveBeenLastCalledWith(1, 10, "");
   });
 
-  it("reloads the current page when clicking actualiser", async () => {
+  it("recharge la page courante au clic sur actualiser", async () => {
     vi.mocked(apiQuotesList)
       .mockResolvedValueOnce({
         items: [{ quoteID: 1, content: "Hello", author: "Morpheus" }],
@@ -163,7 +163,7 @@ describe("QuotesPanel", () => {
     });
   });
 
-  it("shows generic fallback messages for non-Error create, update, and delete failures", async () => {
+  it("affiche les messages génériques de secours pour les échecs non Error en création, mise à jour et suppression", async () => {
     vi.mocked(apiQuotesList).mockResolvedValue({
       items: [{ quoteID: 1, content: "Hello", author: "Morpheus" }],
       page: 1,
@@ -180,7 +180,7 @@ describe("QuotesPanel", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole("button", { name: "\u00c9diter" }),
+        screen.getByRole("button", { name: "Éditer" }),
       ).toBeInTheDocument();
     });
 
@@ -207,7 +207,7 @@ describe("QuotesPanel", () => {
       expect(screen.getByText("Erreur suppression")).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "\u00c9diter" }));
+    fireEvent.click(screen.getByRole("button", { name: "Éditer" }));
     fireEvent.click(screen.getByRole("button", { name: "Enregistrer" }));
 
     await waitFor(() => {
@@ -215,7 +215,7 @@ describe("QuotesPanel", () => {
     });
   });
 
-  it("searches and resets the query", async () => {
+  it("recherche puis réinitialise la requête", async () => {
     vi.mocked(apiQuotesList).mockResolvedValue({
       items: [],
       page: 1,
@@ -246,7 +246,7 @@ describe("QuotesPanel", () => {
     });
   });
 
-  it("edits a quote and handles update errors", async () => {
+  it("modifie une citation et gère les erreurs de mise à jour", async () => {
     vi.mocked(apiQuotesList)
       .mockResolvedValueOnce({
         items: [{ quoteID: 1, content: "Hello", author: "Morpheus" }],
@@ -272,11 +272,11 @@ describe("QuotesPanel", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole("button", { name: "\u00c9diter" }),
+        screen.getByRole("button", { name: "Éditer" }),
       ).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "\u00c9diter" }));
+    fireEvent.click(screen.getByRole("button", { name: "Éditer" }));
     fireEvent.change(screen.getByDisplayValue("Hello"), {
       target: { value: "Updated" },
     });
@@ -295,7 +295,7 @@ describe("QuotesPanel", () => {
     vi.mocked(apiQuotesUpdate).mockRejectedValueOnce(
       new Error("Update failed"),
     );
-    fireEvent.click(screen.getByRole("button", { name: "\u00c9diter" }));
+    fireEvent.click(screen.getByRole("button", { name: "Éditer" }));
     fireEvent.click(screen.getByRole("button", { name: "Enregistrer" }));
 
     await waitFor(() => {
@@ -303,7 +303,7 @@ describe("QuotesPanel", () => {
     });
   });
 
-  it("deletes a quote when confirmed and keeps it when the confirm dialog is cancelled", async () => {
+  it("supprime une citation après confirmation et la conserve si la boîte de confirmation est annulée", async () => {
     vi.mocked(apiQuotesList)
       .mockResolvedValueOnce({
         items: [{ quoteID: 1, content: "Hello", author: "Morpheus" }],
@@ -340,7 +340,7 @@ describe("QuotesPanel", () => {
     expect(apiQuotesList).toHaveBeenLastCalledWith(1, 10, "");
   });
 
-  it("shows the delete error when deletion fails", async () => {
+  it("affiche l’erreur de suppression quand la suppression échoue", async () => {
     vi.mocked(apiQuotesList).mockResolvedValue({
       items: [{ quoteID: 1, content: "Hello", author: "Morpheus" }],
       page: 1,
@@ -366,7 +366,7 @@ describe("QuotesPanel", () => {
     });
   });
 
-  it("cancels edit and supports pagination shortcuts", async () => {
+  it("annule l’édition et gère les raccourcis de pagination", async () => {
     vi.mocked(apiQuotesList)
       .mockResolvedValueOnce({
         items: [{ quoteID: 11, content: "Hello", author: "Morpheus" }],
@@ -387,16 +387,16 @@ describe("QuotesPanel", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole("button", { name: "\u00c9diter" }),
+        screen.getByRole("button", { name: "Éditer" }),
       ).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "\u00c9diter" }));
+    fireEvent.click(screen.getByRole("button", { name: "Éditer" }));
     fireEvent.change(screen.getByDisplayValue("Hello"), {
       target: { value: "Changed" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Annuler" }));
-    fireEvent.click(screen.getByRole("button", { name: "\u00c9diter" }));
+    fireEvent.click(screen.getByRole("button", { name: "Éditer" }));
 
     expect(screen.getByDisplayValue("Hello")).toBeInTheDocument();
 
@@ -406,7 +406,7 @@ describe("QuotesPanel", () => {
     });
   });
 
-  it("supports previous, next, and last-page pagination controls", async () => {
+  it("gère les contrôles de pagination précédent, suivant et dernière page", async () => {
     vi.mocked(apiQuotesList)
       .mockResolvedValueOnce({
         items: [{ quoteID: 11, content: "Hello", author: "Morpheus" }],
@@ -436,7 +436,7 @@ describe("QuotesPanel", () => {
       expect(screen.getByText("41-50 / 100")).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "\u25c0" }));
+    fireEvent.click(screen.getByRole("button", { name: "◀" }));
     await waitFor(() => {
       expect(apiQuotesList).toHaveBeenLastCalledWith(4, 10, "");
     });
@@ -447,7 +447,7 @@ describe("QuotesPanel", () => {
     });
   });
 
-  it("navigates to a non-current page inside the page window and then to the next page", async () => {
+  it("navigue vers une page non courante dans la fenêtre puis vers la page suivante", async () => {
     vi.mocked(apiQuotesList)
       .mockResolvedValueOnce({
         items: [{ quoteID: 11, content: "Hello", author: "Morpheus" }],
@@ -477,7 +477,7 @@ describe("QuotesPanel", () => {
       expect(screen.getByText("41-50 / 100")).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "\u25b6" }));
+    fireEvent.click(screen.getByRole("button", { name: "▶" }));
     await waitFor(() => {
       expect(apiQuotesList).toHaveBeenLastCalledWith(6, 10, "");
     });

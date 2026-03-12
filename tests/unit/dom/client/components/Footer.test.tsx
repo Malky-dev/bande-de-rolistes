@@ -1,29 +1,25 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import Footer from "@/client/components/Footer";
-import { fireEvent } from "@testing-library/react";
+import { apiQuote } from "@/api/authApi";
 
 vi.mock("@/api/authApi", () => ({
   apiQuote: vi.fn(),
 }));
 
-import { apiQuote } from "@/api/authApi";
-
 describe("Footer", () => {
-  const onChangeView = vi.fn();
-
   afterEach(() => {
     vi.clearAllMocks();
   });
 
-  it("renders the quote from the API", async () => {
+  it("affiche la citation renvoyée par l’API", async () => {
     vi.mocked(apiQuote).mockResolvedValue({
       content: "Wake up, Neo.",
       author: "Morpheus",
     });
 
-    render(<Footer onChangeView={onChangeView} />);
+    render(<Footer onChangeView={vi.fn()} />);
 
     await waitFor(() => {
       expect(screen.getByText(/Wake up, Neo\./i)).toBeInTheDocument();
@@ -31,28 +27,28 @@ describe("Footer", () => {
     expect(screen.getByText(/Morpheus/i)).toBeInTheDocument();
   });
 
-  it("renders the fallback quote when the API fails", async () => {
+  it("affiche la citation de secours quand l’API échoue", async () => {
     vi.mocked(apiQuote).mockRejectedValue(new Error("boom"));
 
-    render(<Footer onChangeView={onChangeView} />);
+    render(<Footer onChangeView={vi.fn()} />);
 
     await waitFor(() => {
       expect(
-        screen.getByText(/Tout \u00e7a n'est qu'une farce\./i),
+        screen.getByText(/Tout ça n'est qu'une farce\./i),
       ).toBeInTheDocument();
     });
   });
 
-  it("renders the quote without an author suffix when the author is empty", async () => {
+  it("affiche la citation sans suffixe d’auteur quand l’auteur est vide", async () => {
     vi.mocked(apiQuote).mockResolvedValue({
       content: "Wake up, Neo.",
       author: "",
     });
 
-    render(<Footer onChangeView={onChangeView} />);
+    render(<Footer onChangeView={vi.fn()} />);
 
     await waitFor(() => {
-      expect(screen.getByText(/\u00ab Wake up, Neo\./i)).toBeInTheDocument();
+      expect(screen.getByText(/« Wake up, Neo\./i)).toBeInTheDocument();
     });
     expect(screen.queryByText(/Wake up, Neo\..*Morpheus/i)).toBeNull();
   });
@@ -70,7 +66,7 @@ describe("Footer", () => {
     expect(onChangeView).toHaveBeenCalledWith("rules");
   });
 
-  it("ignores a late quote response after unmount", async () => {
+  it("ignore une réponse tardive de citation après le démontage", async () => {
     let resolveQuote:
       | ((value: { content: string; author: string }) => void)
       | undefined;
@@ -82,7 +78,7 @@ describe("Footer", () => {
         }),
     );
 
-    const { unmount } = render(<Footer onChangeView={onChangeView} />);
+    const { unmount } = render(<Footer onChangeView={vi.fn()} />);
 
     unmount();
     resolveQuote?.({ content: "Late quote", author: "Ghost" });
@@ -92,7 +88,7 @@ describe("Footer", () => {
     });
   });
 
-  it("ignores a late quote failure after unmount", async () => {
+  it("ignore un échec tardif de citation après le démontage", async () => {
     let rejectQuote: ((reason?: unknown) => void) | undefined;
 
     vi.mocked(apiQuote).mockImplementation(
@@ -102,7 +98,7 @@ describe("Footer", () => {
         }),
     );
 
-    const { unmount } = render(<Footer onChangeView={onChangeView} />);
+    const { unmount } = render(<Footer onChangeView={vi.fn()} />);
 
     unmount();
     rejectQuote?.(new Error("boom"));

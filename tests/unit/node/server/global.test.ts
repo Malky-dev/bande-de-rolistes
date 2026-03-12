@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 
-describe("server/global", () => {
-  it("hashPassword + comparePassword utilisent bcrypt", async () => {
+describe("utilitaires globaux serveur", () => {
+  it("hashPassword et comparePassword utilisent bcrypt", async () => {
     vi.resetModules();
 
     const bcryptHash = vi.fn().mockResolvedValue("hashed");
@@ -24,7 +24,7 @@ describe("server/global", () => {
     expect(bcryptCompare).toHaveBeenCalled();
   });
 
-  it("generateSessionToken renvoie 64 chars hex", async () => {
+  it("generateSessionToken renvoie 64 caractères hexadécimaux", async () => {
     vi.resetModules();
 
     const mod = await import("@/server/global");

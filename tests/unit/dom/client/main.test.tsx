@@ -13,8 +13,8 @@ vi.mock("@/client/App", () => ({
   default: () => <div>App</div>,
 }));
 
-describe("client main", () => {
-  it("mounts the app into the root element", async () => {
+describe("point d’entrée de client", () => {
+  it("monte l’application dans l’élément root", async () => {
     document.body.innerHTML = '<div id="root"></div>';
 
     await import("@/client/main");

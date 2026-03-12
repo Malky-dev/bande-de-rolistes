@@ -15,7 +15,7 @@ import {
   getMembershipStatus,
 } from "@/server/utils/cotisation";
 
-describe("cotisation utils", () => {
+describe("utilitaires de cotisation", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });

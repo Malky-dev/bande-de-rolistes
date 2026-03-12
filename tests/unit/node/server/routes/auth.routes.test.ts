@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { createRouterMock } from "./_routerMock";
 
 const router = createRouterMock();
@@ -24,7 +25,7 @@ const verifyCsrfMw = vi.fn();
 const verifyCsrf = vi.fn(() => verifyCsrfMw);
 vi.mock("@/server/middleware/csrf", () => ({ verifyCsrf }));
 
-describe("routes/auth", () => {
+describe("routes auth", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     router.post.mockClear();

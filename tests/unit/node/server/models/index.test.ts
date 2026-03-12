@@ -1,6 +1,6 @@
-import { describe, expect, it, vi } from "vitest";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { describe, expect, it, vi } from "vitest";
 
 const root = process.cwd();
 
@@ -112,7 +112,7 @@ async function load() {
 }
 
 describe("models index", () => {
-  it("wires associations and re-exports the model symbols", async () => {
+  it("configure les associations et réexporte les symboles des modèles", async () => {
     const { mod, mocks } = await load();
 
     expect(mocks.Role.hasMany).toHaveBeenCalledTimes(1);

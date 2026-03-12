@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from "vitest";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { describe, expect, it, vi } from "vitest";
 
 const root = process.cwd();
 
@@ -107,8 +107,8 @@ async function load(opts?: {
   };
 }
 
-describe("controllerGetTable", () => {
-  it("400 si eventID invalide", async () => {
+describe("controller getTable", () => {
+  it("retourne 400 si eventID est invalide", async () => {
     const { controllerGetTable, makeReq, makeTypedRes } = await load({
       parseEventID: null,
     });
@@ -125,7 +125,7 @@ describe("controllerGetTable", () => {
     });
   });
 
-  it("404 si table introuvable", async () => {
+  it("retourne 404 si la table est introuvable", async () => {
     const { controllerGetTable, makeReq, makeTypedRes, mocks } = await load({
       tableFindResult: null,
     });
@@ -141,7 +141,7 @@ describe("controllerGetTable", () => {
     );
   });
 
-  it("500 si table.toJSON pas record", async () => {
+  it("retourne 500 si table.toJSON ne renvoie pas un objet exploitable", async () => {
     const { controllerGetTable, makeReq, makeTypedRes } = await load({
       tableFindResult: makeTable("nope"),
     });
@@ -158,7 +158,7 @@ describe("controllerGetTable", () => {
     });
   });
 
-  it("500 si dungeonMaster pas record", async () => {
+  it("retourne 500 si dungeonMaster n’est pas un objet exploitable", async () => {
     const { controllerGetTable, makeReq, makeTypedRes } = await load({
       tableFindResult: makeTable({ dungeonMaster: "nope" }),
     });
@@ -175,7 +175,7 @@ describe("controllerGetTable", () => {
     });
   });
 
-  it("500 si dungeonMaster userID/nickname invalides", async () => {
+  it("retourne 500 si userID ou nickname du dungeonMaster est invalide", async () => {
     const { controllerGetTable, makeReq, makeTypedRes } = await load({
       tableFindResult: makeTable({
         dungeonMaster: { userID: "7", nickname: 123 },
@@ -194,7 +194,7 @@ describe("controllerGetTable", () => {
     });
   });
 
-  it("500 si eventDate invalide (Date NaN)", async () => {
+  it("retourne 500 si eventDate est invalide avec une Date NaN", async () => {
     const badDate = new Date("invalid");
     const { controllerGetTable, makeReq, makeTypedRes } = await load({
       tableFindResult: makeTable({
@@ -215,7 +215,7 @@ describe("controllerGetTable", () => {
     });
   });
 
-  it("500 si eventDate invalide (string)", async () => {
+  it("retourne 500 si eventDate est invalide sous forme de chaîne", async () => {
     const { controllerGetTable, makeReq, makeTypedRes } = await load({
       tableFindResult: makeTable({
         dungeonMaster: { userID: 1, nickname: "DM" },
@@ -235,7 +235,7 @@ describe("controllerGetTable", () => {
     });
   });
 
-  it("500 si eventID invalide dans table JSON", async () => {
+  it("retourne 500 si eventID est invalide dans le JSON de la table", async () => {
     const { controllerGetTable, makeReq, makeTypedRes } = await load({
       tableFindResult: makeTable({
         dungeonMaster: { userID: 1, nickname: "DM" },
@@ -256,7 +256,7 @@ describe("controllerGetTable", () => {
     });
   });
 
-  it("500 si location/game invalides", async () => {
+  it("retourne 500 si location ou game est invalide", async () => {
     const { controllerGetTable, makeReq, makeTypedRes } = await load({
       tableFindResult: makeTable({
         dungeonMaster: { userID: 1, nickname: "DM" },
@@ -281,7 +281,7 @@ describe("controllerGetTable", () => {
     });
   });
 
-  it("500 si status invalide", async () => {
+  it("retourne 500 si status est invalide", async () => {
     const { controllerGetTable, makeReq, makeTypedRes } = await load({
       tableFindResult: makeTable({
         dungeonMaster: { userID: 1, nickname: "DM" },
@@ -306,7 +306,7 @@ describe("controllerGetTable", () => {
     });
   });
 
-  it("500 si maxPlayers invalide (non-finie)", async () => {
+  it("retourne 500 si maxPlayers est invalide car non fini", async () => {
     const { controllerGetTable, makeReq, makeTypedRes } = await load({
       tableFindResult: makeTable({
         dungeonMaster: { userID: 1, nickname: "DM" },
@@ -331,7 +331,7 @@ describe("controllerGetTable", () => {
     });
   });
 
-  it("200: map signups (continue paths), cap=6, waitlist, comments string", async () => {
+  it("retourne 200 avec les inscriptions mappées, une capacité confirmée de 6, une liste d’attente et des commentaires en chaîne", async () => {
     const signups = [
       makeSignup("bad"),
       makeSignup({}),
@@ -410,7 +410,7 @@ describe("controllerGetTable", () => {
     expect(lastWait.userID).toBe(7);
   });
 
-  it("200: comments null et cap basé sur maxPlayers", async () => {
+  it("retourne 200 avec comments à null et une capacité confirmée basée sur maxPlayers", async () => {
     const signups = [
       makeSignup({
         user: { userID: 1, nickname: "A" },
@@ -462,7 +462,7 @@ describe("controllerGetTable", () => {
     expect(waitlist.length).toBe(1);
   });
 
-  it("200: comments non-string devient null", async () => {
+  it("retourne 200 en convertissant comments à null si ce n’est pas une chaîne", async () => {
     const signups = [
       makeSignup({
         user: { userID: 1, nickname: "A" },
@@ -496,7 +496,7 @@ describe("controllerGetTable", () => {
     expect(payload.comments).toBeNull();
   });
 
-  it("500 si erreur non-Error", async () => {
+  it("retourne 500 avec un message serveur générique si l’erreur n’est pas une Error", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerGetTable, makeReq, makeTypedRes } = await load({
       tableFindReject: "nope",
@@ -516,7 +516,7 @@ describe("controllerGetTable", () => {
     errSpy.mockRestore();
   });
 
-  it("500 si Error(message)", async () => {
+  it("retourne 500 avec le message de l’erreur si une Error est levée", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerGetTable, makeReq, makeTypedRes } = await load({
       signupsFindReject: new Error("boom"),

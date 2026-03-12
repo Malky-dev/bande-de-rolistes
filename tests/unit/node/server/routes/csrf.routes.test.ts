@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { makeNext, makeReq, makeRes } from "@/../tests/helpers/express";
 import { createRouterMock } from "./_routerMock";
-import { makeReq, makeRes, makeNext } from "@/../tests/helpers/express";
 
 const router = createRouterMock();
 
@@ -28,12 +29,12 @@ async function loadHandler() {
   return router.get.mock.calls[0][1] as Function;
 }
 
-describe("routes/csrf", () => {
+describe("routes csrf", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("200: set no-cache headers + renvoie {csrfToken}", async () => {
+  it("retourne 200, définit les en-têtes anti-cache et renvoie { csrfToken }", async () => {
     const handler = await loadHandler();
 
     generateCsrfToken.mockReturnValue("token123");
@@ -57,7 +58,7 @@ describe("routes/csrf", () => {
     expect(res.status).not.toHaveBeenCalled();
   });
 
-  it("500: si generateCsrfToken renvoie un token invalide (empty)", async () => {
+  it("retourne 500 si generateCsrfToken renvoie un token invalide vide", async () => {
     const handler = await loadHandler();
 
     generateCsrfToken.mockReturnValue("");
@@ -80,7 +81,7 @@ describe("routes/csrf", () => {
     errSpy.mockRestore();
   });
 
-  it("500: si generateCsrfToken throw (message Error)", async () => {
+  it("retourne 500 avec le message de l’erreur si generateCsrfToken lève une Error", async () => {
     const handler = await loadHandler();
 
     generateCsrfToken.mockImplementation(() => {
@@ -105,7 +106,7 @@ describe("routes/csrf", () => {
     errSpy.mockRestore();
   });
 
-  it("500: si throw non-Error -> message 'Erreur serveur'", async () => {
+  it("retourne 500 avec un message serveur générique si l’erreur n’est pas une Error", async () => {
     const handler = await loadHandler();
 
     generateCsrfToken.mockImplementation(() => {

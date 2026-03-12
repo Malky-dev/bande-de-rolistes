@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from "vitest";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { describe, expect, it, vi } from "vitest";
 
 const root = process.cwd();
 
@@ -60,8 +60,8 @@ async function load(opts?: {
   return { controllerAdminUsers, makeReq, makeTypedRes, mocks: { User, Role } };
 }
 
-describe("controllerAdminUsers", () => {
-  it("200 json: liste mappée + tri nickname ASC + include role", async () => {
+describe("controller admin users", () => {
+  it("retourne 200 avec la liste des utilisateurs mappée, triée par nickname croissant et avec le rôle inclus", async () => {
     const { controllerAdminUsers, makeReq, makeTypedRes, mocks } = await load({
       findAllResult: [
         {
@@ -114,7 +114,7 @@ describe("controllerAdminUsers", () => {
     ]);
   });
 
-  it('200 json: role manquant => roleLabel "member"', async () => {
+  it("retourne 200 avec roleLabel à 'member' par défaut si le rôle est absent", async () => {
     const { controllerAdminUsers, makeReq, makeTypedRes } = await load({
       findAllResult: [
         {
@@ -145,7 +145,7 @@ describe("controllerAdminUsers", () => {
     ]);
   });
 
-  it("500 si Error(message)", async () => {
+  it("retourne 500 avec le message de l’erreur si une Error est levée", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerAdminUsers, makeReq, makeTypedRes } = await load({
       findAllReject: new Error("boom"),
@@ -162,7 +162,7 @@ describe("controllerAdminUsers", () => {
     errSpy.mockRestore();
   });
 
-  it("500 si erreur non-Error", async () => {
+  it("retourne 500 avec un message serveur générique si l’erreur n’est pas une Error", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerAdminUsers, makeReq, makeTypedRes } = await load({
       findAllReject: "nope",

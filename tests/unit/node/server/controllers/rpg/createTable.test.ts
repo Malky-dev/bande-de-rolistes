@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from "vitest";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { describe, expect, it, vi } from "vitest";
 
 const root = process.cwd();
 
@@ -94,8 +94,8 @@ async function load(opts?: {
   };
 }
 
-describe("controllerCreateTable", () => {
-  it("403 si pas le rôle", async () => {
+describe("controller createTable", () => {
+  it("retourne 403 si l’utilisateur n’a pas le rôle requis", async () => {
     const { controllerCreateTable, makeReq, makeTypedRes, mocks } = await load({
       hasRole: false,
     });
@@ -115,7 +115,7 @@ describe("controllerCreateTable", () => {
     expect(mocks.TableRPG.create).not.toHaveBeenCalled();
   });
 
-  it("401 si pas authentifié (getUserID falsy)", async () => {
+  it("retourne 401 si l’utilisateur n’est pas authentifié", async () => {
     const { controllerCreateTable, makeReq, makeTypedRes } = await load({
       userID: null,
     });
@@ -138,7 +138,7 @@ describe("controllerCreateTable", () => {
     });
   });
 
-  it("400 si eventDate pas string", async () => {
+  it("retourne 400 si eventDate n’est pas une chaîne de caractères", async () => {
     const { controllerCreateTable, makeReq, makeTypedRes, mocks } =
       await load();
 
@@ -155,7 +155,7 @@ describe("controllerCreateTable", () => {
     );
   });
 
-  it("400 si eventDate invalide", async () => {
+  it("retourne 400 si eventDate est invalide", async () => {
     const { controllerCreateTable, makeReq, makeTypedRes, mocks } =
       await load();
 
@@ -172,7 +172,7 @@ describe("controllerCreateTable", () => {
     );
   });
 
-  it("400 si location invalide", async () => {
+  it("retourne 400 si location est invalide", async () => {
     const { controllerCreateTable, makeReq, makeTypedRes, mocks } =
       await load();
 
@@ -193,7 +193,7 @@ describe("controllerCreateTable", () => {
     );
   });
 
-  it("400 si game invalide", async () => {
+  it("retourne 400 si game est invalide", async () => {
     const { controllerCreateTable, makeReq, makeTypedRes, mocks } =
       await load();
 
@@ -214,7 +214,7 @@ describe("controllerCreateTable", () => {
     );
   });
 
-  it("401 si req.user.role.roleID absent", async () => {
+  it("retourne 401 si req.user.role.roleID est absent", async () => {
     const { controllerCreateTable, makeReq, makeTypedRes } = await load({
       roleID: undefined,
     });
@@ -238,7 +238,7 @@ describe("controllerCreateTable", () => {
     });
   });
 
-  it("400 si admin/orga sans dungeonMasterUserID", async () => {
+  it("retourne 400 si un admin ou un organisateur ne fournit pas de dungeonMasterUserID", async () => {
     const { controllerCreateTable, makeReq, makeTypedRes, mocks } = await load({
       roleID: 4,
     });
@@ -260,7 +260,7 @@ describe("controllerCreateTable", () => {
     );
   });
 
-  it("400 si DM introuvable", async () => {
+  it("retourne 400 si le maître du jeu est introuvable", async () => {
     const { controllerCreateTable, makeReq, makeTypedRes } = await load({
       roleID: 4,
       dmFindResult: null,
@@ -285,7 +285,7 @@ describe("controllerCreateTable", () => {
     });
   });
 
-  it("400 si DM rôle invalide", async () => {
+  it("retourne 400 si le rôle du maître du jeu est invalide", async () => {
     const { controllerCreateTable, makeReq, makeTypedRes } = await load({
       roleID: 4,
       dmFindResult: { toJSON: () => ({ role: { roleID: 9 } }) },
@@ -310,7 +310,7 @@ describe("controllerCreateTable", () => {
     });
   });
 
-  it("400 si le JSON du DM n'est pas un record", async () => {
+  it("retourne 400 si le JSON du maître du jeu n’est pas un objet exploitable", async () => {
     const { controllerCreateTable, makeReq, makeTypedRes } = await load({
       roleID: 4,
       dmFindResult: { toJSON: () => "bad-shape" },
@@ -335,7 +335,7 @@ describe("controllerCreateTable", () => {
     });
   });
 
-  it("400 si le JSON du DM ne contient pas un Role record", async () => {
+  it("retourne 400 si le JSON du maître du jeu ne contient pas de rôle exploitable", async () => {
     const { controllerCreateTable, makeReq, makeTypedRes } = await load({
       roleID: 4,
       dmFindResult: { toJSON: () => ({ role: "bad-shape" }) },
@@ -360,7 +360,7 @@ describe("controllerCreateTable", () => {
     });
   });
 
-  it("400 si le roleID du DM n'est pas un number", async () => {
+  it("retourne 400 si le roleID du maître du jeu n’est pas un nombre", async () => {
     const { controllerCreateTable, makeReq, makeTypedRes } = await load({
       roleID: 4,
       dmFindResult: { toJSON: () => ({ role: { roleID: "1" } }) },
@@ -385,7 +385,7 @@ describe("controllerCreateTable", () => {
     });
   });
 
-  it("400 si maxPlayers hors limites", async () => {
+  it("retourne 400 si maxPlayers est hors limites", async () => {
     const { controllerCreateTable, makeReq, makeTypedRes, mocks } = await load({
       roleID: 1,
     });
@@ -408,7 +408,7 @@ describe("controllerCreateTable", () => {
     );
   });
 
-  it("201 si ok (role <= 3 => dm = userID) + maxPlayers default 10", async () => {
+  it("retourne 201 avec la table créée et maxPlayers à 10 par défaut si le rôle est inférieur ou égal à 3", async () => {
     const { controllerCreateTable, makeReq, makeTypedRes, mocks } = await load({
       roleID: 2,
       userID: 7,
@@ -445,7 +445,7 @@ describe("controllerCreateTable", () => {
     expect(json).toHaveBeenCalledWith({ eventID: 99, message: "Table créée" });
   });
 
-  it("201 si comments est une string et maxPlayers est arrondi", async () => {
+  it("retourne 201 si comments est une chaîne et si maxPlayers est arrondi", async () => {
     const { controllerCreateTable, makeReq, makeTypedRes, mocks } = await load({
       roleID: 4,
       createResult: { eventID: 100 },
@@ -480,7 +480,7 @@ describe("controllerCreateTable", () => {
     expect(json).toHaveBeenCalledWith({ eventID: 100, message: "Table créée" });
   });
 
-  it("500 si erreur Error(message)", async () => {
+  it("retourne 500 avec le message de l’erreur si une Error est levée", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerCreateTable, makeReq, makeTypedRes } = await load({
       createReject: new Error("boom"),
@@ -506,7 +506,7 @@ describe("controllerCreateTable", () => {
     errSpy.mockRestore();
   });
 
-  it("500 si erreur non-Error", async () => {
+  it("retourne 500 avec un message serveur générique si l’erreur n’est pas une Error", async () => {
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { controllerCreateTable, makeReq, makeTypedRes } = await load({
       createReject: "nope",

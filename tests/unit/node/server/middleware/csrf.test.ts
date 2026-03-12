@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import type { NextFunction, CookieOptions } from "express";
+import type { CookieOptions, NextFunction } from "express";
 import Tokens from "csrf";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { makeReq, makeNext } from "@/../tests/helpers/express";
+import { makeNext, makeReq } from "@/../tests/helpers/express";
 import { generateCsrfToken, verifyCsrf } from "@/server/middleware/csrf";
 
 type CookieSetter = (
@@ -22,7 +22,7 @@ function makeResWithCookie() {
   };
 }
 
-describe("csrf middleware", () => {
+describe("middleware csrf", () => {
   const tokens = new Tokens();
 
   beforeEach(() => {
@@ -34,7 +34,7 @@ describe("csrf middleware", () => {
   });
 
   describe("generateCsrfToken", () => {
-    it("crée un secret si absent, le stocke en cookie, et renvoie un token", () => {
+    it("crée un secret s’il est absent, le stocke en cookie et retourne un token", () => {
       process.env.NODE_ENV = "test";
 
       const req = makeReq({ headers: { cookie: "" } });
@@ -67,7 +67,7 @@ describe("csrf middleware", () => {
       expect(tokens.verify(secret, token)).toBe(true);
     });
 
-    it("ne touche pas au cookie si secret déjà présent et renvoie un token", () => {
+    it("ne modifie pas le cookie si le secret est déjà présent et retourne un token", () => {
       const secret = tokens.secretSync();
 
       const req = makeReq({
@@ -82,7 +82,7 @@ describe("csrf middleware", () => {
       expect(tokens.verify(secret, token)).toBe(true);
     });
 
-    it("met secure=true en production", () => {
+    it("utilise secure=true en production", () => {
       process.env.NODE_ENV = "production";
 
       const req = makeReq({ headers: { cookie: "" } });
@@ -102,7 +102,7 @@ describe("csrf middleware", () => {
   });
 
   describe("verifyCsrf", () => {
-    it("403 si secret CSRF manquant", async () => {
+    it("retourne 403 si le secret CSRF est manquant", async () => {
       const mw = verifyCsrf();
       const req = makeReq({ headers: {} });
       const { res } = makeResWithCookie();
@@ -119,7 +119,7 @@ describe("csrf middleware", () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it("403 si token manquant (ni header x-csrf-token, ni body csrfToken)", async () => {
+    it("retourne 403 si le token est manquant dans le header x-csrf-token et dans body.csrfToken", async () => {
       const mw = verifyCsrf();
       const secret = tokens.secretSync();
 
@@ -141,7 +141,7 @@ describe("csrf middleware", () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it("403 si token invalide", async () => {
+    it("retourne 403 si le token est invalide", async () => {
       const mw = verifyCsrf();
       const secret = tokens.secretSync();
 
@@ -166,7 +166,7 @@ describe("csrf middleware", () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it("passe (next) avec token valide depuis le header", async () => {
+    it("appelle next avec un token valide provenant du header", async () => {
       const mw = verifyCsrf();
       const secret = tokens.secretSync();
       const token = tokens.create(secret);
@@ -189,7 +189,7 @@ describe("csrf middleware", () => {
       expect(res.json).not.toHaveBeenCalled();
     });
 
-    it("passe (next) avec token valide depuis le body (csrfToken) si header absent", async () => {
+    it("appelle next avec un token valide provenant du body si le header est absent", async () => {
       const mw = verifyCsrf();
       const secret = tokens.secretSync();
       const token = tokens.create(secret);
@@ -209,7 +209,7 @@ describe("csrf middleware", () => {
       expect(res.json).not.toHaveBeenCalled();
     });
 
-    it("403 si csrfToken body n'est pas une string", async () => {
+    it("retourne 403 si body.csrfToken n’est pas une chaîne", async () => {
       const mw = verifyCsrf();
       const secret = tokens.secretSync();
 
@@ -231,7 +231,7 @@ describe("csrf middleware", () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it("prend le premier élément si x-csrf-token est un tableau", async () => {
+    it("utilise le premier élément si x-csrf-token est un tableau", async () => {
       const mw = verifyCsrf();
       const secret = tokens.secretSync();
       const token = tokens.create(secret);
@@ -256,13 +256,13 @@ describe("csrf middleware", () => {
   });
 });
 
-describe("verifyCsrf - error handling", () => {
+describe("middleware csrf - gestion des erreurs", () => {
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();
   });
 
-  it("500 si une exception est levée (catch)", async () => {
+  it("retourne 500 si une exception de type Error est levée", async () => {
     vi.doMock("@/server/utils/cookies", () => ({
       getCookieValue: vi.fn(() => {
         throw new Error("boom");
@@ -291,7 +291,7 @@ describe("verifyCsrf - error handling", () => {
     consoleSpy.mockRestore();
   });
 
-  it("500 si une exception non-Error est levée (catch)", async () => {
+  it("retourne 500 avec un message serveur générique si une exception non-Error est levée", async () => {
     vi.doMock("@/server/utils/cookies", () => ({
       getCookieValue: vi.fn(() => {
         throw "nope";
