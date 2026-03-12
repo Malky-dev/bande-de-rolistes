@@ -20,12 +20,6 @@ function AboutView({ onJoinTable }: AboutViewProps) {
             des univers marquants et faire vivre une communauté conviviale
             autour du jeu de rôle.
           </p>
-
-          <div className="hero-actions">
-            <button className="btn-primary" type="button" onClick={onJoinTable}>
-              Voir les tables
-            </button>
-          </div>
         </div>
 
         <div className="hero-right">

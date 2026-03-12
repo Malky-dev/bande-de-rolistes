@@ -101,6 +101,16 @@ describe("QuotesPanel", () => {
 
     await waitFor(() => {
       expect(
+        screen.getByRole("button", { name: "Ajouter une citation" }),
+      ).toBeInTheDocument();
+    });
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Ajouter une citation" }),
+    );
+
+    await waitFor(() => {
+      expect(
         screen.getByPlaceholderText("Texte de la citation"),
       ).toBeInTheDocument();
     });
@@ -174,6 +184,14 @@ describe("QuotesPanel", () => {
       ).toBeInTheDocument();
     });
 
+    fireEvent.click(
+      screen.getByRole("button", { name: "Ajouter une citation" }),
+    );
+    await waitFor(() => {
+      expect(
+        screen.getByPlaceholderText("Texte de la citation"),
+      ).toBeInTheDocument();
+    });
     fireEvent.change(screen.getByPlaceholderText("Texte de la citation"), {
       target: { value: "Hello" },
     });

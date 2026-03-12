@@ -13,7 +13,7 @@ import AccountView from "./views/AccountView";
 import ForbiddenView from "./views/ForbiddenView";
 import UpsertRpgTableView from "./views/rpg/UpsertRpgTableView";
 import QuotesView from "./views/QuoteView";
-import WhatIsRpg from "./views/WhatIsRpg";
+import WhatIsRpg from "./views/WhatIsRpgView";
 import AboutView from "./views/AboutView";
 import LocationView from "./views/LocationView";
 import RuleView from "./views/RuleView";
@@ -23,6 +23,30 @@ function App() {
   const [session, setSession] = useState<SessionInfo | null>(null);
   const [checkingSession, setCheckingSession] = useState(true);
   const [editingEventID, setEditingEventID] = useState<number | null>(null);
+  const [rpgModalMode, setRpgModalMode] = useState<"create" | "edit" | null>(
+    null,
+  );
+  const [rpgReloadToken, setRpgReloadToken] = useState(0);
+
+  const openRpgCreateModal = () => {
+    setEditingEventID(null);
+    setRpgModalMode("create");
+  };
+
+  const openRpgEditModal = (eventID: number) => {
+    setEditingEventID(eventID);
+    setRpgModalMode("edit");
+  };
+
+  const closeRpgModal = () => {
+    setRpgModalMode(null);
+    setEditingEventID(null);
+  };
+
+  const handleRpgSaved = () => {
+    setRpgReloadToken((v) => v + 1);
+    closeRpgModal();
+  };
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -95,27 +119,38 @@ function App() {
         {view === "rules" && <RuleView />}
 
         {view === "rpg" && (
-          <RpgTablesView
-            session={session}
-            onCreateTable={() => setView("rpg-create")}
-            onEditTable={(eventID) => {
-              setEditingEventID(eventID);
-              setView("rpg-edit");
-            }}
-            onLogin={() => setView("login")}
-          />
-        )}
+          <>
+            <RpgTablesView
+              session={session}
+              reloadToken={rpgReloadToken}
+              onCreateTable={openRpgCreateModal}
+              onEditTable={openRpgEditModal}
+              onLogin={() => setView("login")}
+            />
 
-        {view === "rpg-create" && (
-          <UpsertRpgTableView session={session} onBack={() => setView("rpg")} />
-        )}
-
-        {view === "rpg-edit" && editingEventID !== null && (
-          <UpsertRpgTableView
-            session={session}
-            eventID={editingEventID}
-            onBack={() => setView("rpg")}
-          />
+            {rpgModalMode !== null && (
+              <div
+                className="appModal"
+                role="dialog"
+                aria-modal="true"
+                data-testid="rpg-modal-overlay"
+                onClick={closeRpgModal}
+              >
+                <div
+                  className="appModal__dialog appModal__dialog--wide"
+                  data-testid="rpg-modal-content"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <UpsertRpgTableView
+                    session={session}
+                    eventID={rpgModalMode === "edit" ? editingEventID : null}
+                    onBack={closeRpgModal}
+                    onDone={handleRpgSaved}
+                  />
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         {view === "quotes" && (

@@ -17,7 +17,6 @@ function Footer({ onChangeView }: FooterProps) {
         if (!cancelled) setQuote(q);
       })
       .catch(() => {
-        // On laisse le footer vivre sans quote si l'API déconne
         if (!cancelled) setQuote(null);
       });
 

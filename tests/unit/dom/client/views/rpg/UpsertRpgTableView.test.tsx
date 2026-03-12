@@ -31,6 +31,7 @@ describe("UpsertRpgTableView", () => {
 
   it("renders the create form when no event id is provided", () => {
     const onBack = vi.fn();
+    const onDone = vi.fn();
     render(
       <UpsertRpgTableView
         session={{
@@ -41,13 +42,15 @@ describe("UpsertRpgTableView", () => {
           isVerified: true,
         }}
         onBack={onBack}
+        onDone={onDone}
       />,
     );
 
     expect(screen.getByText("create")).toBeInTheDocument();
     expect(screen.getByText("true")).toBeInTheDocument();
     screen.getByText("done").click();
-    expect(onBack).toHaveBeenCalledTimes(1);
+    expect(onDone).toHaveBeenCalledTimes(1);
+    expect(onBack).not.toHaveBeenCalled();
   });
 
   it("renders the loading, error, and not-found edit states", async () => {
@@ -62,6 +65,7 @@ describe("UpsertRpgTableView", () => {
         }}
         eventID={10}
         onBack={vi.fn()}
+        onDone={vi.fn()}
       />,
     );
 
@@ -79,6 +83,7 @@ describe("UpsertRpgTableView", () => {
         }}
         eventID={11}
         onBack={vi.fn()}
+        onDone={vi.fn()}
       />,
     );
 
@@ -98,6 +103,7 @@ describe("UpsertRpgTableView", () => {
         }}
         eventID={12}
         onBack={vi.fn()}
+        onDone={vi.fn()}
       />,
     );
 
@@ -120,6 +126,7 @@ describe("UpsertRpgTableView", () => {
         }}
         eventID={10}
         onBack={vi.fn()}
+        onDone={vi.fn()}
       />,
     );
 
@@ -156,6 +163,7 @@ describe("UpsertRpgTableView", () => {
         }}
         eventID={10}
         onBack={vi.fn()}
+        onDone={vi.fn()}
       />,
     );
 

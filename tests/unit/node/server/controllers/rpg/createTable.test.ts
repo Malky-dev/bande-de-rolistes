@@ -42,7 +42,7 @@ async function load(opts?: {
     User.findByPk.mockResolvedValue(opts.dmFindResult);
   } else {
     User.findByPk.mockResolvedValue({
-      toJSON: () => ({ Role: { roleID: 1 } }),
+      toJSON: () => ({ role: { roleID: 1 } }),
     });
   }
 
@@ -256,7 +256,7 @@ describe("controllerCreateTable", () => {
 
     expect(mocks.badRequest).toHaveBeenCalledWith(
       expect.anything(),
-      "dungeonMasterUserID requis (admin/orga)",
+      "dungeonMasterUserID requis",
     );
   });
 
@@ -288,7 +288,7 @@ describe("controllerCreateTable", () => {
   it("400 si DM rôle invalide", async () => {
     const { controllerCreateTable, makeReq, makeTypedRes } = await load({
       roleID: 4,
-      dmFindResult: { toJSON: () => ({ Role: { roleID: 9 } }) },
+      dmFindResult: { toJSON: () => ({ role: { roleID: 9 } }) },
     });
 
     const req = makeReq({
@@ -338,7 +338,7 @@ describe("controllerCreateTable", () => {
   it("400 si le JSON du DM ne contient pas un Role record", async () => {
     const { controllerCreateTable, makeReq, makeTypedRes } = await load({
       roleID: 4,
-      dmFindResult: { toJSON: () => ({ Role: "bad-shape" }) },
+      dmFindResult: { toJSON: () => ({ role: "bad-shape" }) },
     });
 
     const req = makeReq({
@@ -363,7 +363,7 @@ describe("controllerCreateTable", () => {
   it("400 si le roleID du DM n'est pas un number", async () => {
     const { controllerCreateTable, makeReq, makeTypedRes } = await load({
       roleID: 4,
-      dmFindResult: { toJSON: () => ({ Role: { roleID: "1" } }) },
+      dmFindResult: { toJSON: () => ({ role: { roleID: "1" } }) },
     });
 
     const req = makeReq({
@@ -449,7 +449,7 @@ describe("controllerCreateTable", () => {
     const { controllerCreateTable, makeReq, makeTypedRes, mocks } = await load({
       roleID: 4,
       createResult: { eventID: 100 },
-      dmFindResult: { toJSON: () => ({ Role: { roleID: 2 } }) },
+      dmFindResult: { toJSON: () => ({ role: { roleID: 2 } }) },
     });
 
     const req = makeReq({
