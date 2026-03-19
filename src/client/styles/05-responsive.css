@@ -3,22 +3,44 @@
 ========================================================= */
 
 @media (max-width: 900px) {
-  .hero .auth-grid .rpg-grid .about-story-grid,
+  .hero,
+  .auth-grid,
+  .rpg-grid,
+  .about-story-grid,
   .about-cards,
-  .about-values .location-place,
-  .location-features .rule-block {
+  .about-values,
+  .location-place,
+  .location-features,
+  .rule-block,
+  .poll-modal__body,
+  .poll-modal__grid,
+  .polls-view__layout,
+  .poll-edit {
     grid-template-columns: 1fr;
   }
 
-  .location-map .location-map iframe {
+  .location-map iframe {
     min-height: 220px;
   }
 }
 
 @media (max-width: 640px) {
-  .inline-row .what-is-rpg-cards,
+  .inline-row,
+  .what-is-rpg-cards,
   .what-is-rpg-steps,
   .what-is-rpg-split {
     grid-template-columns: 1fr;
+  }
+
+  .poll-page__header,
+  .poll-modal__header,
+  .poll-vote__header,
+  .polls-view__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .poll-cards {
+    grid-auto-columns: minmax(240px, 88vw);
   }
 }

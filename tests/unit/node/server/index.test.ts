@@ -20,12 +20,15 @@ describe("initialisation du serveur", () => {
     const appUse = vi.fn();
     const appListen = vi.fn((port: number, cb?: () => void) => cb?.());
 
-    const expressDefault: any = vi.fn(() => ({
-      use: appUse,
-      listen: appListen,
-    }));
-
-    expressDefault.json = vi.fn(() => "express.json");
+    const expressDefault = Object.assign(
+      vi.fn(() => ({
+        use: appUse,
+        listen: appListen,
+      })),
+      {
+        json: vi.fn(() => "express.json"),
+      },
+    );
 
     vi.doMock("express", () => ({
       default: expressDefault,
@@ -35,8 +38,8 @@ describe("initialisation du serveur", () => {
     const helmetMw = { _mw: "helmet" };
     const compressionMw = { _mw: "compression" };
 
-    const corsFn = vi.fn((_opts: any) => corsMw);
-    const helmetFn = vi.fn((_opts: any) => helmetMw);
+    const corsFn = vi.fn(() => corsMw);
+    const helmetFn = vi.fn(() => helmetMw);
     const compressionFn = vi.fn(() => compressionMw);
 
     vi.doMock("cors", () => ({ default: corsFn }));
@@ -75,14 +78,17 @@ describe("initialisation du serveur", () => {
     vi.doMock("@/server/routes/cotisation", () => ({
       default: mkRouter("cotisation"),
     }));
+    vi.doMock("@/server/routes/polls", () => ({
+      default: mkRouter("polls"),
+    }));
 
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const exitSpy = vi.spyOn(process, "exit").mockImplementation(((
-      _code?: number,
+      _: number | string | null | undefined,
     ) => {
       return undefined as never;
-    }) as any);
+    }) as typeof process.exit);
 
     await import("@/server/index");
     await flushPromises();
@@ -104,7 +110,7 @@ describe("initialisation du serveur", () => {
     expect(appUse).toHaveBeenCalledWith(compressionMw);
 
     const usesApi = appUse.mock.calls.filter((c) => c[0] === "/api");
-    expect(usesApi.length).toBe(10);
+    expect(usesApi.length).toBe(11);
 
     expect(authenticate).toHaveBeenCalledTimes(1);
     expect(sync).toHaveBeenCalledTimes(1);
@@ -128,12 +134,15 @@ describe("initialisation du serveur", () => {
     const appUse = vi.fn();
     const appListen = vi.fn();
 
-    const expressDefault: any = vi.fn(() => ({
-      use: appUse,
-      listen: appListen,
-    }));
-
-    expressDefault.json = vi.fn(() => "express.json");
+    const expressDefault = Object.assign(
+      vi.fn(() => ({
+        use: appUse,
+        listen: appListen,
+      })),
+      {
+        json: vi.fn(() => "express.json"),
+      },
+    );
 
     vi.doMock("express", () => ({
       default: expressDefault,
@@ -173,14 +182,17 @@ describe("initialisation du serveur", () => {
     vi.doMock("@/server/routes/cotisation", () => ({
       default: mkRouter("cotisation"),
     }));
+    vi.doMock("@/server/routes/polls", () => ({
+      default: mkRouter("polls"),
+    }));
 
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const exitSpy = vi.spyOn(process, "exit").mockImplementation(((
-      _code?: number,
+      _: number | string | null | undefined,
     ) => {
       return undefined as never;
-    }) as any);
+    }) as typeof process.exit);
 
     await import("@/server/index");
     await flushPromises();
@@ -202,12 +214,15 @@ describe("initialisation du serveur", () => {
     const appUse = vi.fn();
     const appListen = vi.fn((port: number, cb?: () => void) => cb?.());
 
-    const expressDefault: any = vi.fn(() => ({
-      use: appUse,
-      listen: appListen,
-    }));
-
-    expressDefault.json = vi.fn(() => "express.json");
+    const expressDefault = Object.assign(
+      vi.fn(() => ({
+        use: appUse,
+        listen: appListen,
+      })),
+      {
+        json: vi.fn(() => "express.json"),
+      },
+    );
 
     vi.doMock("express", () => ({
       default: expressDefault,
@@ -215,7 +230,7 @@ describe("initialisation du serveur", () => {
 
     const corsMw = { _mw: "cors" };
 
-    const corsFn = vi.fn((_opts: unknown) => corsMw);
+    const corsFn = vi.fn(() => corsMw);
     vi.doMock("cors", () => ({ default: corsFn }));
     vi.doMock("helmet", () => ({ default: vi.fn(() => "helmet") }));
     vi.doMock("compression", () => ({ default: vi.fn(() => "compression") }));
@@ -249,14 +264,17 @@ describe("initialisation du serveur", () => {
     vi.doMock("@/server/routes/cotisation", () => ({
       default: mkRouter("cotisation"),
     }));
+    vi.doMock("@/server/routes/polls", () => ({
+      default: mkRouter("polls"),
+    }));
 
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const exitSpy = vi.spyOn(process, "exit").mockImplementation(((
-      _code?: number,
+      _: number | string | null | undefined,
     ) => {
       return undefined as never;
-    }) as any);
+    }) as typeof process.exit);
 
     await import("@/server/index");
     await flushPromises();

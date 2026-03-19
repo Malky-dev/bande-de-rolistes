@@ -1,9 +1,9 @@
-import type { SessionInfo } from "../../types/api/session";
+import type { SessionInfo } from "@/types/api/session";
 import type {
   RpgTableDetails,
   RpgTableListItem,
   RpgSignupItem,
-} from "../../types/api/rpg";
+} from "@/types/api/rpg";
 
 export type MySignupBucket = "CONFIRMED" | "WAITLIST" | null;
 

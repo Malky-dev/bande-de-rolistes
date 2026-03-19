@@ -1,4 +1,6 @@
 export { default as requireAuth } from "./auth/requireAuth";
+export { default as optionalAuth } from "./auth/optionalAuth";
+
 export {
   requireAdmin,
   requireStaff,

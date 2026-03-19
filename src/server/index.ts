@@ -23,6 +23,7 @@ import rpgRoutes from "./routes/rpg";
 import quoteRoutes from "./routes/quote";
 import quotesRoutes from "./routes/quotes";
 import cotisationRoutes from "./routes/cotisation";
+import pollsRoutes from "./routes/polls";
 
 // ---------------------------
 // Création application
@@ -60,6 +61,7 @@ app.use("/api", rpgRoutes);
 app.use("/api", quoteRoutes);
 app.use("/api", quotesRoutes);
 app.use("/api", cotisationRoutes);
+app.use("/api", pollsRoutes);
 
 // ---------------------------
 // Initialisation base
