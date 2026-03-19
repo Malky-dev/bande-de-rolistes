@@ -1,5 +1,6 @@
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+
 import { describe, expect, it, vi } from "vitest";
 
 const root = process.cwd();
@@ -30,6 +31,15 @@ const quoteUrl = pathToFileURL(
 const cotisationUrl = pathToFileURL(
   path.join(root, "src/server/models/Cotisation.ts"),
 ).href;
+const pollUrl = pathToFileURL(
+  path.join(root, "src/server/models/Poll.ts"),
+).href;
+const pollOptionUrl = pathToFileURL(
+  path.join(root, "src/server/models/PollOption.ts"),
+).href;
+const pollVoteUrl = pathToFileURL(
+  path.join(root, "src/server/models/PollVote.ts"),
+).href;
 
 async function load() {
   vi.resetModules();
@@ -42,22 +52,44 @@ async function load() {
     belongsTo: vi.fn(),
     belongsToMany: vi.fn(),
   };
+
   const Role = {
     hasMany: vi.fn(),
   };
+
   const Session = {
     belongsTo: vi.fn(),
   };
+
   const TableRPG = {
     belongsTo: vi.fn(),
     hasMany: vi.fn(),
     belongsToMany: vi.fn(),
   };
+
   const TableRPGPlayer = {
     belongsTo: vi.fn(),
   };
-  const Quote = { modelName: "Quote" };
+
+  const Quote = {
+    modelName: "Quote",
+  };
+
   const Cotisation = {
+    belongsTo: vi.fn(),
+  };
+
+  const Poll = {
+    belongsTo: vi.fn(),
+    hasMany: vi.fn(),
+  };
+
+  const PollOption = {
+    belongsTo: vi.fn(),
+    hasMany: vi.fn(),
+  };
+
+  const PollVote = {
     belongsTo: vi.fn(),
   };
 
@@ -65,33 +97,55 @@ async function load() {
     __esModule: true,
     default: sequelize,
   }));
+
   vi.doMock(userUrl, () => ({
     __esModule: true,
     default: User,
   }));
+
   vi.doMock(roleUrl, () => ({
     __esModule: true,
     default: Role,
   }));
+
   vi.doMock(sessionUrl, () => ({
     __esModule: true,
     default: Session,
   }));
+
   vi.doMock(tableRpgUrl, () => ({
     __esModule: true,
     default: TableRPG,
   }));
+
   vi.doMock(tableRpgPlayerUrl, () => ({
     __esModule: true,
     default: TableRPGPlayer,
   }));
+
   vi.doMock(quoteUrl, () => ({
     __esModule: true,
     default: Quote,
   }));
+
   vi.doMock(cotisationUrl, () => ({
     __esModule: true,
     default: Cotisation,
+  }));
+
+  vi.doMock(pollUrl, () => ({
+    __esModule: true,
+    default: Poll,
+  }));
+
+  vi.doMock(pollOptionUrl, () => ({
+    __esModule: true,
+    default: PollOption,
+  }));
+
+  vi.doMock(pollVoteUrl, () => ({
+    __esModule: true,
+    default: PollVote,
   }));
 
   const mod = await import(modelsIndexUrl);
@@ -107,6 +161,9 @@ async function load() {
       TableRPGPlayer,
       Quote,
       Cotisation,
+      Poll,
+      PollOption,
+      PollVote,
     },
   };
 }
@@ -127,7 +184,7 @@ describe("models index", () => {
       as: "role",
     });
 
-    expect(mocks.User.hasMany).toHaveBeenCalledTimes(4);
+    expect(mocks.User.hasMany).toHaveBeenCalledTimes(6);
     expect(mocks.User.hasMany).toHaveBeenCalledWith(mocks.Session, {
       foreignKey: "userID",
       as: "sessions",
@@ -145,6 +202,18 @@ describe("models index", () => {
     expect(mocks.User.hasMany).toHaveBeenCalledWith(mocks.TableRPGPlayer, {
       foreignKey: "userID",
       as: "rpgSignups",
+    });
+    expect(mocks.User.hasMany).toHaveBeenCalledWith(mocks.Poll, {
+      foreignKey: "createdBy",
+      as: "createdPolls",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    });
+    expect(mocks.User.hasMany).toHaveBeenCalledWith(mocks.PollVote, {
+      foreignKey: "userID",
+      as: "pollVotes",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
     });
 
     expect(mocks.Session.belongsTo).toHaveBeenCalledTimes(1);
@@ -202,6 +271,64 @@ describe("models index", () => {
       as: "joinedTables",
     });
 
+    expect(mocks.Poll.belongsTo).toHaveBeenCalledTimes(1);
+    expect(mocks.Poll.belongsTo).toHaveBeenCalledWith(mocks.User, {
+      foreignKey: "createdBy",
+      as: "author",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    });
+
+    expect(mocks.Poll.hasMany).toHaveBeenCalledTimes(2);
+    expect(mocks.Poll.hasMany).toHaveBeenCalledWith(mocks.PollOption, {
+      foreignKey: "pollID",
+      as: "options",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    });
+    expect(mocks.Poll.hasMany).toHaveBeenCalledWith(mocks.PollVote, {
+      foreignKey: "pollID",
+      as: "votes",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    });
+
+    expect(mocks.PollOption.belongsTo).toHaveBeenCalledTimes(1);
+    expect(mocks.PollOption.belongsTo).toHaveBeenCalledWith(mocks.Poll, {
+      foreignKey: "pollID",
+      as: "poll",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    });
+
+    expect(mocks.PollOption.hasMany).toHaveBeenCalledTimes(1);
+    expect(mocks.PollOption.hasMany).toHaveBeenCalledWith(mocks.PollVote, {
+      foreignKey: "optionID",
+      as: "votes",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    });
+
+    expect(mocks.PollVote.belongsTo).toHaveBeenCalledTimes(3);
+    expect(mocks.PollVote.belongsTo).toHaveBeenCalledWith(mocks.Poll, {
+      foreignKey: "pollID",
+      as: "poll",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    });
+    expect(mocks.PollVote.belongsTo).toHaveBeenCalledWith(mocks.PollOption, {
+      foreignKey: "optionID",
+      as: "option",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    });
+    expect(mocks.PollVote.belongsTo).toHaveBeenCalledWith(mocks.User, {
+      foreignKey: "userID",
+      as: "user",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    });
+
     expect(mod.sequelize).toBe(mocks.sequelize);
     expect(mod.User).toBe(mocks.User);
     expect(mod.Role).toBe(mocks.Role);
@@ -210,5 +337,8 @@ describe("models index", () => {
     expect(mod.TableRPGPlayer).toBe(mocks.TableRPGPlayer);
     expect(mod.Quote).toBe(mocks.Quote);
     expect(mod.Cotisation).toBe(mocks.Cotisation);
+    expect(mod.Poll).toBe(mocks.Poll);
+    expect(mod.PollOption).toBe(mocks.PollOption);
+    expect(mod.PollVote).toBe(mocks.PollVote);
   });
 });

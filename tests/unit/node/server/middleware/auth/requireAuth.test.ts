@@ -40,7 +40,7 @@ describe("requireAuth", () => {
     expect(status).toHaveBeenCalledWith(401);
     expect(json).toHaveBeenCalledWith({
       code: "UNAUTHORIZED",
-      message: "Token required",
+      message: "Authentification requise",
     });
   });
 
@@ -66,11 +66,11 @@ describe("requireAuth", () => {
     expect(status).toHaveBeenCalledWith(401);
     expect(json).toHaveBeenCalledWith({
       code: "UNAUTHORIZED",
-      message: "Invalid token",
+      message: "Authentification requise",
     });
   });
 
-  it("retourne 500 si user.role est manquant", async () => {
+  it("retourne 401 si user.role est manquant", async () => {
     vi.resetModules();
 
     vi.doMock("@/server/middleware/auth/token", () => ({
@@ -97,10 +97,10 @@ describe("requireAuth", () => {
 
     await requireAuth(req, res, next);
 
-    expect(status).toHaveBeenCalledWith(500);
+    expect(status).toHaveBeenCalledWith(401);
     expect(json).toHaveBeenCalledWith({
-      code: "ERROR",
-      message: "User role missing",
+      code: "UNAUTHORIZED",
+      message: "Authentification requise",
     });
   });
 

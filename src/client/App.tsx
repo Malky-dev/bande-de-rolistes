@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import type { View } from "@/types/navigation";
 import type { SessionInfo } from "../types/api/session";
 import { apiSession } from "../api/authApi";
@@ -17,16 +18,25 @@ import WhatIsRpg from "./views/WhatIsRpgView";
 import AboutView from "./views/AboutView";
 import LocationView from "./views/LocationView";
 import RuleView from "./views/RuleView";
+import PollsView from "./views/PollsView";
+import UpsertPollView from "./views/polls/UpsertPollView";
 
 function App() {
   const [view, setView] = useState<View>("home");
   const [session, setSession] = useState<SessionInfo | null>(null);
   const [checkingSession, setCheckingSession] = useState(true);
+
   const [editingEventID, setEditingEventID] = useState<number | null>(null);
   const [rpgModalMode, setRpgModalMode] = useState<"create" | "edit" | null>(
     null,
   );
   const [rpgReloadToken, setRpgReloadToken] = useState(0);
+
+  const [editingPollID, setEditingPollID] = useState<number | null>(null);
+  const [pollModalMode, setPollModalMode] = useState<"create" | "edit" | null>(
+    null,
+  );
+  const [pollReloadToken, setPollReloadToken] = useState(0);
 
   const openRpgCreateModal = () => {
     setEditingEventID(null);
@@ -46,6 +56,26 @@ function App() {
   const handleRpgSaved = () => {
     setRpgReloadToken((v) => v + 1);
     closeRpgModal();
+  };
+
+  const openPollCreateModal = () => {
+    setEditingPollID(null);
+    setPollModalMode("create");
+  };
+
+  const openPollEditModal = (pollID: number) => {
+    setEditingPollID(pollID);
+    setPollModalMode("edit");
+  };
+
+  const closePollModal = () => {
+    setPollModalMode(null);
+    setEditingPollID(null);
+  };
+
+  const handlePollSaved = () => {
+    setPollReloadToken((v) => v + 1);
+    closePollModal();
   };
 
   useEffect(() => {
@@ -119,38 +149,23 @@ function App() {
         {view === "rules" && <RuleView />}
 
         {view === "rpg" && (
-          <>
-            <RpgTablesView
-              session={session}
-              reloadToken={rpgReloadToken}
-              onCreateTable={openRpgCreateModal}
-              onEditTable={openRpgEditModal}
-              onLogin={() => setView("login")}
-            />
+          <RpgTablesView
+            session={session}
+            reloadToken={rpgReloadToken}
+            onCreateTable={openRpgCreateModal}
+            onEditTable={openRpgEditModal}
+            onLogin={() => setView("login")}
+          />
+        )}
 
-            {rpgModalMode !== null && (
-              <div
-                className="appModal"
-                role="dialog"
-                aria-modal="true"
-                data-testid="rpg-modal-overlay"
-                onClick={closeRpgModal}
-              >
-                <div
-                  className="appModal__dialog appModal__dialog--wide"
-                  data-testid="rpg-modal-content"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <UpsertRpgTableView
-                    session={session}
-                    eventID={rpgModalMode === "edit" ? editingEventID : null}
-                    onBack={closeRpgModal}
-                    onDone={handleRpgSaved}
-                  />
-                </div>
-              </div>
-            )}
-          </>
+        {view === "polls" && (
+          <PollsView
+            session={session}
+            reloadToken={pollReloadToken}
+            onCreatePoll={openPollCreateModal}
+            onEditPoll={openPollEditModal}
+            onLogin={() => setView("login")}
+          />
         )}
 
         {view === "quotes" && (
@@ -185,6 +200,56 @@ function App() {
       </main>
 
       <Footer onChangeView={(v) => setView(v)} />
+
+      {rpgModalMode !== null &&
+        createPortal(
+          <div
+            className="appModal"
+            role="dialog"
+            aria-modal="true"
+            data-testid="rpg-modal-overlay"
+            onClick={closeRpgModal}
+          >
+            <div
+              className="appModal__dialog appModal__dialog--wide"
+              data-testid="rpg-modal-content"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <UpsertRpgTableView
+                session={session}
+                eventID={rpgModalMode === "edit" ? editingEventID : null}
+                onBack={closeRpgModal}
+                onDone={handleRpgSaved}
+              />
+            </div>
+          </div>,
+          document.body,
+        )}
+
+      {pollModalMode !== null &&
+        createPortal(
+          <div
+            className="appModal"
+            role="dialog"
+            aria-modal="true"
+            data-testid="poll-modal-overlay"
+            onClick={closePollModal}
+          >
+            <div
+              className="appModal__dialog appModal__dialog--wide"
+              data-testid="poll-modal-content"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <UpsertPollView
+                session={session}
+                pollID={pollModalMode === "edit" ? editingPollID : null}
+                onBack={closePollModal}
+                onDone={handlePollSaved}
+              />
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
