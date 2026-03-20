@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   apiDeletePoll,
   apiDeletePollVote,
   apiGetPoll,
   apiListPolls,
   apiReplacePollVote,
-} from "../../api/pollsApi";
+} from "../../api/polls";
 import PollVoteModal from "../components/polls/PollVoteModal";
 import PollList from "../components/polls/PollList";
 import {
@@ -42,7 +42,7 @@ export default function PollsView({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isVoteModalOpen, setIsVoteModalOpen] = useState(false);
 
-  async function loadPolls(): Promise<void> {
+  const loadPolls = useCallback(async (): Promise<void> => {
     setLoadingList(true);
     setErrorMessage(null);
 
@@ -58,13 +58,13 @@ export default function PollsView({
         return;
       }
 
-      const hasSelection =
-        selectedPollID !== null &&
-        nextPolls.some((poll) => poll.pollID === selectedPollID);
+      setSelectedPollID((currentSelectedPollID) => {
+        const hasSelection =
+          currentSelectedPollID !== null &&
+          nextPolls.some((poll) => poll.pollID === currentSelectedPollID);
 
-      if (!hasSelection) {
-        setSelectedPollID(nextPolls[0].pollID);
-      }
+        return hasSelection ? currentSelectedPollID : nextPolls[0].pollID;
+      });
     } catch (cause) {
       setErrorMessage(
         cause instanceof Error
@@ -74,9 +74,9 @@ export default function PollsView({
     } finally {
       setLoadingList(false);
     }
-  }
+  }, []);
 
-  async function loadPollDetails(pollID: number): Promise<void> {
+  const loadPollDetails = useCallback(async (pollID: number): Promise<void> => {
     setLoadingDetails(true);
     setErrorMessage(null);
 
@@ -95,23 +95,26 @@ export default function PollsView({
     } finally {
       setLoadingDetails(false);
     }
-  }
+  }, []);
 
-  async function refreshCurrentPoll(message?: string): Promise<void> {
-    if (selectedPollID !== null) {
-      await loadPollDetails(selectedPollID);
-    }
+  const refreshCurrentPoll = useCallback(
+    async (message?: string): Promise<void> => {
+      if (selectedPollID !== null) {
+        await loadPollDetails(selectedPollID);
+      }
 
-    await loadPolls();
+      await loadPolls();
 
-    if (message !== undefined) {
-      setSuccessMessage(message);
-    }
-  }
+      if (message !== undefined) {
+        setSuccessMessage(message);
+      }
+    },
+    [loadPollDetails, loadPolls, selectedPollID],
+  );
 
   useEffect(() => {
     void loadPolls();
-  }, [reloadToken]);
+  }, [loadPolls, reloadToken]);
 
   useEffect(() => {
     if (selectedPollID === null) {
@@ -121,7 +124,7 @@ export default function PollsView({
     }
 
     void loadPollDetails(selectedPollID);
-  }, [selectedPollID, reloadToken]);
+  }, [selectedPollID, reloadToken, loadPollDetails]);
 
   function handleOpenVoteModal(pollID: number): void {
     setSelectedPollID(pollID);

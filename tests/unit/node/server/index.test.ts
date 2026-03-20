@@ -18,7 +18,7 @@ describe("initialisation du serveur", () => {
     process.env.FRONTEND_URL = "http://frontend.test";
 
     const appUse = vi.fn();
-    const appListen = vi.fn((port: number, cb?: () => void) => cb?.());
+    const appListen = vi.fn((_port: number, cb?: () => void) => cb?.());
 
     const expressDefault = Object.assign(
       vi.fn(() => ({
@@ -212,7 +212,7 @@ describe("initialisation du serveur", () => {
 
   it("utilise les valeurs par défaut pour PORT et FRONTEND_URL", async () => {
     const appUse = vi.fn();
-    const appListen = vi.fn((port: number, cb?: () => void) => cb?.());
+    const appListen = vi.fn((_port: number, cb?: () => void) => cb?.());
 
     const expressDefault = Object.assign(
       vi.fn(() => ({

@@ -2,15 +2,11 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import App from "@/client/App";
-import { apiSession } from "@/api/authApi";
-import { fetchCsrfToken } from "@/api/securityApi";
+import { apiLogout, apiSession } from "@/api/auth";
 
-vi.mock("@/api/authApi", () => ({
+vi.mock("@/api/auth", () => ({
   apiSession: vi.fn(),
-}));
-
-vi.mock("@/api/securityApi", () => ({
-  fetchCsrfToken: vi.fn(),
+  apiLogout: vi.fn(),
 }));
 
 vi.mock("@/client/components/Navbar", () => ({
@@ -30,7 +26,8 @@ vi.mock("@/client/components/Navbar", () => ({
         | "about"
         | "what-is-rpg"
         | "location"
-        | "rules",
+        | "rules"
+        | "polls",
     ) => void;
     onLogout: () => void;
   }) => (
@@ -41,6 +38,7 @@ vi.mock("@/client/components/Navbar", () => ({
       <button onClick={() => onChangeView("admin")}>go-admin</button>
       <button onClick={() => onChangeView("account")}>go-account</button>
       <button onClick={() => onChangeView("rpg")}>go-rpg</button>
+      <button onClick={() => onChangeView("polls")}>go-polls</button>
       <button onClick={() => onChangeView("quotes")}>go-quotes</button>
       <button onClick={() => onChangeView("about")}>go-about</button>
       <button onClick={() => onChangeView("what-is-rpg")}>
@@ -96,7 +94,19 @@ vi.mock("@/client/components/AuthForms", () => ({
 }));
 
 vi.mock("@/client/views/HomeView", () => ({
-  default: () => <div>HomeView</div>,
+  default: ({
+    onDiscover,
+    onJoinTable,
+  }: {
+    onDiscover?: () => void;
+    onJoinTable?: () => void;
+  }) => (
+    <div>
+      <span>HomeView</span>
+      <button onClick={onDiscover}>home-discover</button>
+      <button onClick={onJoinTable}>home-join-table</button>
+    </div>
+  ),
 }));
 
 vi.mock("@/client/views/AdminView", () => ({
@@ -125,6 +135,27 @@ vi.mock("@/client/views/RpgTablesView", () => ({
       <button onClick={onCreateTable}>rpg-create</button>
       <button onClick={() => onEditTable(42)}>rpg-edit</button>
       <button onClick={onLogin}>rpg-login</button>
+    </div>
+  ),
+}));
+
+vi.mock("@/client/views/PollsView", () => ({
+  default: ({
+    onCreatePoll,
+    onEditPoll,
+    onLogin,
+    reloadToken,
+  }: {
+    onCreatePoll: () => void;
+    onEditPoll: (pollID: number) => void;
+    onLogin: () => void;
+    reloadToken?: number;
+  }) => (
+    <div>
+      <span>{`PollsView-${reloadToken ?? 0}`}</span>
+      <button onClick={onCreatePoll}>poll-create</button>
+      <button onClick={() => onEditPoll(24)}>poll-edit</button>
+      <button onClick={onLogin}>poll-login</button>
     </div>
   ),
 }));
@@ -197,6 +228,24 @@ vi.mock("@/client/views/rpg/UpsertRpgTableView", () => ({
   ),
 }));
 
+vi.mock("@/client/views/polls/UpsertPollView", () => ({
+  default: ({
+    pollID,
+    onBack,
+    onDone,
+  }: {
+    pollID?: number | null;
+    onBack: () => void;
+    onDone: () => void;
+  }) => (
+    <div>
+      <span>{pollID ? `UpsertPoll-${pollID}` : "UpsertPoll-create"}</span>
+      <button onClick={onBack}>poll-upsert-back</button>
+      <button onClick={onDone}>poll-upsert-done</button>
+    </div>
+  ),
+}));
+
 vi.mock("@/client/views/QuoteView", () => ({
   default: ({ onBackHome }: { onBackHome: () => void }) => (
     <div>
@@ -207,30 +256,15 @@ vi.mock("@/client/views/QuoteView", () => ({
 }));
 
 vi.mock("@/client/views/AboutView", () => ({
-  default: ({ onJoinTable }: { onJoinTable: () => void }) => (
-    <div>
-      <span>AboutView</span>
-      <button onClick={onJoinTable}>about-back</button>
-    </div>
-  ),
+  default: () => <div>AboutView</div>,
 }));
 
 vi.mock("@/client/views/WhatIsRpgView", () => ({
-  default: ({ onJoinTable }: { onJoinTable: () => void }) => (
-    <div>
-      <span>WhatIsRpgView</span>
-      <button onClick={onJoinTable}>what-is-rpg-back</button>
-    </div>
-  ),
+  default: () => <div>WhatIsRpgView</div>,
 }));
 
 vi.mock("@/client/views/LocationView", () => ({
-  default: ({ onJoinTable }: { onJoinTable: () => void }) => (
-    <div>
-      <span>LocationView</span>
-      <button onClick={onJoinTable}>location-back</button>
-    </div>
-  ),
+  default: () => <div>LocationView</div>,
 }));
 
 vi.mock("@/client/views/RuleView", () => ({
@@ -342,10 +376,8 @@ describe("App", () => {
       role: "admin",
       isVerified: true,
     });
-    vi.mocked(fetchCsrfToken).mockResolvedValue("csrf-1");
 
-    const fetchMock = vi.fn().mockResolvedValue({ ok: true });
-    vi.stubGlobal("fetch", fetchMock);
+    vi.mocked(apiLogout).mockResolvedValue({ success: true });
 
     render(<App />);
 
@@ -359,17 +391,13 @@ describe("App", () => {
     fireEvent.click(screen.getByText("do-logout"));
 
     await waitFor(() => {
-      expect(fetchMock).toHaveBeenCalledWith("/api/logout", {
-        method: "POST",
-        headers: { "x-csrf-token": "csrf-1" },
-        credentials: "include",
-      });
+      expect(apiLogout).toHaveBeenCalled();
     });
 
     expect(screen.getByText("HomeView")).toBeInTheDocument();
   });
 
-  it("déconnecte et revient à l’accueil même si la récupération du token CSRF échoue", async () => {
+  it("déconnecte et revient à l’accueil même si la déconnexion échoue", async () => {
     vi.mocked(apiSession).mockResolvedValue({
       userID: 1,
       nickname: "Neo",
@@ -377,7 +405,8 @@ describe("App", () => {
       role: "admin",
       isVerified: true,
     });
-    vi.mocked(fetchCsrfToken).mockRejectedValue(new Error("csrf failed"));
+
+    vi.mocked(apiLogout).mockRejectedValue(new Error("logout failed"));
 
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
@@ -434,7 +463,7 @@ describe("App", () => {
     expect(screen.getByText("HomeView")).toBeInTheDocument();
   });
 
-  it("affiche la vue à propos puis revient à la vue JDR", async () => {
+  it("affiche la vue à propos", async () => {
     vi.mocked(apiSession).mockRejectedValue(new Error("no session"));
 
     render(<App />);
@@ -445,12 +474,9 @@ describe("App", () => {
 
     fireEvent.click(screen.getByText("go-about"));
     expect(screen.getByText("AboutView")).toBeInTheDocument();
-
-    fireEvent.click(screen.getByText("about-back"));
-    expect(screen.getByText(/RpgTablesView-/)).toBeInTheDocument();
   });
 
-  it("affiche la vue qu’est-ce qu’un JDR puis revient à la vue JDR", async () => {
+  it("affiche la vue qu’est-ce qu’un JDR", async () => {
     vi.mocked(apiSession).mockRejectedValue(new Error("no session"));
 
     render(<App />);
@@ -461,12 +487,9 @@ describe("App", () => {
 
     fireEvent.click(screen.getByText("go-what-is-rpg"));
     expect(screen.getByText("WhatIsRpgView")).toBeInTheDocument();
-
-    fireEvent.click(screen.getByText("what-is-rpg-back"));
-    expect(screen.getByText(/RpgTablesView-/)).toBeInTheDocument();
   });
 
-  it("affiche la vue lieu puis revient à la vue JDR", async () => {
+  it("affiche la vue nos locaux", async () => {
     vi.mocked(apiSession).mockRejectedValue(new Error("no session"));
 
     render(<App />);
@@ -477,9 +500,6 @@ describe("App", () => {
 
     fireEvent.click(screen.getByText("go-location"));
     expect(screen.getByText("LocationView")).toBeInTheDocument();
-
-    fireEvent.click(screen.getByText("location-back"));
-    expect(screen.getByText(/RpgTablesView-/)).toBeInTheDocument();
   });
 
   it("affiche la vue des règles", async () => {
@@ -493,6 +513,32 @@ describe("App", () => {
 
     fireEvent.click(screen.getByText("go-rules"));
     expect(screen.getByText("RuleView")).toBeInTheDocument();
+  });
+
+  it("navigue depuis l’accueil vers à propos avec le callback de HomeView", async () => {
+    vi.mocked(apiSession).mockRejectedValue(new Error("no session"));
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText("HomeView")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText("home-discover"));
+    expect(screen.getByText("AboutView")).toBeInTheDocument();
+  });
+
+  it("navigue depuis l’accueil vers les tables JDR avec le callback de HomeView", async () => {
+    vi.mocked(apiSession).mockRejectedValue(new Error("no session"));
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText("HomeView")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText("home-join-table"));
+    expect(screen.getByText("RpgTablesView-0")).toBeInTheDocument();
   });
 
   it("ouvre la modale de création JDR puis la ferme avec retour", async () => {
@@ -624,6 +670,116 @@ describe("App", () => {
     expect(screen.getByText("RpgTablesView-0")).toBeInTheDocument();
 
     fireEvent.click(screen.getByText("rpg-login"));
+    expect(screen.getByText("AuthForms-login")).toBeInTheDocument();
+  });
+
+  it("ouvre la modale de création de sondage puis la ferme", async () => {
+    vi.mocked(apiSession).mockRejectedValue(new Error("no session"));
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText("HomeView")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText("go-polls"));
+    expect(screen.getByText("PollsView-0")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("poll-create"));
+    expect(screen.getByText("UpsertPoll-create")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("poll-upsert-back"));
+    expect(screen.getByText("PollsView-0")).toBeInTheDocument();
+  });
+
+  it("ouvre la modale d’édition de sondage avec l’identifiant sélectionné", async () => {
+    vi.mocked(apiSession).mockRejectedValue(new Error("no session"));
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText("HomeView")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText("go-polls"));
+    fireEvent.click(screen.getByText("poll-edit"));
+
+    expect(screen.getByText("UpsertPoll-24")).toBeInTheDocument();
+  });
+
+  it("ferme la modale de sondage quand on clique sur l’overlay", async () => {
+    vi.mocked(apiSession).mockRejectedValue(new Error("no session"));
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText("HomeView")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText("go-polls"));
+    fireEvent.click(screen.getByText("poll-create"));
+
+    expect(screen.getByText("UpsertPoll-create")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("poll-modal-overlay"));
+
+    expect(screen.queryByText("UpsertPoll-create")).not.toBeInTheDocument();
+  });
+
+  it("ne ferme pas la modale de sondage quand on clique dans son contenu", async () => {
+    vi.mocked(apiSession).mockRejectedValue(new Error("no session"));
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText("HomeView")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText("go-polls"));
+    fireEvent.click(screen.getByText("poll-create"));
+
+    expect(screen.getByText("UpsertPoll-create")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("poll-modal-content"));
+
+    expect(screen.getByText("UpsertPoll-create")).toBeInTheDocument();
+  });
+
+  it("incrémente le reload token sondage quand la modale est validée", async () => {
+    vi.mocked(apiSession).mockRejectedValue(new Error("no session"));
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText("HomeView")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText("go-polls"));
+    expect(screen.getByText("PollsView-0")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("poll-create"));
+    expect(screen.getByText("UpsertPoll-create")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("poll-upsert-done"));
+
+    await waitFor(() => {
+      expect(screen.getByText("PollsView-1")).toBeInTheDocument();
+    });
+  });
+
+  it("bascule vers la connexion depuis la vue sondages quand elle est demandée", async () => {
+    vi.mocked(apiSession).mockRejectedValue(new Error("no session"));
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText("HomeView")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText("go-polls"));
+    expect(screen.getByText("PollsView-0")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("poll-login"));
     expect(screen.getByText("AuthForms-login")).toBeInTheDocument();
   });
 

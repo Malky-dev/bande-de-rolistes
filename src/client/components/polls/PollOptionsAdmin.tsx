@@ -3,7 +3,7 @@ import {
   apiCreatePollOption,
   apiDeletePollOption,
   apiUpdatePollOption,
-} from "../../../api/pollsApi";
+} from "../../../api/polls";
 import type { PollDetails } from "../../../types/api/polls";
 
 type PollOptionsAdminProps = {

@@ -7,7 +7,6 @@ import {
   apiLogin,
   apiLogout,
   apiQuote,
-  isApiErrorPayload,
   isPaginatedQuoteAdmin,
   apiQuotesCreate,
   apiQuotesDelete,
@@ -15,9 +14,13 @@ import {
   apiQuotesUpdate,
   apiSession,
   apiSignin,
+} from "@/api/auth";
+
+import {
+  isApiErrorPayload,
   parseJsonObject,
   readErrorMessage,
-} from "@/api/authApi";
+} from "@/api/http";
 
 type FetchResponseShape = {
   ok: boolean;
@@ -40,7 +43,7 @@ function makeResponse(data: {
   };
 }
 
-describe("authApi", () => {
+describe("auth", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.restoreAllMocks();

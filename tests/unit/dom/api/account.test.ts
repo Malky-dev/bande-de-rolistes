@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { apiGetAccount, apiUpdateAccount } from "@/api/accountApi";
+import { apiGetAccount, apiUpdateAccount } from "@/api/account";
 
 type FetchResponseShape = {
   ok: boolean;

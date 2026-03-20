@@ -178,7 +178,7 @@ describe("controller admin updateRole", () => {
       });
 
     const req = makeReq({ params: { userID: "7" }, body: { roleID: "2" } });
-    const { res, status, json } = makeTypedRes();
+    const { res, json } = makeTypedRes();
 
     await controllerAdminUpdateRole(req, res);
 
@@ -196,7 +196,7 @@ describe("controller admin updateRole", () => {
       });
 
     const req = makeReq({ params: { userID: "7" }, body: { roleID: "2" } });
-    const { res, status, json } = makeTypedRes();
+    const { res, json } = makeTypedRes();
 
     await controllerAdminUpdateRole(req, res);
 
@@ -357,7 +357,7 @@ describe("controller admin updateRole", () => {
       body: { roleID: "2" },
       user: { userID: 99 },
     });
-    const { res, status, json } = makeTypedRes();
+    const { res, json } = makeTypedRes();
 
     await controllerAdminUpdateRole(req, res);
 

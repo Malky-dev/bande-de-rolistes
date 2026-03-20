@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { ReactElement } from "react";
 import type { SessionInfo } from "../../../types/api/session";
 import type { RpgTableDetails } from "../../../types/api/rpg";
-import { apiGetRpgTable } from "../../../api/rpgApi";
+import { apiGetRpgTable } from "../../../api/rpg";
 import RpgTableForm from "./RpgTableForm";
 import { canCreateRpgTable, canEditRpgTable } from "./rpgPermissions";
 

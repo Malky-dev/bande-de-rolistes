@@ -6,7 +6,7 @@ import {
   apiQuotesList,
   apiQuotesUpdate,
   type QuoteAdmin,
-} from "../../api/authApi";
+} from "../../api/auth";
 import {
   buildQuotesPageWindow,
   getQuotesRangeLabel,

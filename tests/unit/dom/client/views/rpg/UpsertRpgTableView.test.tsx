@@ -2,9 +2,9 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import UpsertRpgTableView from "@/client/views/rpg/UpsertRpgTableView";
-import { apiGetRpgTable } from "@/api/rpgApi";
+import { apiGetRpgTable } from "@/api/rpg";
 
-vi.mock("@/api/rpgApi", () => ({
+vi.mock("@/api/rpg", () => ({
   apiGetRpgTable: vi.fn(),
 }));
 

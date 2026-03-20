@@ -5,7 +5,7 @@ import {
   apiListRpgTables,
   apiSignupRpg,
   apiUnsignupRpg,
-} from "../../api/rpgApi";
+} from "../../api/rpg";
 
 import type {
   RpgTableDetails,

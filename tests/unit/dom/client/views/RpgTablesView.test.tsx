@@ -14,9 +14,9 @@ import {
   apiListRpgTables,
   apiSignupRpg,
   apiUnsignupRpg,
-} from "@/api/rpgApi";
+} from "@/api/rpg";
 
-vi.mock("@/api/rpgApi", () => ({
+vi.mock("@/api/rpg", () => ({
   apiGetRpgTable: vi.fn(),
   apiListRpgTables: vi.fn(),
   apiSignupRpg: vi.fn(),

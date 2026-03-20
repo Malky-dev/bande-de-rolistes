@@ -5,11 +5,11 @@ import {
   apiCreatePollOption,
   apiDeletePollOption,
   apiUpdatePollOption,
-} from "@/api/pollsApi";
+} from "@/api/polls";
 import PollOptionsAdmin from "@/client/components/polls/PollOptionsAdmin";
 import type { PollDetails } from "@/types/api/polls";
 
-vi.mock("@/api/pollsApi", () => ({
+vi.mock("@/api/polls", () => ({
   apiCreatePollOption: vi.fn(),
   apiUpdatePollOption: vi.fn(),
   apiDeletePollOption: vi.fn(),

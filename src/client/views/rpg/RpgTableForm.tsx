@@ -30,7 +30,7 @@ import {
   apiListRpgStatuses,
   apiUpdateRpgTable,
   apiUpdateRpgTableStatus,
-} from "../../../api/rpgApi";
+} from "../../../api/rpg";
 
 type Props =
   | {

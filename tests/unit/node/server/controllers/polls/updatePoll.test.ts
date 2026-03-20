@@ -236,7 +236,7 @@ describe("controller updatePoll", () => {
     const { controllerUpdatePoll, makeReq, makeTypedRes, mocks } = await load();
 
     const req = makeReq("1", { description: "New description" });
-    const { res, status, json } = makeTypedRes();
+    const { res, status } = makeTypedRes();
 
     await controllerUpdatePoll(req, res);
 
@@ -283,7 +283,7 @@ describe("controller updatePoll", () => {
 
     const future = new Date(Date.now() + 86400000).toISOString();
     const req = makeReq("1", { endAt: future });
-    const { res, status, json } = makeTypedRes();
+    const { res, status } = makeTypedRes();
 
     await controllerUpdatePoll(req, res);
 

@@ -1,6 +1,6 @@
-// src/api/authApi.ts
-
 import type { SessionInfo } from "../types/api/session";
+import { getCsrfToken } from "./csrf";
+import { readErrorMessage, readJsonObject } from "./http";
 
 export type Quote = {
   content: string;
@@ -35,94 +35,6 @@ export type AdminRole = {
   roleID: number;
   roleLabel: string;
 };
-
-// ----------------------------------
-// Helpers
-// ----------------------------------
-
-export type ApiErrorPayload = { message?: string; code?: string };
-
-export function isApiErrorPayload(value: object): value is ApiErrorPayload {
-  return (
-    (!("message" in value) || typeof value.message === "string") &&
-    (!("code" in value) || typeof value.code === "string")
-  );
-}
-
-export function parseJsonObject(text: string): object {
-  // JSON.parse est runtime-only. On contraint immédiatement à `object` + vérifs.
-  const parsed = JSON.parse(text) as object;
-
-  if (typeof parsed !== "object" || parsed === null) {
-    throw new Error("Invalid JSON payload");
-  }
-
-  return parsed;
-}
-
-export async function readJsonObject(res: Response): Promise<object> {
-  const text = await res.text();
-  return parseJsonObject(text);
-}
-
-export async function readErrorMessage(
-  res: Response,
-  fallback: string,
-): Promise<string> {
-  try {
-    const obj = await readJsonObject(res);
-    if (
-      isApiErrorPayload(obj) &&
-      typeof obj.message === "string" &&
-      obj.message.length > 0
-    ) {
-      return obj.message;
-    }
-    return fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-/**
- * Fonction utilitaire pour récupérer le token CSRF
- * Ne pas mettre en cache car chaque token est unique et lié au secret dans le cookie
- */
-export function isCsrfTokenResponse(
-  value: object,
-): value is { csrfToken: string } {
-  return (
-    "csrfToken" in value &&
-    typeof value.csrfToken === "string" &&
-    value.csrfToken.length > 0
-  );
-}
-
-async function getCsrfToken(): Promise<string> {
-  const res = await fetch("/api/csrf-token", {
-    credentials: "include",
-    method: "GET",
-    cache: "no-store",
-    headers: {
-      "Cache-Control": "no-cache",
-    },
-  });
-
-  if (!res.ok) {
-    throw new Error(
-      await readErrorMessage(res, "Impossible de récupérer le token CSRF"),
-    );
-  }
-
-  const obj = await readJsonObject(res);
-
-  if (!isCsrfTokenResponse(obj)) {
-    console.error("Token CSRF invalide reçu:", obj);
-    throw new Error("Token CSRF invalide reçu du serveur");
-  }
-
-  return obj.csrfToken;
-}
 
 export function isSessionInfo(value: object): value is SessionInfo {
   return (
@@ -194,9 +106,58 @@ export function isLogoutResponse(value: object): value is { success: boolean } {
   return "success" in value && typeof value.success === "boolean";
 }
 
-// ----------------------------------
-// Auth
-// ----------------------------------
+export function isQuoteAdminArray(value: object): value is QuoteAdmin[] {
+  if (!Array.isArray(value)) return false;
+  return value.every((v) => {
+    if (typeof v !== "object" || v === null) return false;
+    const o = v as Record<string, string | number | undefined>;
+    return (
+      typeof o.quoteID === "number" &&
+      typeof o.content === "string" &&
+      typeof o.author === "string"
+    );
+  });
+}
+
+export function isQuoteAdmin(value: object): value is QuoteAdmin {
+  const record = value as Record<string, string | number | undefined>;
+
+  const createdAt = record.created_at;
+
+  return (
+    "quoteID" in value &&
+    typeof value.quoteID === "number" &&
+    "content" in value &&
+    typeof value.content === "string" &&
+    "author" in value &&
+    typeof value.author === "string" &&
+    (typeof createdAt === "string" || typeof createdAt === "undefined")
+  );
+}
+
+export function isPaginatedQuoteAdmin(
+  value: object,
+): value is Paginated<QuoteAdmin> {
+  const record = value as Record<
+    string,
+    string | number | boolean | object | object[] | null
+  >;
+
+  const items = record.items;
+  const page = record.page;
+  const limit = record.limit;
+  const totalItems = record.totalItems;
+  const totalPages = record.totalPages;
+
+  return (
+    Array.isArray(items) &&
+    isQuoteAdminArray(items as object) &&
+    typeof page === "number" &&
+    typeof limit === "number" &&
+    typeof totalItems === "number" &&
+    typeof totalPages === "number"
+  );
+}
 
 export async function apiSignin(
   nickname: string,
@@ -246,13 +207,15 @@ export async function apiSession(): Promise<SessionInfo> {
     credentials: "include",
   });
 
-  if (!res.ok)
+  if (!res.ok) {
     throw new Error(await readErrorMessage(res, "Not authenticated"));
+  }
 
   const obj = await readJsonObject(res);
   if (!isSessionInfo(obj)) {
     throw new Error("Invalid session payload");
   }
+
   return obj;
 }
 
@@ -267,18 +230,17 @@ export async function apiLogout(): Promise<{ success: boolean }> {
     credentials: "include",
   });
 
-  if (!res.ok) throw new Error(await readErrorMessage(res, "Logout failed"));
+  if (!res.ok) {
+    throw new Error(await readErrorMessage(res, "Logout failed"));
+  }
 
   const obj = await readJsonObject(res);
   if (!isLogoutResponse(obj)) {
     throw new Error("Invalid logout payload");
   }
+
   return obj;
 }
-
-// ----------------------------------
-// Quote
-// ----------------------------------
 
 export async function apiQuote(): Promise<Quote> {
   const res = await fetch("/api/quote", { credentials: "include" });
@@ -296,51 +258,8 @@ export async function apiQuote(): Promise<Quote> {
   if (!isQuote(obj)) {
     throw new Error("Invalid quote payload");
   }
+
   return obj;
-}
-
-export function isQuoteAdminArray(value: unknown): value is QuoteAdmin[] {
-  if (!Array.isArray(value)) return false;
-  return value.every((v) => {
-    if (typeof v !== "object" || v === null) return false;
-    const o = v as Record<string, unknown>;
-    return (
-      typeof o.quoteID === "number" &&
-      typeof o.content === "string" &&
-      typeof o.author === "string"
-    );
-  });
-}
-
-export function isQuoteAdmin(value: object): value is QuoteAdmin {
-  return (
-    "quoteID" in value &&
-    typeof value.quoteID === "number" &&
-    "content" in value &&
-    typeof value.content === "string" &&
-    "author" in value &&
-    typeof value.author === "string" &&
-    (!("created_at" in value) ||
-      typeof (value as Record<string, unknown>).created_at === "string")
-  );
-}
-
-export function isPaginatedQuoteAdmin(
-  value: object,
-): value is Paginated<QuoteAdmin> {
-  return (
-    "items" in value &&
-    Array.isArray((value as Record<string, unknown>).items) &&
-    isQuoteAdminArray((value as Record<string, unknown>).items) &&
-    "page" in value &&
-    typeof (value as Record<string, unknown>).page === "number" &&
-    "limit" in value &&
-    typeof (value as Record<string, unknown>).limit === "number" &&
-    "totalItems" in value &&
-    typeof (value as Record<string, unknown>).totalItems === "number" &&
-    "totalPages" in value &&
-    typeof (value as Record<string, unknown>).totalPages === "number"
-  );
 }
 
 export async function apiQuotesList(
@@ -356,10 +275,12 @@ export async function apiQuotesList(
   const res = await fetch(`/api/quotes?${params.toString()}`, {
     credentials: "include",
   });
-  if (!res.ok)
+
+  if (!res.ok) {
     throw new Error(
       await readErrorMessage(res, "Erreur lors du chargement des citations"),
     );
+  }
 
   const obj = await readJsonObject(res);
   if (!isPaginatedQuoteAdmin(obj)) {
@@ -395,6 +316,7 @@ export async function apiQuotesCreate(payload: {
   if (!isQuoteAdmin(obj)) {
     throw new Error("Invalid quote payload");
   }
+
   return obj;
 }
 
@@ -407,38 +329,44 @@ export async function apiQuotesUpdate(
   const res = await fetch(`/api/quotes/${quoteID}`, {
     method: "PUT",
     credentials: "include",
-    headers: { "Content-Type": "application/json", "x-csrf-token": csrfToken },
+    headers: {
+      "Content-Type": "application/json",
+      "x-csrf-token": csrfToken,
+    },
     body: JSON.stringify(payload),
   });
 
-  if (!res.ok)
+  if (!res.ok) {
     throw new Error(
       await readErrorMessage(res, "Erreur lors de la mise à jour"),
     );
+  }
 
   const obj = await readJsonObject(res);
   if (!isQuoteAdmin(obj)) {
     throw new Error("Invalid quote payload");
   }
+
   return obj;
 }
 
 export async function apiQuotesDelete(quoteID: number): Promise<void> {
   const csrfToken = await getCsrfToken();
+
   const res = await fetch(`/api/quotes/${quoteID}`, {
     method: "DELETE",
     credentials: "include",
-    headers: { "x-csrf-token": csrfToken },
+    headers: {
+      "x-csrf-token": csrfToken,
+    },
   });
-  if (!res.ok)
+
+  if (!res.ok) {
     throw new Error(
       await readErrorMessage(res, "Erreur lors de la suppression"),
     );
+  }
 }
-
-// ----------------------------------
-// Admin
-// ----------------------------------
 
 export async function apiAdminUsers(): Promise<AdminUser[]> {
   const res = await fetch("/api/admin/users", {
@@ -461,6 +389,7 @@ export async function apiAdminUsers(): Promise<AdminUser[]> {
   if (!isAdminUserArray(obj)) {
     throw new Error("Invalid admin users payload");
   }
+
   return obj;
 }
 
@@ -485,6 +414,7 @@ export async function apiAdminRoles(): Promise<AdminRole[]> {
   if (!isAdminRoleArray(obj)) {
     throw new Error("Invalid admin roles payload");
   }
+
   return obj;
 }
 
@@ -517,5 +447,6 @@ export async function apiAdminUpdateRole(
   if (!isAdminUser(obj)) {
     throw new Error("Invalid admin user payload");
   }
+
   return obj;
 }

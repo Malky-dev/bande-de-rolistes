@@ -2,7 +2,6 @@ import type { PollDetails } from "../../../types/api/polls";
 import type { SessionInfo } from "../../../types/api/session";
 import PollResults from "./PollResults";
 import PollVoteForm from "./PollVoteForm";
-import PollOptionsAdmin from "./PollOptionsAdmin";
 
 type PollVoteModalProps = {
   session: SessionInfo | null;
@@ -41,7 +40,6 @@ export default function PollVoteModal({
   onDeletePoll,
   onEditPoll,
   onLogin,
-  onOptionsChanged,
 }: PollVoteModalProps) {
   return (
     <div className="appModal" onClick={onClose}>

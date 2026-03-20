@@ -10,7 +10,7 @@ import {
   apiGetPoll,
   apiUpdatePoll,
   apiUpdatePollOption,
-} from "../../../api/pollsApi";
+} from "../../../api/polls";
 import type {
   CreatePollBody,
   PollDetails,

@@ -1,18 +1,18 @@
-import type { SessionInfo } from '../../types/api/session'
-import AdminPanel from '@/client/components/AdminPanel'
-import ForbiddenView from './ForbiddenView'
+import type { SessionInfo } from "../../types/api/session";
+import AdminPanel from "@/client/components/AdminPanel";
+import ForbiddenView from "./ForbiddenView";
 
 type AdminViewProps = {
-  session: SessionInfo | null
-  onBackHome: () => void
-}
+  session: SessionInfo | null;
+  onBackHome: () => void;
+};
 
 function AdminView({ session, onBackHome }: AdminViewProps) {
-  if (session?.role !== 'admin') {
-    return <ForbiddenView onBackHome={onBackHome} />
+  if (session?.role !== "admin") {
+    return <ForbiddenView onBackHome={onBackHome} />;
   }
 
-  return <AdminPanel />
+  return <AdminPanel />;
 }
 
-export default AdminView
+export default AdminView;

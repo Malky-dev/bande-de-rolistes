@@ -18,7 +18,7 @@ const controllerAdminUsers: RequestHandler<
   Record<string, never>,
   AdminUserItem[] | ApiError,
   Record<string, never>
-> = async (req, res): Promise<void> => {
+> = async (_req, res): Promise<void> => {
   try {
     const users: UserWithRole[] = await User.findAll({
       include: { model: Role, as: "role", required: true },

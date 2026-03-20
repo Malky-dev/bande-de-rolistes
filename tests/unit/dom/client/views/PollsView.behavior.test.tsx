@@ -7,11 +7,11 @@ import {
   apiGetPoll,
   apiListPolls,
   apiReplacePollVote,
-} from "@/api/pollsApi";
+} from "@/api/polls";
 import PollsView from "@/client/views/PollsView";
 import type { PollDetails, PollListItem } from "@/types/api/polls";
 
-vi.mock("@/api/pollsApi", () => ({
+vi.mock("@/api/polls", () => ({
   apiListPolls: vi.fn(),
   apiGetPoll: vi.fn(),
   apiReplacePollVote: vi.fn(),

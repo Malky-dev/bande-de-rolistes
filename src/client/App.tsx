@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import type { View } from "@/types/navigation";
 import type { SessionInfo } from "../types/api/session";
-import { apiSession } from "../api/authApi";
-import { fetchCsrfToken } from "../api/securityApi";
+import { apiSession } from "../api/auth";
 import AuthForms from "./components/AuthForms";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -20,6 +19,7 @@ import LocationView from "./views/LocationView";
 import RuleView from "./views/RuleView";
 import PollsView from "./views/PollsView";
 import UpsertPollView from "./views/polls/UpsertPollView";
+import { apiLogout } from "../api/auth";
 
 function App() {
   const [view, setView] = useState<View>("home");
@@ -104,12 +104,7 @@ function App() {
 
   const handleLogout = async () => {
     try {
-      const csrfToken = await fetchCsrfToken();
-      await fetch("/api/logout", {
-        method: "POST",
-        headers: { "x-csrf-token": csrfToken },
-        credentials: "include",
-      });
+      await apiLogout();
     } catch (error) {
       console.error("Erreur lors de la déconnexion:", error);
     }
@@ -134,17 +129,18 @@ function App() {
       />
 
       <main className="main">
-        {view === "home" && <HomeView />}
-
-        {view === "about" && <AboutView onJoinTable={() => setView("rpg")} />}
-
-        {view === "what-is-rpg" && (
-          <WhatIsRpg onJoinTable={() => setView("rpg")} />
+        {view === "home" && (
+          <HomeView
+            onDiscover={() => setView("about")}
+            onJoinTable={() => setView("rpg")}
+          />
         )}
 
-        {view === "location" && (
-          <LocationView onJoinTable={() => setView("rpg")} />
-        )}
+        {view === "about" && <AboutView />}
+
+        {view === "what-is-rpg" && <WhatIsRpg />}
+
+        {view === "location" && <LocationView />}
 
         {view === "rules" && <RuleView />}
 

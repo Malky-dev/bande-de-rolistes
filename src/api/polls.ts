@@ -1,4 +1,5 @@
-import { fetchCsrfToken } from "./securityApi";
+import { getCsrfToken } from "./csrf";
+import { readErrorMessage, readJsonObject } from "./http";
 import type {
   CreatePollBody,
   CreatePollOptionBody,
@@ -12,15 +13,6 @@ import type {
   UpdatePollOptionBody,
 } from "../types/api/polls";
 
-type JsonPrimitive = boolean | number | string | null;
-type JsonValue = JsonPrimitive | JsonObject | JsonValue[];
-type JsonObject = { [key: string]: JsonValue };
-
-type ApiErrorPayload = {
-  message?: string;
-  code?: string;
-};
-
 type ApiMessagePayload = {
   message: string;
 };
@@ -30,154 +22,155 @@ type ApiCreatePollPayload = {
   message: string;
 };
 
-function isJsonObject(value: JsonValue): value is JsonObject {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function parseJson(text: string): JsonValue {
-  return JSON.parse(text) as JsonValue;
-}
-
-async function readJson(res: Response): Promise<JsonValue> {
-  const text = await res.text();
-  return parseJson(text);
-}
-
-function isApiErrorPayload(value: JsonValue): value is ApiErrorPayload {
-  if (!isJsonObject(value)) {
-    return false;
-  }
-
-  const message = value.message;
-  const code = value.code;
-
-  const isMessageValid =
-    typeof message === "string" || typeof message === "undefined";
-  const isCodeValid = typeof code === "string" || typeof code === "undefined";
-
-  return isMessageValid && isCodeValid;
-}
-
-async function readErrorMessage(
-  res: Response,
-  fallback: string,
-): Promise<string> {
-  try {
-    const value = await readJson(res);
-
-    if (isApiErrorPayload(value) && typeof value.message === "string") {
-      if (value.message.length > 0) {
-        return value.message;
-      }
-    }
-
-    return fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function isPollAuthorView(value: JsonValue): value is PollAuthorView {
-  if (!isJsonObject(value)) {
-    return false;
-  }
-
-  return typeof value.userID === "number" && typeof value.nickname === "string";
-}
-
-function isPollVoterView(value: JsonValue): value is PollVoterView {
-  if (!isJsonObject(value)) {
-    return false;
-  }
-
-  return typeof value.userID === "number" && typeof value.nickname === "string";
-}
-
-function isPollOptionView(value: JsonValue): value is PollOptionView {
-  if (!isJsonObject(value)) {
-    return false;
-  }
-
-  const voters = value.voters;
-
+function isPollAuthorView(value: object): value is PollAuthorView {
   return (
-    typeof value.optionID === "number" &&
-    typeof value.label === "string" &&
-    typeof value.displayOrder === "number" &&
-    typeof value.voteCount === "number" &&
-    Array.isArray(voters) &&
-    voters.every(isPollVoterView)
+    "userID" in value &&
+    typeof value.userID === "number" &&
+    "nickname" in value &&
+    typeof value.nickname === "string"
   );
 }
 
-function isPollListItem(value: JsonValue): value is PollListItem {
-  if (!isJsonObject(value)) {
-    return false;
-  }
+function isPollVoterView(value: object): value is PollVoterView {
+  return (
+    "userID" in value &&
+    typeof value.userID === "number" &&
+    "nickname" in value &&
+    typeof value.nickname === "string"
+  );
+}
 
-  const description = value.description;
+function isPollOptionView(value: object): value is PollOptionView {
+  const record = value as Record<
+    string,
+    string | number | boolean | object | object[] | null
+  >;
+
+  const voters = record.voters;
 
   return (
+    "optionID" in value &&
+    typeof value.optionID === "number" &&
+    "label" in value &&
+    typeof value.label === "string" &&
+    "displayOrder" in value &&
+    typeof value.displayOrder === "number" &&
+    "voteCount" in value &&
+    typeof value.voteCount === "number" &&
+    Array.isArray(voters) &&
+    voters.every(
+      (entry) =>
+        typeof entry === "object" &&
+        entry !== null &&
+        isPollVoterView(entry as object),
+    )
+  );
+}
+
+function isPollListItem(value: object): value is PollListItem {
+  const record = value as Record<
+    string,
+    string | number | boolean | object | number[] | object[] | null
+  >;
+
+  const description = record.description;
+
+  return (
+    "pollID" in value &&
     typeof value.pollID === "number" &&
+    "title" in value &&
     typeof value.title === "string" &&
     (typeof description === "string" || description === null) &&
+    "endAt" in value &&
     typeof value.endAt === "string" &&
+    "createdAt" in value &&
     typeof value.createdAt === "string" &&
+    "createdBy" in value &&
+    typeof value.createdBy === "object" &&
+    value.createdBy !== null &&
     isPollAuthorView(value.createdBy) &&
+    "maxSelections" in value &&
     typeof value.maxSelections === "number" &&
+    "totalVoters" in value &&
     typeof value.totalVoters === "number" &&
+    "totalVotes" in value &&
     typeof value.totalVotes === "number" &&
+    "isClosed" in value &&
     typeof value.isClosed === "boolean" &&
+    "canManage" in value &&
     typeof value.canManage === "boolean"
   );
 }
 
-function isPollDetails(value: JsonValue): value is PollDetails {
-  if (!isJsonObject(value)) {
-    return false;
-  }
+function isPollDetails(value: object): value is PollDetails {
+  const record = value as Record<
+    string,
+    string | number | boolean | object | number[] | object[] | null
+  >;
 
-  const description = value.description;
-  const myVote = value.myVote;
-  const options = value.options;
+  const description = record.description;
+  const myVote = record.myVote;
+  const options = record.options;
 
   return (
+    "pollID" in value &&
     typeof value.pollID === "number" &&
+    "title" in value &&
     typeof value.title === "string" &&
     (typeof description === "string" || description === null) &&
+    "endAt" in value &&
     typeof value.endAt === "string" &&
+    "createdAt" in value &&
     typeof value.createdAt === "string" &&
+    "updatedAt" in value &&
     typeof value.updatedAt === "string" &&
+    "createdBy" in value &&
+    typeof value.createdBy === "object" &&
+    value.createdBy !== null &&
     isPollAuthorView(value.createdBy) &&
+    "maxSelections" in value &&
     typeof value.maxSelections === "number" &&
+    "isClosed" in value &&
     typeof value.isClosed === "boolean" &&
+    "canVote" in value &&
     typeof value.canVote === "boolean" &&
+    "canManage" in value &&
     typeof value.canManage === "boolean" &&
     Array.isArray(myVote) &&
     myVote.every((entry) => typeof entry === "number") &&
     Array.isArray(options) &&
-    options.every(isPollOptionView)
+    options.every(
+      (entry) =>
+        typeof entry === "object" &&
+        entry !== null &&
+        isPollOptionView(entry as object),
+    )
   );
 }
 
-function isPollList(value: JsonValue): value is PollListItem[] {
-  return Array.isArray(value) && value.every(isPollListItem);
+function isPollList(value: object): value is PollListItem[] {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (entry) =>
+        typeof entry === "object" &&
+        entry !== null &&
+        isPollListItem(entry as object),
+    )
+  );
 }
 
-function isCreatePollPayload(value: JsonValue): value is ApiCreatePollPayload {
-  if (!isJsonObject(value)) {
-    return false;
-  }
-
-  return typeof value.pollID === "number" && typeof value.message === "string";
+function isCreatePollPayload(value: object): value is ApiCreatePollPayload {
+  return (
+    "pollID" in value &&
+    typeof value.pollID === "number" &&
+    "message" in value &&
+    typeof value.message === "string"
+  );
 }
 
-function isMessagePayload(value: JsonValue): value is ApiMessagePayload {
-  if (!isJsonObject(value)) {
-    return false;
-  }
-
-  return typeof value.message === "string";
+function isMessagePayload(value: object): value is ApiMessagePayload {
+  return "message" in value && typeof value.message === "string";
 }
 
 export async function apiListPolls(): Promise<PollListItem[]> {
@@ -186,29 +179,21 @@ export async function apiListPolls(): Promise<PollListItem[]> {
   });
 
   if (!res.ok) {
-    const backendMessage = await readErrorMessage(
-      res,
-      `Impossible de charger les sondages (HTTP ${res.status}).`,
-    );
-    throw new Error(backendMessage);
-  }
-
-  const text = await res.text();
-
-  let value: JsonValue;
-  try {
-    value = parseJson(text);
-  } catch {
-    throw new Error(`Réponse JSON invalide pour /api/polls : ${text}`);
-  }
-
-  if (!isPollList(value)) {
     throw new Error(
-      `Payload inattendu pour /api/polls : ${JSON.stringify(value)}`,
+      await readErrorMessage(
+        res,
+        `Impossible de charger les sondages (HTTP ${res.status}).`,
+      ),
     );
   }
 
-  return value;
+  const obj = await readJsonObject(res);
+
+  if (!isPollList(obj)) {
+    throw new Error("Invalid polls payload");
+  }
+
+  return obj;
 }
 
 export async function apiGetPoll(pollID: number): Promise<PollDetails> {
@@ -222,19 +207,19 @@ export async function apiGetPoll(pollID: number): Promise<PollDetails> {
     );
   }
 
-  const value = await readJson(res);
+  const obj = await readJsonObject(res);
 
-  if (!isPollDetails(value)) {
+  if (!isPollDetails(obj)) {
     throw new Error("Invalid poll payload");
   }
 
-  return value;
+  return obj;
 }
 
 export async function apiCreatePoll(
   body: CreatePollBody,
 ): Promise<{ pollID: number; message: string }> {
-  const csrfToken = await fetchCsrfToken();
+  const csrfToken = await getCsrfToken();
 
   const res = await fetch("/api/polls", {
     method: "POST",
@@ -252,20 +237,20 @@ export async function apiCreatePoll(
     );
   }
 
-  const value = await readJson(res);
+  const obj = await readJsonObject(res);
 
-  if (!isCreatePollPayload(value)) {
+  if (!isCreatePollPayload(obj)) {
     throw new Error("Invalid create poll payload");
   }
 
-  return value;
+  return obj;
 }
 
 export async function apiUpdatePoll(
   pollID: number,
   body: UpdatePollBody,
 ): Promise<string> {
-  const csrfToken = await fetchCsrfToken();
+  const csrfToken = await getCsrfToken();
 
   const res = await fetch(`/api/polls/${pollID}`, {
     method: "PATCH",
@@ -283,16 +268,17 @@ export async function apiUpdatePoll(
     );
   }
 
-  const value = await readJson(res);
-  if (!isMessagePayload(value)) {
+  const obj = await readJsonObject(res);
+
+  if (!isMessagePayload(obj)) {
     throw new Error("Invalid update poll payload");
   }
 
-  return value.message;
+  return obj.message;
 }
 
 export async function apiDeletePoll(pollID: number): Promise<string> {
-  const csrfToken = await fetchCsrfToken();
+  const csrfToken = await getCsrfToken();
 
   const res = await fetch(`/api/polls/${pollID}`, {
     method: "DELETE",
@@ -308,20 +294,20 @@ export async function apiDeletePoll(pollID: number): Promise<string> {
     );
   }
 
-  const value = await readJson(res);
+  const obj = await readJsonObject(res);
 
-  if (!isMessagePayload(value)) {
+  if (!isMessagePayload(obj)) {
     throw new Error("Invalid delete poll payload");
   }
 
-  return value.message;
+  return obj.message;
 }
 
 export async function apiCreatePollOption(
   pollID: number,
   body: CreatePollOptionBody,
 ): Promise<string> {
-  const csrfToken = await fetchCsrfToken();
+  const csrfToken = await getCsrfToken();
 
   const res = await fetch(`/api/polls/${pollID}/options`, {
     method: "POST",
@@ -339,13 +325,13 @@ export async function apiCreatePollOption(
     );
   }
 
-  const value = await readJson(res);
+  const obj = await readJsonObject(res);
 
-  if (!isMessagePayload(value)) {
+  if (!isMessagePayload(obj)) {
     throw new Error("Invalid create option payload");
   }
 
-  return value.message;
+  return obj.message;
 }
 
 export async function apiUpdatePollOption(
@@ -353,7 +339,7 @@ export async function apiUpdatePollOption(
   optionID: number,
   body: UpdatePollOptionBody,
 ): Promise<string> {
-  const csrfToken = await fetchCsrfToken();
+  const csrfToken = await getCsrfToken();
 
   const res = await fetch(`/api/polls/${pollID}/options/${optionID}`, {
     method: "PATCH",
@@ -371,19 +357,20 @@ export async function apiUpdatePollOption(
     );
   }
 
-  const value = await readJson(res);
-  if (!isMessagePayload(value)) {
+  const obj = await readJsonObject(res);
+
+  if (!isMessagePayload(obj)) {
     throw new Error("Invalid update option payload");
   }
 
-  return value.message;
+  return obj.message;
 }
 
 export async function apiDeletePollOption(
   pollID: number,
   optionID: number,
 ): Promise<string> {
-  const csrfToken = await fetchCsrfToken();
+  const csrfToken = await getCsrfToken();
 
   const res = await fetch(`/api/polls/${pollID}/options/${optionID}`, {
     method: "DELETE",
@@ -399,20 +386,20 @@ export async function apiDeletePollOption(
     );
   }
 
-  const value = await readJson(res);
+  const obj = await readJsonObject(res);
 
-  if (!isMessagePayload(value)) {
+  if (!isMessagePayload(obj)) {
     throw new Error("Invalid delete option payload");
   }
 
-  return value.message;
+  return obj.message;
 }
 
 export async function apiReplacePollVote(
   pollID: number,
   body: ReplacePollVoteBody,
 ): Promise<string> {
-  const csrfToken = await fetchCsrfToken();
+  const csrfToken = await getCsrfToken();
 
   const res = await fetch(`/api/polls/${pollID}/vote`, {
     method: "PUT",
@@ -428,17 +415,17 @@ export async function apiReplacePollVote(
     throw new Error(await readErrorMessage(res, "Vote impossible."));
   }
 
-  const value = await readJson(res);
+  const obj = await readJsonObject(res);
 
-  if (!isMessagePayload(value)) {
+  if (!isMessagePayload(obj)) {
     throw new Error("Invalid vote payload");
   }
 
-  return value.message;
+  return obj.message;
 }
 
 export async function apiDeletePollVote(pollID: number): Promise<string> {
-  const csrfToken = await fetchCsrfToken();
+  const csrfToken = await getCsrfToken();
 
   const res = await fetch(`/api/polls/${pollID}/vote`, {
     method: "DELETE",
@@ -454,11 +441,11 @@ export async function apiDeletePollVote(pollID: number): Promise<string> {
     );
   }
 
-  const value = await readJson(res);
+  const obj = await readJsonObject(res);
 
-  if (!isMessagePayload(value)) {
+  if (!isMessagePayload(obj)) {
     throw new Error("Invalid delete vote payload");
   }
 
-  return value.message;
+  return obj.message;
 }

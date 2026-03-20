@@ -1,18 +1,14 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/api/authApi", () => ({
+vi.mock("@/api/auth", () => ({
   apiAdminRoles: vi.fn(),
   apiAdminUpdateRole: vi.fn(),
   apiAdminUsers: vi.fn(),
 }));
 
 import AdminPanel from "@/client/components/AdminPanel";
-import {
-  apiAdminRoles,
-  apiAdminUpdateRole,
-  apiAdminUsers,
-} from "@/api/authApi";
+import { apiAdminRoles, apiAdminUpdateRole, apiAdminUsers } from "@/api/auth";
 
 describe("AdminPanel", () => {
   afterEach(() => {

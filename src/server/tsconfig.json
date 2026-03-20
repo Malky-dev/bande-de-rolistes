@@ -1,8 +1,4 @@
 {
-    "extends": "../../tsconfig.server.json",
-    "include": [
-      "**/*.ts",
-      "../types/**/*.d.ts"
-, "../types/express/index.d.ts"    ]
-  }
-  
+  "extends": "../../tsconfig.server.json",
+  "include": ["**/*.ts", "../types/**/*.d.ts", "../types/express/index.d.ts"]
+}

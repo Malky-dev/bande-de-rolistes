@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import QuotesPanel from "@/client/components/QuotesPanel";
 
-vi.mock("@/api/authApi", () => ({
+vi.mock("@/api/auth", () => ({
   apiQuotesCreate: vi.fn(),
   apiQuotesDelete: vi.fn(),
   apiQuotesList: vi.fn(),
@@ -20,7 +20,7 @@ import {
   apiQuotesDelete,
   apiQuotesList,
   apiQuotesUpdate,
-} from "@/api/authApi";
+} from "@/api/auth";
 
 describe("QuotesPanel", () => {
   afterEach(() => {
