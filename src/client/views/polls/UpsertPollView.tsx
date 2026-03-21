@@ -1,22 +1,33 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ChangeEvent, ReactElement } from "react";
-import DatePicker from "react-datepicker";
+
 import { fr } from "date-fns/locale";
+import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+
+import { apiCreatePoll, apiGetPoll, apiUpdatePoll } from "@/api/polls";
+import { syncEditedPollOptions } from "@/client/views/polls/pollOptionEditor.service";
+import { canManagePolls } from "@/client/utils/permissions";
 import {
-  apiCreatePoll,
-  apiCreatePollOption,
-  apiDeletePollOption,
-  apiGetPoll,
-  apiUpdatePoll,
-  apiUpdatePollOption,
-} from "../../../api/polls";
-import type {
-  CreatePollBody,
-  PollDetails,
-  UpdatePollBody,
-} from "../../../types/api/polls";
-import type { SessionInfo } from "../../../types/api/session";
+  addEditablePollOption,
+  buildInitialPollOptions,
+  getActiveEditablePollOptions,
+  getNormalizedActivePollOptionLabels,
+  mapPollDetailsToEditableOptions,
+  removeEditablePollOption,
+  restoreEditablePollOption,
+  updateEditablePollOptionLabel,
+  type EditablePollOption,
+} from "@/client/views/polls/pollOptionEditor.model";
+import {
+  buildCreatePollPayload,
+  buildPollFormError,
+  buildUpdatePollPayload,
+} from "@/client/views/polls/pollForm.helpers";
+import PollOptionsEditor from "@/client/views/polls/PollOptionsEditor";
+import PollEditorState from "@/client/views/polls/PollEditorState";
+import type { PollDetails } from "@/types/api/polls";
+import type { SessionInfo } from "@/types/api/session";
 
 type Props = {
   session: SessionInfo | null;
@@ -25,61 +36,9 @@ type Props = {
   onDone: () => void;
 };
 
-type EditableOption = {
-  localID: string;
-  optionID: number | null;
-  label: string;
-  initialLabel: string;
-  markedForDeletion: boolean;
-};
-
-function canManagePolls(session: SessionInfo | null): boolean {
-  return session !== null && (session.roleID === 1 || session.roleID === 2);
-}
-
-function normalizeOptionLabel(value: string): string {
-  return value.trim();
-}
-
-function buildEmptyOption(): EditableOption {
-  return {
-    localID: crypto.randomUUID(),
-    optionID: null,
-    label: "",
-    initialLabel: "",
-    markedForDeletion: false,
-  };
-}
-
 function toDate(value: string): Date | null {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function buildInitialOptions(): EditableOption[] {
-  return [buildEmptyOption(), buildEmptyOption()];
-}
-
-function mapPollOptions(poll: PollDetails): EditableOption[] {
-  const sortedOptions = [...poll.options].sort((left, right) => {
-    if (left.displayOrder !== right.displayOrder) {
-      return left.displayOrder - right.displayOrder;
-    }
-
-    return left.optionID - right.optionID;
-  });
-
-  if (sortedOptions.length === 0) {
-    return buildInitialOptions();
-  }
-
-  return sortedOptions.map((option) => ({
-    localID: crypto.randomUUID(),
-    optionID: option.optionID,
-    label: option.label,
-    initialLabel: option.label,
-    markedForDeletion: false,
-  }));
 }
 
 export default function UpsertPollView({
@@ -95,7 +54,9 @@ export default function UpsertPollView({
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [endAt, setEndAt] = useState<Date | null>(null);
-  const [options, setOptions] = useState<EditableOption[]>(buildInitialOptions);
+  const [options, setOptions] = useState<EditablePollOption[]>(
+    buildInitialPollOptions,
+  );
   const [loading, setLoading] = useState<boolean>(isEdit);
   const [saving, setSaving] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -106,7 +67,7 @@ export default function UpsertPollView({
       setTitle("");
       setDescription("");
       setEndAt(null);
-      setOptions(buildInitialOptions());
+      setOptions(buildInitialPollOptions());
       setError(null);
       setLoading(false);
       return;
@@ -130,7 +91,7 @@ export default function UpsertPollView({
         setTitle(nextPoll.title);
         setDescription(nextPoll.description ?? "");
         setEndAt(toDate(nextPoll.endAt));
-        setOptions(mapPollOptions(nextPoll));
+        setOptions(mapPollDetailsToEditableOptions(nextPoll));
       } catch (cause) {
         /* v8 ignore next -- @preserve */
         if (!mounted) {
@@ -157,16 +118,13 @@ export default function UpsertPollView({
   }, [isEdit, pollID]);
 
   const activeOptions = useMemo(
-    () => options.filter((option) => !option.markedForDeletion),
+    () => getActiveEditablePollOptions(options),
     [options],
   );
 
   const normalizedActiveLabels = useMemo(
-    () =>
-      activeOptions
-        .map((option) => normalizeOptionLabel(option.label))
-        .filter((label) => label.length > 0),
-    [activeOptions],
+    () => getNormalizedActivePollOptionLabels(options),
+    [options],
   );
 
   function handleTitleChange(event: ChangeEvent<HTMLInputElement>): void {
@@ -181,111 +139,35 @@ export default function UpsertPollView({
 
   function updateOption(localID: string, value: string): void {
     setOptions((current) =>
-      current.map((option) =>
-        option.localID === localID ? { ...option, label: value } : option,
-      ),
+      updateEditablePollOptionLabel(current, localID, value),
     );
   }
 
   function addOption(): void {
-    setOptions((current) => [...current, buildEmptyOption()]);
+    setOptions((current) => addEditablePollOption(current));
   }
 
   function removeOption(localID: string): void {
-    setOptions((current) => {
-      const target = current.find((option) => option.localID === localID);
-      const activeCount = current.filter(
-        (option) => !option.markedForDeletion,
-      ).length;
-
-      if (target === undefined || activeCount <= 2) {
-        return current;
-      }
-
-      if (target.optionID === null) {
-        return current.filter((option) => option.localID !== localID);
-      }
-
-      return current.map((option) =>
-        option.localID === localID
-          ? { ...option, markedForDeletion: true }
-          : option,
-      );
-    });
+    setOptions((current) => removeEditablePollOption(current, localID));
   }
 
   function restoreOption(localID: string): void {
-    setOptions((current) =>
-      current.map((option) =>
-        option.localID === localID
-          ? { ...option, markedForDeletion: false }
-          : option,
-      ),
-    );
-  }
-
-  async function syncEditedOptions(currentPollID: number): Promise<void> {
-    const optionsToDelete = options.filter(
-      (option) => option.optionID !== null && option.markedForDeletion,
-    );
-
-    const optionsToRename = options.filter((option) => {
-      if (option.optionID === null || option.markedForDeletion) {
-        return false;
-      }
-
-      const normalizedLabel = normalizeOptionLabel(option.label);
-      return (
-        normalizedLabel.length > 0 && normalizedLabel !== option.initialLabel
-      );
-    });
-
-    const optionsToCreate = options.filter((option) => {
-      if (option.optionID !== null || option.markedForDeletion) {
-        return false;
-      }
-
-      return normalizeOptionLabel(option.label).length > 0;
-    });
-
-    for (const option of optionsToDelete) {
-      await apiDeletePollOption(currentPollID, option.optionID as number);
-    }
-
-    for (const option of optionsToRename) {
-      await apiUpdatePollOption(currentPollID, option.optionID as number, {
-        label: normalizeOptionLabel(option.label),
-      });
-    }
-
-    for (const option of optionsToCreate) {
-      await apiCreatePollOption(currentPollID, {
-        label: normalizeOptionLabel(option.label),
-      });
-    }
+    setOptions((current) => restoreEditablePollOption(current, localID));
   }
 
   async function handleSubmit(): Promise<void> {
-    if (!canSubmit) {
-      setError("Vous n'avez pas les droits pour gérer les sondages.");
-      return;
-    }
+    const formError = buildPollFormError(
+      canSubmit,
+      {
+        title,
+        description,
+        endAt,
+      },
+      normalizedActiveLabels,
+    );
 
-    const trimmedTitle = title.trim();
-    const trimmedDescription = description.trim();
-
-    if (trimmedTitle.length === 0) {
-      setError("Le titre est obligatoire.");
-      return;
-    }
-
-    if (endAt === null || Number.isNaN(endAt.getTime())) {
-      setError("La date de fin est invalide.");
-      return;
-    }
-
-    if (normalizedActiveLabels.length < 2) {
-      setError("Un sondage doit contenir au moins deux réponses.");
+    if (formError !== null) {
+      setError(formError);
       return;
     }
 
@@ -294,25 +176,23 @@ export default function UpsertPollView({
 
     try {
       if (isEdit && typeof pollID === "number") {
-        const payload: UpdatePollBody = {
-          title: trimmedTitle,
-          description:
-            trimmedDescription.length > 0 ? trimmedDescription : null,
-          endAt: endAt.toISOString(),
-          maxSelections: 1,
-        };
+        const payload = buildUpdatePollPayload({
+          title,
+          description,
+          endAt,
+        });
 
         await apiUpdatePoll(pollID, payload);
-        await syncEditedOptions(pollID);
+        await syncEditedPollOptions(pollID, options);
       } else {
-        const payload: CreatePollBody = {
-          title: trimmedTitle,
-          description:
-            trimmedDescription.length > 0 ? trimmedDescription : null,
-          endAt: endAt.toISOString(),
-          maxSelections: 1,
-          options: normalizedActiveLabels,
-        };
+        const payload = buildCreatePollPayload(
+          {
+            title,
+            description,
+            endAt,
+          },
+          normalizedActiveLabels,
+        );
 
         await apiCreatePoll(payload);
       }
@@ -330,33 +210,21 @@ export default function UpsertPollView({
   }
 
   if (!canSubmit) {
-    return <p>Accès refusé.</p>;
+    return <PollEditorState mode="forbidden" onBack={onBack} />;
   }
 
   if (isEdit && loading) {
-    return <p>Chargement…</p>;
+    return <PollEditorState mode="loading" onBack={onBack} />;
   }
 
   if (isEdit && !loading && error !== null && poll === null) {
     return (
-      <div>
-        <p>{error}</p>
-        <button type="button" className="btn-secondary" onClick={onBack}>
-          Retour
-        </button>
-      </div>
+      <PollEditorState mode="load-error" message={error} onBack={onBack} />
     );
   }
 
   if (isEdit && !loading && poll === null) {
-    return (
-      <div>
-        <p>Sondage introuvable.</p>
-        <button type="button" className="btn-secondary" onClick={onBack}>
-          Retour
-        </button>
-      </div>
-    );
+    return <PollEditorState mode="not-found" onBack={onBack} />;
   }
 
   return (
@@ -425,76 +293,15 @@ export default function UpsertPollView({
         </div>
 
         <aside className="poll-edit__side">
-          <section className="poll-options-editor poll-edit__section">
-            <div className="poll-edit__section-header">
-              <h3>Réponses</h3>
-              <p>Ajoute, modifie ou retire les options proposées au vote.</p>
-            </div>
-
-            <div className="poll-options-editor__list">
-              {options.map((option, index) => {
-                if (option.markedForDeletion) {
-                  return (
-                    <div
-                      key={option.localID}
-                      className="poll-option-row poll-option-row--deleted"
-                    >
-                      <input
-                        className="form-input"
-                        value={`${option.label} (supprimée)`}
-                        disabled
-                      />
-
-                      <button
-                        type="button"
-                        className="btn-secondary"
-                        onClick={() => restoreOption(option.localID)}
-                        disabled={saving}
-                      >
-                        Restaurer
-                      </button>
-                    </div>
-                  );
-                }
-
-                const activeCount = activeOptions.length;
-
-                return (
-                  <div key={option.localID} className="poll-option-row">
-                    <input
-                      id={`poll-option-${index}`}
-                      type="text"
-                      className="form-input"
-                      placeholder={`Réponse ${index + 1}`}
-                      value={option.label}
-                      onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                        updateOption(option.localID, event.target.value)
-                      }
-                      disabled={saving}
-                    />
-
-                    <button
-                      type="button"
-                      className="btn-secondary"
-                      onClick={() => removeOption(option.localID)}
-                      disabled={saving || activeCount <= 2}
-                    >
-                      Supprimer
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-
-            <button
-              type="button"
-              className="btn-secondary poll-options-editor__add"
-              onClick={addOption}
-              disabled={saving}
-            >
-              Ajouter une réponse
-            </button>
-          </section>
+          <PollOptionsEditor
+            options={options}
+            activeOptionCount={activeOptions.length}
+            saving={saving}
+            onAddOption={addOption}
+            onRemoveOption={removeOption}
+            onRestoreOption={restoreOption}
+            onUpdateOption={updateOption}
+          />
         </aside>
       </div>
 

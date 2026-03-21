@@ -1,8 +1,9 @@
 import type { PollDetails } from "@/types/api/polls";
 import type { SessionInfo } from "@/types/api/session";
+import { canCreatePoll as canCreatePollFromPermissions } from "@/client/utils/permissions";
 
 export function canCreatePoll(session: SessionInfo | null): boolean {
-  return session !== null && (session.roleID === 1 || session.roleID === 2);
+  return canCreatePollFromPermissions(session);
 }
 
 export function getPollsViewErrorMessage(

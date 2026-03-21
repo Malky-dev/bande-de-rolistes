@@ -66,3 +66,9 @@ export const RPG_ALLOWED_CREATE_ROLE_IDS = [1, 2, 3] as const;
 export const RPG_ALLOWED_DM_ROLE_IDS = [1, 2, 3] as const;
 export const RPG_ALLOWED_PLAYER_ROLE_IDS = [1, 2, 3, 4, 5] as const;
 export const RPG_ADMIN_OR_ORGA_ROLE_IDS = [1, 2] as const;
+
+/* =========================
+   POLLS
+========================= */
+
+export const INITIAL_RELOAD_TOKEN = 0;
