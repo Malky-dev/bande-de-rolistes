@@ -1,0 +1,14 @@
+/* =========================================================
+   16) QUOTES
+========================================================= */
+
+.quotes__ellipsis {
+  max-width: 560px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quotes__content {
+  min-height: 120px;
+}

@@ -29,6 +29,89 @@ describe("QuotesPanel", () => {
     vi.unstubAllGlobals();
   });
 
+  it("ne ferme pas la modale pendant l'enregistrement d'une citation", async () => {
+    type CreatedQuote = {
+      quoteID: number;
+      content: string;
+      author: string;
+    };
+
+    let resolveCreate: ((value: CreatedQuote) => void) | undefined;
+
+    vi.mocked(apiQuotesList)
+      .mockResolvedValueOnce({
+        items: [],
+        page: 1,
+        limit: 10,
+        totalItems: 0,
+        totalPages: 1,
+      })
+      .mockResolvedValueOnce({
+        items: [{ quoteID: 1, content: "Hello", author: "Morpheus" }],
+        page: 1,
+        limit: 10,
+        totalItems: 1,
+        totalPages: 1,
+      });
+
+    vi.mocked(apiQuotesCreate).mockImplementation(
+      () =>
+        new Promise<CreatedQuote>((resolve) => {
+          resolveCreate = resolve;
+        }),
+    );
+
+    render(<QuotesPanel />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "Ajouter une citation" }),
+      ).toBeInTheDocument();
+    });
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Ajouter une citation" }),
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByPlaceholderText("Texte de la citation"),
+      ).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByPlaceholderText("Texte de la citation"), {
+      target: { value: "Hello" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Auteur (optionnel)"), {
+      target: { value: "Morpheus" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Ajouter" }));
+    fireEvent.click(screen.getByRole("button", { name: "Annuler" }));
+
+    expect(
+      screen.getByPlaceholderText("Texte de la citation"),
+    ).toBeInTheDocument();
+
+    expect(resolveCreate).toBeDefined();
+
+    if (!resolveCreate) {
+      throw new Error("resolveCreate non initialisé");
+    }
+
+    resolveCreate({
+      quoteID: 1,
+      content: "Hello",
+      author: "Morpheus",
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.queryByPlaceholderText("Texte de la citation"),
+      ).not.toBeInTheDocument();
+    });
+  });
+
   it("calcule les fenêtres de pagination et les libellés des citations", () => {
     expect(buildQuotesPageWindow(5, 10)).toEqual([2, 3, 4, 5, 6, 7, 8]);
     expect(buildQuotesPageWindow(1, 2)).toEqual([1, 2]);
