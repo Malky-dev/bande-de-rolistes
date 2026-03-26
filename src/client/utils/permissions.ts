@@ -1,5 +1,9 @@
 import type { SessionInfo } from "@/types/api/session";
 
+const ADMIN_ROLE_ID = 1;
+const ADMIN_OR_ORGANISATOR_ROLE_IDS = [1, 2] as const;
+const RPG_CREATOR_ROLE_IDS = [1, 2, 3] as const;
+
 function hasRole(
   session: SessionInfo | null,
   allowedRoleIDs: readonly number[],
@@ -7,8 +11,16 @@ function hasRole(
   return session !== null && allowedRoleIDs.includes(session.roleID);
 }
 
+export function canAccessAdmin(session: SessionInfo | null): boolean {
+  return hasRole(session, [ADMIN_ROLE_ID]);
+}
+
+export function canManageQuotes(session: SessionInfo | null): boolean {
+  return hasRole(session, ADMIN_OR_ORGANISATOR_ROLE_IDS);
+}
+
 export function canManagePolls(session: SessionInfo | null): boolean {
-  return hasRole(session, [1, 2]);
+  return hasRole(session, ADMIN_OR_ORGANISATOR_ROLE_IDS);
 }
 
 export function canCreatePoll(session: SessionInfo | null): boolean {
@@ -16,11 +28,11 @@ export function canCreatePoll(session: SessionInfo | null): boolean {
 }
 
 export function canCreateRpgTable(session: SessionInfo | null): boolean {
-  return hasRole(session, [1, 2, 3]);
+  return hasRole(session, RPG_CREATOR_ROLE_IDS);
 }
 
 export function canManageRpgTable(session: SessionInfo | null): boolean {
-  return hasRole(session, [1, 2]);
+  return hasRole(session, ADMIN_OR_ORGANISATOR_ROLE_IDS);
 }
 
 export function canEditRpgTable(

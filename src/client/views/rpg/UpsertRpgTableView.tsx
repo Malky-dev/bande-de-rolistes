@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ReactElement } from "react";
-import type { SessionInfo } from "../../../types/api/session";
-import type { RpgTableDetails } from "../../../types/api/rpg";
-import { apiGetRpgTable } from "../../../api/rpg";
+import { apiGetRpgTable } from "@/api/rpg";
+import { canCreateRpgTable, canEditRpgTable } from "@/client/utils/permissions";
+import type { RpgTableDetails } from "@/types/api/rpg";
+import type { SessionInfo } from "@/types/api/session";
 import RpgTableForm from "./RpgTableForm";
-import { canCreateRpgTable, canEditRpgTable } from "./rpgPermissions";
 
 type Props = {
   session: SessionInfo | null;
@@ -38,16 +38,22 @@ export default function UpsertRpgTableView({
       try {
         setLoading(true);
         setError(null);
-        const t = await apiGetRpgTable(eventID);
-        if (mounted) setTable(t);
-      } catch (e) {
+        const nextTable = await apiGetRpgTable(eventID);
+        if (mounted) {
+          setTable(nextTable);
+        }
+      } catch (cause) {
         if (mounted) {
           setError(
-            e instanceof Error ? e.message : "Impossible de charger la table",
+            cause instanceof Error
+              ? cause.message
+              : "Impossible de charger la table",
           );
         }
       } finally {
-        if (mounted) setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
@@ -59,14 +65,25 @@ export default function UpsertRpgTableView({
   }, [isEdit, eventID]);
 
   const canSubmit = useMemo(() => {
-    if (isEdit) return canEditRpgTable(session, table);
+    if (isEdit) {
+      return canEditRpgTable(session, table?.dungeonMaster.userID);
+    }
+
     return canCreateRpgTable(session);
   }, [isEdit, session, table]);
 
   if (isEdit) {
-    if (loading) return <div>Chargement…</div>;
-    if (error) return <div>{error}</div>;
-    if (!table) return <div>Table introuvable.</div>;
+    if (loading) {
+      return <div>Chargement…</div>;
+    }
+
+    if (error !== null) {
+      return <div>{error}</div>;
+    }
+
+    if (table === null) {
+      return <div>Table introuvable.</div>;
+    }
 
     return (
       <RpgTableForm
@@ -84,7 +101,7 @@ export default function UpsertRpgTableView({
       mode="create"
       canSubmit={canSubmit}
       onBack={onBack}
-      onDone={() => onDone()}
+      onDone={onDone}
     />
   );
 }

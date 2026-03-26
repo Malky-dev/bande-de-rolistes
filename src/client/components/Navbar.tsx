@@ -1,5 +1,6 @@
-import type { SessionInfo } from "../../types/api/session";
-import logoBDR from "../../assets/img/LogoBDR_creme-removebg.png";
+import logoBDR from "@/assets/img/LogoBDR_creme-removebg.png";
+import { canAccessAdmin, canManageQuotes } from "@/client/utils/permissions";
+import type { SessionInfo } from "@/types/api/session";
 import { mainNavItems, type View } from "@/types/navigation";
 
 type NavbarProps = {
@@ -17,6 +18,9 @@ function Navbar({
   onChangeView,
   onLogout,
 }: NavbarProps) {
+  const canOpenQuotes = canManageQuotes(session);
+  const canOpenAdmin = canAccessAdmin(session);
+
   return (
     <header className="navbar">
       <div
@@ -45,7 +49,7 @@ function Navbar({
           </button>
         ))}
 
-        {!checkingSession && !session && (
+        {!checkingSession && session === null ? (
           <>
             <button
               className={`navbar-link navbar-link-button ${
@@ -64,23 +68,22 @@ function Navbar({
               Inscription
             </button>
           </>
-        )}
+        ) : null}
 
-        {session &&
-          (session.role === "admin" || session.role === "organisator") && (
-            <button
-              className={`navbar-link navbar-link-button ${
-                view === "quotes" ? "navbar-link-active" : ""
-              }`}
-              onClick={() => onChangeView("quotes")}
-            >
-              Citations
-            </button>
-          )}
+        {canOpenQuotes ? (
+          <button
+            className={`navbar-link navbar-link-button ${
+              view === "quotes" ? "navbar-link-active" : ""
+            }`}
+            onClick={() => onChangeView("quotes")}
+          >
+            Citations
+          </button>
+        ) : null}
 
-        {session && (
+        {session !== null ? (
           <>
-            {session.role === "admin" && (
+            {canOpenAdmin ? (
               <button
                 className={`navbar-link navbar-link-button ${
                   view === "admin" ? "navbar-link-active" : ""
@@ -89,7 +92,7 @@ function Navbar({
               >
                 Privilèges Admin
               </button>
-            )}
+            ) : null}
 
             <button
               className={`navbar-link navbar-link-button ${
@@ -107,7 +110,7 @@ function Navbar({
               Déconnexion
             </button>
           </>
-        )}
+        ) : null}
       </nav>
     </header>
   );

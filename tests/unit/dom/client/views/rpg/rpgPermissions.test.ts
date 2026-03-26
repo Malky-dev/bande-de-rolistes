@@ -1,13 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  canCreateRpgTable,
-  canEditRpgTable,
-} from "@/client/views/rpg/rpgPermissions";
+import { canCreateRpgTable, canEditRpgTable } from "@/client/utils/permissions";
 
-describe("rpgPermissions", () => {
+describe("permissions - rpg", () => {
   it("canCreateRpgTable autorise uniquement les rôles 1, 2 et 3", () => {
     expect(canCreateRpgTable(null)).toBe(false);
+
     expect(
       canCreateRpgTable({
         userID: 1,
@@ -17,6 +15,27 @@ describe("rpgPermissions", () => {
         isVerified: true,
       }),
     ).toBe(true);
+
+    expect(
+      canCreateRpgTable({
+        userID: 1,
+        nickname: "Neo",
+        roleID: 2,
+        role: "member",
+        isVerified: true,
+      }),
+    ).toBe(true);
+
+    expect(
+      canCreateRpgTable({
+        userID: 1,
+        nickname: "Neo",
+        roleID: 3,
+        role: "member",
+        isVerified: true,
+      }),
+    ).toBe(true);
+
     expect(
       canCreateRpgTable({
         userID: 1,
@@ -29,21 +48,10 @@ describe("rpgPermissions", () => {
   });
 
   it("canEditRpgTable autorise un admin, un organisateur ou le maître du jeu", () => {
-    const table = {
-      eventID: 1,
-      eventDate: "2026-01-01T00:00:00.000Z",
-      dungeonMaster: { userID: 7, nickname: "DM" },
-      location: "Paris",
-      game: "D&D",
-      comments: null,
-      status: "OPEN" as const,
-      maxPlayers: 6,
-      confirmedCap: 6,
-      confirmed: [],
-      waitlist: [],
-    };
+    const dungeonMasterUserID = 7;
 
-    expect(canEditRpgTable(null, table)).toBe(false);
+    expect(canEditRpgTable(null, dungeonMasterUserID)).toBe(false);
+
     expect(
       canEditRpgTable(
         {
@@ -53,9 +61,23 @@ describe("rpgPermissions", () => {
           role: "admin",
           isVerified: true,
         },
-        table,
+        dungeonMasterUserID,
       ),
     ).toBe(true);
+
+    expect(
+      canEditRpgTable(
+        {
+          userID: 2,
+          nickname: "Orga",
+          roleID: 2,
+          role: "member",
+          isVerified: true,
+        },
+        dungeonMasterUserID,
+      ),
+    ).toBe(true);
+
     expect(
       canEditRpgTable(
         {
@@ -65,9 +87,10 @@ describe("rpgPermissions", () => {
           role: "member",
           isVerified: true,
         },
-        table,
+        dungeonMasterUserID,
       ),
     ).toBe(true);
+
     expect(
       canEditRpgTable(
         {
@@ -77,7 +100,22 @@ describe("rpgPermissions", () => {
           role: "member",
           isVerified: true,
         },
-        table,
+        dungeonMasterUserID,
+      ),
+    ).toBe(false);
+  });
+
+  it("canEditRpgTable refuse quand le maître du jeu est absent", () => {
+    expect(
+      canEditRpgTable(
+        {
+          userID: 7,
+          nickname: "DM",
+          roleID: 5,
+          role: "member",
+          isVerified: true,
+        },
+        null,
       ),
     ).toBe(false);
   });

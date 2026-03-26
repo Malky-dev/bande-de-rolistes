@@ -1,5 +1,6 @@
-import type { SessionInfo } from "../../types/api/session";
 import AdminPanel from "@/client/components/AdminPanel";
+import { canAccessAdmin } from "@/client/utils/permissions";
+import type { SessionInfo } from "@/types/api/session";
 import ForbiddenView from "./ForbiddenView";
 
 type AdminViewProps = {
@@ -8,7 +9,7 @@ type AdminViewProps = {
 };
 
 function AdminView({ session, onBackHome }: AdminViewProps) {
-  if (session?.role !== "admin") {
+  if (!canAccessAdmin(session)) {
     return <ForbiddenView onBackHome={onBackHome} />;
   }
 

@@ -48,7 +48,6 @@ vi.mock("@/client/components/polls/PollVoteModal", () => ({
     onDeletePoll,
     onClose,
     onEditPoll,
-    onOptionsChanged,
   }: {
     poll: PollDetails;
     selectedOptionIDs: number[];
@@ -59,7 +58,6 @@ vi.mock("@/client/components/polls/PollVoteModal", () => ({
     onDeletePoll: () => Promise<void> | void;
     onClose: () => void;
     onEditPoll: (pollID: number) => void;
-    onOptionsChanged: (message: string) => Promise<void> | void;
   }) => (
     <div data-testid="mock-vote-modal">
       <div>{`selected:${selectedOptionIDs.join(",")}`}</div>
@@ -71,9 +69,6 @@ vi.mock("@/client/components/polls/PollVoteModal", () => ({
       <button onClick={() => void onDeleteVote()}>delete-vote</button>
       <button onClick={() => void onDeletePoll()}>delete-poll</button>
       <button onClick={() => onEditPoll(poll.pollID)}>edit-poll</button>
-      <button onClick={() => void onOptionsChanged("Options mises à jour.")}>
-        options-changed
-      </button>
       <button onClick={onClose}>close-modal</button>
     </div>
   ),
@@ -115,7 +110,7 @@ const mockDetails: PollDetails = {
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
-  let reject!: (reason?: unknown) => void;
+  let reject!: (reason?: Error) => void;
 
   const promise = new Promise<T>((res, rej) => {
     resolve = res;
@@ -244,45 +239,6 @@ describe("PollsView - extra behavior coverage", () => {
     await waitFor(() => {
       expect(screen.getByText("delete failed")).toBeInTheDocument();
     });
-  });
-
-  it("rafraîchit le sondage courant après onOptionsChanged et affiche le message de succès", async () => {
-    vi.mocked(apiListPolls).mockResolvedValue([mockListItem]);
-    vi.mocked(apiGetPoll).mockResolvedValue(mockDetails);
-
-    render(
-      <PollsView
-        session={{
-          userID: 1,
-          nickname: "Admin",
-          roleID: 1,
-          role: "admin",
-          isVerified: true,
-        }}
-        onCreatePoll={onCreatePoll}
-        onEditPoll={onEditPoll}
-        onLogin={onLogin}
-      />,
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText("Poll 1")).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByText("Poll 1"));
-
-    await waitFor(() => {
-      expect(screen.getByTestId("mock-vote-modal")).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByText("options-changed"));
-
-    await waitFor(() => {
-      expect(screen.getByText("Options mises à jour.")).toBeInTheDocument();
-    });
-
-    expect(apiGetPoll).toHaveBeenCalledTimes(2);
-    expect(apiListPolls).toHaveBeenCalledTimes(2);
   });
 
   it("refuse une troisième sélection quand le max est atteint puis permet de désélectionner", async () => {

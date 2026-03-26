@@ -1,14 +1,15 @@
-import type { SessionInfo } from "../../types/api/session";
+import QuotesPanel from "@/client/components/QuotesPanel";
+import { canManageQuotes } from "@/client/utils/permissions";
+import type { SessionInfo } from "@/types/api/session";
 import ForbiddenView from "./ForbiddenView";
-import QuotesPanel from "../components/QuotesPanel";
 
 type Props = {
   session: SessionInfo | null;
   onBackHome: () => void;
 };
 
-function QuotesView({ session, onBackHome }: Props) {
-  if (!session) {
+function QuoteView({ session, onBackHome }: Props) {
+  if (session === null) {
     return (
       <ForbiddenView
         title="Connexion requise"
@@ -18,7 +19,7 @@ function QuotesView({ session, onBackHome }: Props) {
     );
   }
 
-  if (session.role !== "admin" && session.role !== "organisator") {
+  if (!canManageQuotes(session)) {
     return (
       <ForbiddenView
         title="Accès interdit"
@@ -31,4 +32,4 @@ function QuotesView({ session, onBackHome }: Props) {
   return <QuotesPanel />;
 }
 
-export default QuotesView;
+export default QuoteView;
