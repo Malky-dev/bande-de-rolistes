@@ -2,8 +2,8 @@ import type {
   RpgTableDetails,
   RpgCreateTableBody,
   RpgUpdateTableBody,
-} from "../../../types/api/rpg";
-import type { RpgTableStatus } from "../../../shared/constants";
+} from "@/types/api/rpg";
+import type { RpgTableStatus } from "@/shared/constants";
 
 export type RpgTableFormValues = {
   eventDate: Date | null;
@@ -11,7 +11,7 @@ export type RpgTableFormValues = {
   game: string;
   maxPlayers: number;
   comments: string;
-  status?: RpgTableStatus; // edit only
+  status?: RpgTableStatus;
 };
 
 export function defaultCreateValues(): RpgTableFormValues {
