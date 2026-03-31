@@ -214,62 +214,15 @@ describe("controller createTable", () => {
     );
   });
 
-  it("retourne 401 si req.user.role.roleID est absent", async () => {
-    const { controllerCreateTable, makeReq, makeTypedRes } = await load({
-      roleID: undefined,
-    });
-
-    const req = makeReq({
-      user: {},
-      body: {
-        eventDate: "2026-01-01T00:00:00.000Z",
-        location: "Paris",
-        game: "D&D",
-      },
-    });
-    const { res, status, json } = makeTypedRes();
-
-    await controllerCreateTable(req, res);
-
-    expect(status).toHaveBeenCalledWith(401);
-    expect(json).toHaveBeenCalledWith({
-      code: "UNAUTHORIZED",
-      message: "Not authenticated",
-    });
-  });
-
-  it("retourne 400 si un admin ou un organisateur ne fournit pas de dungeonMasterUserID", async () => {
-    const { controllerCreateTable, makeReq, makeTypedRes, mocks } = await load({
-      roleID: 4,
-    });
-
-    const req = makeReq({
-      body: {
-        eventDate: "2026-01-01T00:00:00.000Z",
-        location: "Paris",
-        game: "D&D",
-      },
-    });
-    const { res } = makeTypedRes();
-
-    await controllerCreateTable(req, res);
-
-    expect(mocks.badRequest).toHaveBeenCalledWith(
-      expect.anything(),
-      "dungeonMasterUserID requis",
-    );
-  });
-
   it("retourne 400 si le maître du jeu est introuvable", async () => {
     const { controllerCreateTable, makeReq, makeTypedRes } = await load({
-      roleID: 4,
+      userID: 7,
       dmFindResult: null,
     });
 
     const req = makeReq({
       body: {
         eventDate: "2026-01-01T00:00:00.000Z",
-        dungeonMasterUserID: 123,
         location: "Paris",
         game: "D&D",
       },
@@ -287,14 +240,13 @@ describe("controller createTable", () => {
 
   it("retourne 400 si le rôle du maître du jeu est invalide", async () => {
     const { controllerCreateTable, makeReq, makeTypedRes } = await load({
-      roleID: 4,
+      userID: 7,
       dmFindResult: { toJSON: () => ({ role: { roleID: 9 } }) },
     });
 
     const req = makeReq({
       body: {
         eventDate: "2026-01-01T00:00:00.000Z",
-        dungeonMasterUserID: 123,
         location: "Paris",
         game: "D&D",
       },
@@ -312,14 +264,13 @@ describe("controller createTable", () => {
 
   it("retourne 400 si le JSON du maître du jeu n’est pas un objet exploitable", async () => {
     const { controllerCreateTable, makeReq, makeTypedRes } = await load({
-      roleID: 4,
+      userID: 7,
       dmFindResult: { toJSON: () => "bad-shape" },
     });
 
     const req = makeReq({
       body: {
         eventDate: "2026-01-01T00:00:00.000Z",
-        dungeonMasterUserID: 123,
         location: "Paris",
         game: "D&D",
       },
@@ -337,14 +288,13 @@ describe("controller createTable", () => {
 
   it("retourne 400 si le JSON du maître du jeu ne contient pas de rôle exploitable", async () => {
     const { controllerCreateTable, makeReq, makeTypedRes } = await load({
-      roleID: 4,
+      userID: 7,
       dmFindResult: { toJSON: () => ({ role: "bad-shape" }) },
     });
 
     const req = makeReq({
       body: {
         eventDate: "2026-01-01T00:00:00.000Z",
-        dungeonMasterUserID: 123,
         location: "Paris",
         game: "D&D",
       },
@@ -362,14 +312,13 @@ describe("controller createTable", () => {
 
   it("retourne 400 si le roleID du maître du jeu n’est pas un nombre", async () => {
     const { controllerCreateTable, makeReq, makeTypedRes } = await load({
-      roleID: 4,
+      userID: 7,
       dmFindResult: { toJSON: () => ({ role: { roleID: "1" } }) },
     });
 
     const req = makeReq({
       body: {
         eventDate: "2026-01-01T00:00:00.000Z",
-        dungeonMasterUserID: 123,
         location: "Paris",
         game: "D&D",
       },
@@ -447,7 +396,7 @@ describe("controller createTable", () => {
 
   it("retourne 201 si comments est une chaîne et si maxPlayers est arrondi", async () => {
     const { controllerCreateTable, makeReq, makeTypedRes, mocks } = await load({
-      roleID: 4,
+      userID: 7,
       createResult: { eventID: 100 },
       dmFindResult: { toJSON: () => ({ role: { roleID: 2 } }) },
     });
@@ -455,13 +404,11 @@ describe("controller createTable", () => {
     const req = makeReq({
       body: {
         eventDate: "2026-01-01T00:00:00.000Z",
-        dungeonMasterUserID: 123,
         location: "  Paris  ",
         game: "  D&D  ",
         comments: "Bring dice",
         maxPlayers: 6.8,
       },
-      user: { role: { roleID: 4 } },
     });
     const { res, status, json } = makeTypedRes();
 
@@ -469,7 +416,7 @@ describe("controller createTable", () => {
 
     expect(mocks.TableRPG.create).toHaveBeenCalledWith({
       eventDate: new Date("2026-01-01T00:00:00.000Z"),
-      dungeon_master: 123,
+      dungeon_master: 7,
       location: "Paris",
       game: "D&D",
       comments: "Bring dice",

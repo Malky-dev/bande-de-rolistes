@@ -46,7 +46,13 @@ export default function RpgTableForm(props: Props): ReactElement | null {
 
       {error ? <p className="auth-error">{error}</p> : null}
 
-      <form onSubmit={() => void submit()} className="form">
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          void submit();
+        }}
+        className="form"
+      >
         <div>
           <label htmlFor="rpg-game">Nom du Jeu</label>
           <input

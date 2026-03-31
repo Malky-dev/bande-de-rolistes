@@ -5,7 +5,6 @@ import { badRequest, forbid, getUserID, hasRole } from "./helpers";
 
 type CreateBody = {
   eventDate: string;
-  dungeonMasterUserID?: number;
   location: string;
   game: string;
   comments?: string | null;
@@ -59,14 +58,7 @@ const controllerCreateTable: RequestHandler<
       return;
     }
 
-    const {
-      eventDate,
-      dungeonMasterUserID,
-      location,
-      game,
-      comments,
-      maxPlayers,
-    } = req.body;
+    const { eventDate, location, game, comments, maxPlayers } = req.body;
 
     if (typeof eventDate !== "string") {
       badRequest(res, "eventDate requis (ISO string)");
@@ -89,29 +81,7 @@ const controllerCreateTable: RequestHandler<
       return;
     }
 
-    const roleIDUnknown: unknown = req.user?.role?.roleID;
-    if (typeof roleIDUnknown !== "number") {
-      res.status(401).json({
-        code: "UNAUTHORIZED",
-        message: "Not authenticated",
-      });
-      return;
-    }
-
-    const roleID = roleIDUnknown;
-
-    let dmUserID: number;
-
-    // Les rôles 1, 2 et 3 peuvent créer une table pour eux-mêmes.
-    if (ALLOWED_CREATE.includes(roleID)) {
-      dmUserID = userID;
-    } else {
-      if (typeof dungeonMasterUserID !== "number") {
-        badRequest(res, "dungeonMasterUserID requis");
-        return;
-      }
-      dmUserID = dungeonMasterUserID;
-    }
+    const dmUserID = userID;
 
     const dm = await User.findByPk(dmUserID, {
       include: [{ model: Role, as: "role", required: true }],
@@ -151,7 +121,7 @@ const controllerCreateTable: RequestHandler<
       dungeon_master: dmUserID,
       location: location.trim(),
       game: game.trim(),
-      comments: typeof comments === "string" ? comments : (comments ?? null),
+      comments: typeof comments === "string" ? comments : null,
       status: "OPEN",
       maxPlayers: mp,
     });
