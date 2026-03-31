@@ -116,4 +116,42 @@ describe("useQuotesPanel", () => {
 
     expect(result.current.isCreateModalOpen).toBe(false);
   });
+
+  it("ferme la modale et réinitialise le formulaire hors enregistrement", async () => {
+    vi.mocked(apiQuotesList).mockResolvedValue({
+      items: [],
+      page: 1,
+      limit: 10,
+      totalItems: 0,
+      totalPages: 1,
+    });
+
+    const { result } = renderHook(() => useQuotesPanel());
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    act(() => {
+      result.current.openCreateModal();
+      result.current.updateCreateForm("content", "Le gras, c'est la vie");
+      result.current.updateCreateForm("author", "Karadoc");
+    });
+
+    expect(result.current.isCreateModalOpen).toBe(true);
+    expect(result.current.createForm).toEqual({
+      content: "Le gras, c'est la vie",
+      author: "Karadoc",
+    });
+
+    act(() => {
+      result.current.closeCreateModal();
+    });
+
+    expect(result.current.isCreateModalOpen).toBe(false);
+    expect(result.current.createForm).toEqual({
+      content: "",
+      author: "",
+    });
+  });
 });
