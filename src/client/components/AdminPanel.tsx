@@ -1,95 +1,16 @@
-import { useEffect, useState } from "react";
-import {
-  apiAdminRoles,
-  apiAdminUpdateRole,
-  apiAdminUsers,
-} from "../../api/auth";
-import type { AdminRole, AdminUser } from "@/types/api/admin";
+import { useAdminPanel } from "@/client/components/adminPanel/useAdminPanel";
 
 function AdminPanel() {
-  const [users, setUsers] = useState<AdminUser[]>([]);
-  const [roles, setRoles] = useState<AdminRole[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [updating, setUpdating] = useState<number | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    void loadData();
-  }, []);
-
-  async function loadData(): Promise<void> {
-    try {
-      setLoading(true);
-      setError(null);
-      setSuccessMessage(null);
-
-      console.log("🔄 Chargement des données admin...");
-      const token = localStorage.getItem("bdr_token");
-      console.log("Token présent:", !!token);
-
-      const [usersData, rolesData] = await Promise.all([
-        apiAdminUsers(),
-        apiAdminRoles(),
-      ]);
-
-      console.log("✅ Données chargées:", {
-        usersCount: usersData.length,
-        rolesCount: rolesData.length,
-      });
-
-      setUsers(usersData);
-      setRoles(rolesData);
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : "Erreur lors du chargement des données";
-      console.error("❌ Erreur lors du chargement:", err);
-      setError(errorMessage);
-
-      if (
-        errorMessage.includes("Token") ||
-        errorMessage.includes("UNAUTHORIZED") ||
-        errorMessage.includes("FORBIDDEN")
-      ) {
-        setError(`${errorMessage}. Veuillez vous reconnecter.`);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleRoleChange(
-    userID: number,
-    newRoleID: number,
-  ): Promise<void> {
-    try {
-      setUpdating(userID);
-      setError(null);
-      setSuccessMessage(null);
-
-      const updatedUser = await apiAdminUpdateRole(userID, newRoleID);
-
-      setUsers((prevUsers) =>
-        prevUsers.map((user) => (user.userID === userID ? updatedUser : user)),
-      );
-
-      setSuccessMessage(
-        `Rôle de ${updatedUser.nickname} mis à jour avec succès`,
-      );
-      setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Erreur lors de la modification du rôle",
-      );
-      console.error("Erreur:", err);
-    } finally {
-      setUpdating(null);
-    }
-  }
+  const {
+    users,
+    roles,
+    loading,
+    error,
+    updating,
+    successMessage,
+    loadData,
+    handleRoleChange,
+  } = useAdminPanel();
 
   if (loading) {
     return (
