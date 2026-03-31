@@ -1,6 +1,6 @@
 import type { CreatePollBody, UpdatePollBody } from "@/types/api/polls";
 
-export type PollFormValues = {
+type PollFormValues = {
   title: string;
   description: string;
   endAt: Date | null;

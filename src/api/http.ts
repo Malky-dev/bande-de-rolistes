@@ -1,4 +1,4 @@
-export type ApiErrorPayload = {
+type ApiErrorPayload = {
   message?: string;
   code?: string;
 };

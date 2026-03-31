@@ -5,7 +5,7 @@ import type {
   RpgSignupItem,
 } from "@/types/api/rpg";
 
-export type MySignupBucket = "CONFIRMED" | "WAITLIST" | null;
+type MySignupBucket = "CONFIRMED" | "WAITLIST" | null;
 
 export function formatDate(iso: string): string {
   const d = new Date(iso);
