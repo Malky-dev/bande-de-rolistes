@@ -1,9 +1,6 @@
 import type { Request, RequestHandler, Response } from "express";
 import requireAuth from "./requireAuth";
-import {
-  RPG_ALLOWED_CREATE_ROLE_IDS,
-  RPG_ADMIN_OR_ORGA_ROLE_IDS,
-} from "../../../shared/constants";
+import { RPG_ADMIN_OR_ORGA_ROLE_IDS } from "../../../shared/constants";
 
 function forbidden(res: Response, message: string): void {
   res.status(403).json({ code: "FORBIDDEN", message });
@@ -98,5 +95,3 @@ export const requireAdminOrOwner = (
     });
   };
 };
-
-export { getRoleID, getUserID, hasAllowedRole };
