@@ -1,6 +1,7 @@
-import { useState } from "react";
-import type { SessionInfo } from "../../types/api/session";
-import { apiLogin, apiSession, apiSignin } from "../../api/auth";
+import type { FormEvent, ReactElement } from "react";
+
+import { useAuthForms } from "@/client/components/authForms/useAuthForms";
+import type { SessionInfo } from "@/types/api/session";
 
 type View = "home" | "login" | "signup";
 
@@ -10,50 +11,28 @@ type AuthFormsProps = {
   onLoginSuccess: (session: SessionInfo) => void;
 };
 
-function AuthForms({ view, onSwitchView, onLoginSuccess }: AuthFormsProps) {
-  const [nickname, setNickname] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [passwordCheck, setPasswordCheck] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+function AuthForms({
+  view,
+  onSwitchView,
+  onLoginSuccess,
+}: AuthFormsProps): ReactElement {
+  const {
+    nickname,
+    email,
+    password,
+    passwordCheck,
+    loading,
+    error,
+    isLogin,
+    updateField,
+    submit,
+    switchAuthView,
+    loginWithDiscord,
+  } = useAuthForms({ view, onSwitchView, onLoginSuccess });
 
-  const isLogin = view === "login";
-
-  const handleSubmit = (
-    e: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>,
-  ): void => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
-
-    if (!isLogin && password !== passwordCheck) {
-      setError("Les mots de passe ne correspondent pas");
-      setLoading(false);
-      return;
-    }
-
-    Promise.resolve()
-      .then(async () => {
-        if (isLogin) {
-          await apiLogin(email, password);
-        } else {
-          await apiSignin(nickname, email, password, passwordCheck);
-          await apiLogin(email, password);
-        }
-      })
-      .then(async () => {
-        const session = await apiSession();
-        onLoginSuccess(session);
-      })
-      .catch((err: Error) => {
-        setError(
-          err instanceof Error ? err.message : "Une erreur est survenue",
-        );
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+  const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
+    event.preventDefault();
+    void submit();
   };
 
   return (
@@ -80,7 +59,7 @@ function AuthForms({ view, onSwitchView, onLoginSuccess }: AuthFormsProps) {
               <input
                 type="text"
                 value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
+                onChange={(e) => updateField("nickname", e.target.value)}
                 required
               />
             </div>
@@ -91,7 +70,7 @@ function AuthForms({ view, onSwitchView, onLoginSuccess }: AuthFormsProps) {
             <input
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => updateField("email", e.target.value)}
               required
             />
           </div>
@@ -101,7 +80,7 @@ function AuthForms({ view, onSwitchView, onLoginSuccess }: AuthFormsProps) {
             <input
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => updateField("password", e.target.value)}
               required
             />
           </div>
@@ -112,13 +91,13 @@ function AuthForms({ view, onSwitchView, onLoginSuccess }: AuthFormsProps) {
               <input
                 type="password"
                 value={passwordCheck}
-                onChange={(e) => setPasswordCheck(e.target.value)}
+                onChange={(e) => updateField("passwordCheck", e.target.value)}
                 required
               />
             </div>
           )}
 
-          {error && <p className="auth-error">{error}</p>}
+          {error ? <p className="auth-error">{error}</p> : null}
 
           <div className="hero-actions">
             <button className="btn-primary" type="submit" disabled={loading}>
@@ -132,7 +111,7 @@ function AuthForms({ view, onSwitchView, onLoginSuccess }: AuthFormsProps) {
             <button
               className="btn-secondary"
               type="button"
-              onClick={() => onSwitchView(isLogin ? "signup" : "login")}
+              onClick={switchAuthView}
             >
               {isLogin
                 ? "Pas encore de compte ? S'inscrire"
@@ -147,7 +126,7 @@ function AuthForms({ view, onSwitchView, onLoginSuccess }: AuthFormsProps) {
           <button
             className="btn-discord"
             type="button"
-            onClick={() => (window.location.href = "/api/discord/init")}
+            onClick={loginWithDiscord}
             disabled={loading}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
