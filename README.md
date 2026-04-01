@@ -119,6 +119,11 @@ Le projet privilégie :
 - contrôle explicite des entrées API
 - réduction maximale des zones non typées
 
+Code standards:
+
+- Français: `docs/code-standards.fr.md`
+- English: `docs/code-standards.en.md`
+
 ---
 
 ## 📌 État du projet
