@@ -4,7 +4,6 @@
 
 @media (max-width: 900px) {
   .hero,
-  .auth-grid,
   .rpg-grid,
   .about-story-grid,
   .about-cards,
@@ -14,7 +13,6 @@
   .rule-block,
   .poll-modal__body,
   .poll-modal__grid,
-  .polls-view__layout,
   .poll-edit {
     grid-template-columns: 1fr;
   }
@@ -25,7 +23,6 @@
 }
 
 @media (max-width: 640px) {
-  .inline-row,
   .what-is-rpg-cards,
   .what-is-rpg-steps,
   .what-is-rpg-split {
@@ -34,8 +31,7 @@
 
   .poll-page__header,
   .poll-modal__header,
-  .poll-vote__header,
-  .polls-view__header {
+  .poll-vote__header {
     flex-direction: column;
     align-items: stretch;
   }

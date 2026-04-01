@@ -4,43 +4,6 @@
    - AccountView helpers
 ========================================================= */
 
-.auth-wrap {
-  padding: 22px;
-  max-width: 1120px;
-  margin: 0 auto;
-}
-
-.auth-panel {
-  padding: 22px;
-}
-
-.auth-title {
-  margin: 0 0 10px;
-  font-size: 22px;
-}
-
-.auth-subtitle {
-  margin: 0 0 16px;
-  color: rgba(229, 231, 235, 0.8);
-}
-
-.auth-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px;
-}
-
-.auth-block {
-  padding: 16px;
-  border-radius: 16px;
-  background: rgba(2, 6, 23, 0.35);
-  border: 1px solid rgba(148, 163, 184, 0.15);
-}
-
-.auth-block h4 {
-  margin: 0 0 12px;
-}
-
 .auth-hero {
   padding: 56px 22px 40px;
   max-width: 1120px;
