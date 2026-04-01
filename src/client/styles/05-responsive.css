@@ -4,6 +4,7 @@
 
 @media (max-width: 900px) {
   .hero,
+  .auth-grid,
   .rpg-grid,
   .about-story-grid,
   .about-cards,
@@ -12,7 +13,6 @@
   .location-features,
   .rule-block,
   .poll-modal__body,
-  .poll-modal__grid,
   .poll-edit {
     grid-template-columns: 1fr;
   }
@@ -23,6 +23,7 @@
 }
 
 @media (max-width: 640px) {
+  .inline-row,
   .what-is-rpg-cards,
   .what-is-rpg-steps,
   .what-is-rpg-split {
