@@ -2,14 +2,14 @@ import { useCallback, useState } from "react";
 
 import { INITIAL_RELOAD_TOKEN } from "@/shared/constants";
 
-export type UpsertModalMode = "create" | "edit" | null;
+type UpsertModalMode = "create" | "edit" | null;
 
-export interface UpsertModalState<TIdentifier> {
+interface UpsertModalState<TIdentifier> {
   mode: UpsertModalMode;
   editingId: TIdentifier | null;
 }
 
-export interface UseUpsertModalResult<TIdentifier> {
+interface UseUpsertModalResult<TIdentifier> {
   state: UpsertModalState<TIdentifier>;
   reloadToken: number;
   isOpen: boolean;

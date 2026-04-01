@@ -1,9 +1,6 @@
-// db.ts - configuration Sequelize pour bande_de_rolistes
-
 import dotenv from "dotenv";
 import { Sequelize } from "sequelize";
 
-// Charger les variables d'environnement
 dotenv.config();
 
 const sequelize = new Sequelize(
@@ -21,15 +18,5 @@ const sequelize = new Sequelize(
     },
   },
 );
-
-// Vérification connexion DB
-sequelize
-  .authenticate()
-  .then((): void => {
-    console.log("✅ Connexion Sequelize OK à bande_de_rolistes");
-  })
-  .catch((error: Error): void => {
-    console.error("❌ Erreur de connexion Sequelize :", error);
-  });
 
 export default sequelize;

@@ -12,7 +12,7 @@ export function normalizePollOptionLabel(value: string): string {
   return value.trim();
 }
 
-export function buildEmptyPollOption(): EditablePollOption {
+function buildEmptyPollOption(): EditablePollOption {
   return {
     localID: crypto.randomUUID(),
     optionID: null,

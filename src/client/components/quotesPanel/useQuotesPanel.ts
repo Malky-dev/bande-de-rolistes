@@ -19,7 +19,7 @@ const EMPTY_FORM_STATE: QuoteFormState = {
   author: "",
 };
 
-export interface UseQuotesPanelResult {
+interface UseQuotesPanelResult {
   page: number;
   totalPages: number;
   totalItems: number;

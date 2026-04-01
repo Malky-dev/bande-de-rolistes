@@ -31,7 +31,7 @@ export function canCreateRpgTable(session: SessionInfo | null): boolean {
   return hasRole(session, RPG_CREATOR_ROLE_IDS);
 }
 
-export function canManageRpgTable(session: SessionInfo | null): boolean {
+function canManageRpgTable(session: SessionInfo | null): boolean {
   return hasRole(session, ADMIN_OR_ORGANISATOR_ROLE_IDS);
 }
 
