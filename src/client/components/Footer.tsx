@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { apiQuote, type Quote } from "../../api/authApi";
+import { apiQuote, type Quote } from "../../api/auth";
 import type { View } from "@/types/navigation";
 
 type FooterProps = {

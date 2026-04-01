@@ -83,15 +83,3 @@
   border: 0;
   display: block;
 }
-
-.location-highlight {
-  margin-top: 24px;
-  border-color: rgba(250, 204, 21, 0.28);
-  box-shadow:
-    0 0 0 1px rgba(250, 204, 21, 0.08),
-    var(--shadow);
-}
-
-.location-cta {
-  margin-top: 24px;
-}

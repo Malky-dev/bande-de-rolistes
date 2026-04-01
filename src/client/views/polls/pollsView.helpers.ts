@@ -1,16 +1,4 @@
 import type { PollDetails } from "@/types/api/polls";
-import type { SessionInfo } from "@/types/api/session";
-
-export function canCreatePoll(session: SessionInfo | null): boolean {
-  return session !== null && (session.roleID === 1 || session.roleID === 2);
-}
-
-export function getPollsViewErrorMessage(
-  cause: unknown,
-  fallback: string,
-): string {
-  return cause instanceof Error ? cause.message : fallback;
-}
 
 export function computeNextSelectedOptionIDs(params: {
   details: Pick<PollDetails, "canVote" | "maxSelections"> | null;

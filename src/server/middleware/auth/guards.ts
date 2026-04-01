@@ -1,9 +1,6 @@
 import type { Request, RequestHandler, Response } from "express";
 import requireAuth from "./requireAuth";
-import {
-  RPG_ALLOWED_CREATE_ROLE_IDS,
-  RPG_ADMIN_OR_ORGA_ROLE_IDS,
-} from "../../../shared/constants";
+import { RPG_ADMIN_OR_ORGA_ROLE_IDS } from "../../../shared/constants";
 
 function forbidden(res: Response, message: string): void {
   res.status(403).json({ code: "FORBIDDEN", message });
@@ -17,21 +14,13 @@ function unauthorized(res: Response): void {
 }
 
 function getRoleID(req: Request): number | null {
-  const roleIDUnknown: unknown = req.user?.role?.roleID;
-  if (typeof roleIDUnknown !== "number") {
-    return null;
-  }
-
-  return roleIDUnknown;
+  const roleID = req.user?.role?.roleID;
+  return typeof roleID === "number" ? roleID : null;
 }
 
 function getUserID(req: Request): number | null {
-  const userIDUnknown: unknown = req.user?.userID;
-  if (typeof userIDUnknown !== "number") {
-    return null;
-  }
-
-  return userIDUnknown;
+  const userID = req.user?.userID;
+  return typeof userID === "number" ? userID : null;
 }
 
 function hasAllowedRole(
@@ -106,69 +95,3 @@ export const requireAdminOrOwner = (
     });
   };
 };
-
-export const requireCreateRpgTable = (): RequestHandler => {
-  return (req, res, next) => {
-    requireAuth(req, res, () => {
-      if (!hasAllowedRole(req, RPG_ALLOWED_CREATE_ROLE_IDS)) {
-        forbidden(res, "Accès réservé aux rôles 1, 2 ou 3");
-        return;
-      }
-
-      next();
-    });
-  };
-};
-
-export const requireAdminOrOrga = (): RequestHandler => {
-  return (req, res, next) => {
-    requireAuth(req, res, () => {
-      if (!hasAllowedRole(req, RPG_ADMIN_OR_ORGA_ROLE_IDS)) {
-        forbidden(res, "Accès réservé admin/organisateur");
-        return;
-      }
-
-      next();
-    });
-  };
-};
-
-export const requireAdminOrOrgaOrOwnerRpgTable = (
-  getOwnerUserID: (req: Request) => number | null,
-): RequestHandler => {
-  return (req, res, next) => {
-    requireAuth(req, res, () => {
-      const sessionUserID = getUserID(req);
-      if (sessionUserID === null) {
-        unauthorized(res);
-        return;
-      }
-
-      if (hasAllowedRole(req, RPG_ADMIN_OR_ORGA_ROLE_IDS)) {
-        next();
-        return;
-      }
-
-      const roleID = getRoleID(req);
-      if (roleID !== 3) {
-        forbidden(res, "Accès refusé");
-        return;
-      }
-
-      const ownerUserID = getOwnerUserID(req);
-      if (ownerUserID === null) {
-        forbidden(res, "Accès refusé");
-        return;
-      }
-
-      if (sessionUserID !== ownerUserID) {
-        forbidden(res, "Accès refusé");
-        return;
-      }
-
-      next();
-    });
-  };
-};
-
-export { getRoleID, getUserID, hasAllowedRole };

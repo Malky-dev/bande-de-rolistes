@@ -1,8 +1,4 @@
-type AboutViewProps = {
-  onJoinTable: () => void;
-};
-
-function AboutView({ onJoinTable }: AboutViewProps) {
+function AboutView() {
   return (
     <div className="about-wrap">
       <section className="hero about-hero">

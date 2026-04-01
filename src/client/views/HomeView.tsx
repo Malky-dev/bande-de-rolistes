@@ -1,25 +1,29 @@
 type HomeViewProps = {
-  onDiscover?: () => void
-  onJoinTable?: () => void
-}
+  onDiscover?: () => void;
+  onJoinTable?: () => void;
+};
 
 function HomeView({ onDiscover, onJoinTable }: HomeViewProps) {
   return (
     <section className="hero">
       <div className="hero-left">
-        <span className="hero-pill">Bienvenue · Association de jeux de rôles</span>
+        <span className="hero-pill">
+          Bienvenue · Association de jeux de rôles
+        </span>
         <h1 className="hero-title">
           Bienvenue à <span className="gradient-text">Bande de Rôlistes</span>
         </h1>
         <p className="hero-subtitle">
-          Nous sommes une association de jeux de rôles qui réunit joueuses et joueurs
-          autour de tables conviviales, en présentiel et en ligne. Que tu sois
-          débutant curieux ou vétéran des donjons, tu trouveras ici une place à la table.
+          Nous sommes une association de jeux de rôles qui réunit joueuses et
+          joueurs autour de tables conviviales, en présentiel et en ligne. Que
+          tu sois débutant curieux ou vétéran des donjons, tu trouveras ici une
+          place à la table.
         </p>
         <p className="hero-subtitle">
-          L&apos;association propose des campagnes suivies, des one-shots découverte,
-          des ateliers pour apprendre à maîtriser et des soirées à thème autour de
-          tous les univers : fantasy, science-fiction, horreur, contemporain...
+          L&apos;association propose des campagnes suivies, des one-shots
+          découverte, des ateliers pour apprendre à maîtriser et des soirées à
+          thème autour de tous les univers : fantasy, science-fiction, horreur,
+          contemporain...
         </p>
 
         <div className="hero-actions">
@@ -66,13 +70,14 @@ function HomeView({ onDiscover, onJoinTable }: HomeViewProps) {
             <div>
               <div className="hero-card-item-label">Matériel</div>
               <div className="hero-card-item-value">
-                Un micro, une connexion internet et l&apos;envie de raconter des histoires
+                Un micro, une connexion internet et l&apos;envie de raconter des
+                histoires
               </div>
             </div>
           </div>
 
-          <div className="dot-row">
-            <span className="dot dot-accent" />
+          <div className="dots-row">
+            <span className="dot hot" />
             <span className="dot" />
             <span className="dot" />
             <span className="dot" />
@@ -80,7 +85,7 @@ function HomeView({ onDiscover, onJoinTable }: HomeViewProps) {
         </div>
       </div>
     </section>
-  )
+  );
 }
 
-export default HomeView
+export default HomeView;

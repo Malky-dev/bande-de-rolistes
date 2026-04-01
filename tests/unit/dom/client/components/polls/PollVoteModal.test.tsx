@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import PollVoteModal from "@/client/components/polls/PollVoteModal";
 import type { PollDetails } from "@/types/api/polls";
+import type { SessionInfo } from "@/types/api/session";
 
 vi.mock("@/client/components/polls/PollVoteForm", () => ({
   default: ({
@@ -21,7 +22,7 @@ vi.mock("@/client/components/polls/PollVoteForm", () => ({
     onToggleOption: (optionID: number) => void;
     onSubmitVote: () => void;
     onDeleteVote: () => void;
-    session: unknown;
+    session: SessionInfo | null;
     onLogin: () => void;
   }) => (
     <div>
@@ -75,7 +76,6 @@ describe("PollVoteModal", () => {
     onDeletePoll: vi.fn(),
     onEditPoll: vi.fn(),
     onLogin: vi.fn(),
-    onOptionsChanged: vi.fn(),
   };
 
   it("affiche le titre, auteur, fin, état et ferme au clic sur Fermer ou fond", () => {
@@ -245,7 +245,7 @@ describe("PollVoteModal", () => {
       screen.getByRole("button", { name: /Modifier le sondage/i }),
     );
 
-    expect(onEditPoll).toHaveBeenCalled();
+    expect(onEditPoll).toHaveBeenCalledWith(1);
   });
 
   it("appelle onDeletePoll quand on clique sur Supprimer le sondage", () => {

@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 import type { View } from "@/types/navigation";
-import type { SessionInfo } from "../types/api/session";
-import { apiSession } from "../api/authApi";
-import { fetchCsrfToken } from "../api/securityApi";
+import type { SessionInfo } from "@/types/api/session";
+import { apiSession, apiLogout } from "@/api/auth";
 import AuthForms from "./components/AuthForms";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import { AppModal } from "./components/AppModal";
+import { useUpsertModal } from "./app/useUpsertModal";
 import HomeView from "./views/HomeView";
 import AdminView from "./views/AdminView";
 import RpgTablesView from "./views/RpgTablesView";
@@ -20,63 +20,15 @@ import LocationView from "./views/LocationView";
 import RuleView from "./views/RuleView";
 import PollsView from "./views/PollsView";
 import UpsertPollView from "./views/polls/UpsertPollView";
+import type { ReactNode } from "react";
 
 function App() {
   const [view, setView] = useState<View>("home");
   const [session, setSession] = useState<SessionInfo | null>(null);
   const [checkingSession, setCheckingSession] = useState(true);
 
-  const [editingEventID, setEditingEventID] = useState<number | null>(null);
-  const [rpgModalMode, setRpgModalMode] = useState<"create" | "edit" | null>(
-    null,
-  );
-  const [rpgReloadToken, setRpgReloadToken] = useState(0);
-
-  const [editingPollID, setEditingPollID] = useState<number | null>(null);
-  const [pollModalMode, setPollModalMode] = useState<"create" | "edit" | null>(
-    null,
-  );
-  const [pollReloadToken, setPollReloadToken] = useState(0);
-
-  const openRpgCreateModal = () => {
-    setEditingEventID(null);
-    setRpgModalMode("create");
-  };
-
-  const openRpgEditModal = (eventID: number) => {
-    setEditingEventID(eventID);
-    setRpgModalMode("edit");
-  };
-
-  const closeRpgModal = () => {
-    setRpgModalMode(null);
-    setEditingEventID(null);
-  };
-
-  const handleRpgSaved = () => {
-    setRpgReloadToken((v) => v + 1);
-    closeRpgModal();
-  };
-
-  const openPollCreateModal = () => {
-    setEditingPollID(null);
-    setPollModalMode("create");
-  };
-
-  const openPollEditModal = (pollID: number) => {
-    setEditingPollID(pollID);
-    setPollModalMode("edit");
-  };
-
-  const closePollModal = () => {
-    setPollModalMode(null);
-    setEditingPollID(null);
-  };
-
-  const handlePollSaved = () => {
-    setPollReloadToken((v) => v + 1);
-    closePollModal();
-  };
+  const rpgModal = useUpsertModal<number>();
+  const pollModal = useUpsertModal<number>();
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -104,12 +56,7 @@ function App() {
 
   const handleLogout = async () => {
     try {
-      const csrfToken = await fetchCsrfToken();
-      await fetch("/api/logout", {
-        method: "POST",
-        headers: { "x-csrf-token": csrfToken },
-        credentials: "include",
-      });
+      await apiLogout();
     } catch (error) {
       console.error("Erreur lors de la déconnexion:", error);
     }
@@ -123,6 +70,94 @@ function App() {
     setView("home");
   };
 
+  function renderView(): ReactNode {
+    switch (view) {
+      case "home":
+        return (
+          <HomeView
+            onDiscover={() => setView("about")}
+            onJoinTable={() => setView("rpg")}
+          />
+        );
+
+      case "about":
+        return <AboutView />;
+
+      case "what-is-rpg":
+        return <WhatIsRpg />;
+
+      case "location":
+        return <LocationView />;
+
+      case "rules":
+        return <RuleView />;
+
+      case "rpg":
+        return (
+          <RpgTablesView
+            session={session}
+            reloadToken={rpgModal.reloadToken}
+            onCreateTable={rpgModal.openCreate}
+            onEditTable={rpgModal.openEdit}
+            onLogin={() => setView("login")}
+          />
+        );
+
+      case "polls":
+        return (
+          <PollsView
+            session={session}
+            reloadToken={pollModal.reloadToken}
+            onCreatePoll={pollModal.openCreate}
+            onEditPoll={pollModal.openEdit}
+            onLogin={() => setView("login")}
+          />
+        );
+
+      case "quotes":
+        return (
+          <QuotesView session={session} onBackHome={() => setView("home")} />
+        );
+
+      case "login":
+      case "signup":
+        return (
+          <AuthForms
+            view={view}
+            onSwitchView={setView}
+            onLoginSuccess={handleLoginSuccess}
+          />
+        );
+
+      case "admin":
+        return (
+          <AdminView session={session} onBackHome={() => setView("home")} />
+        );
+
+      case "account":
+        return session ? (
+          <AccountView
+            onBackHome={() => setView("home")}
+            onSessionRefresh={(s) => setSession(s)}
+          />
+        ) : (
+          <ForbiddenView
+            title="Connexion requise"
+            message="Vous devez être connecté pour accéder à votre compte."
+            onBackHome={() => setView("login")}
+          />
+        );
+
+      default:
+        return (
+          <HomeView
+            onDiscover={() => setView("about")}
+            onJoinTable={() => setView("rpg")}
+          />
+        );
+    }
+  }
+
   return (
     <div className="app-root">
       <Navbar
@@ -133,123 +168,45 @@ function App() {
         onLogout={() => void handleLogout()}
       />
 
-      <main className="main">
-        {view === "home" && <HomeView />}
-
-        {view === "about" && <AboutView onJoinTable={() => setView("rpg")} />}
-
-        {view === "what-is-rpg" && (
-          <WhatIsRpg onJoinTable={() => setView("rpg")} />
-        )}
-
-        {view === "location" && (
-          <LocationView onJoinTable={() => setView("rpg")} />
-        )}
-
-        {view === "rules" && <RuleView />}
-
-        {view === "rpg" && (
-          <RpgTablesView
-            session={session}
-            reloadToken={rpgReloadToken}
-            onCreateTable={openRpgCreateModal}
-            onEditTable={openRpgEditModal}
-            onLogin={() => setView("login")}
-          />
-        )}
-
-        {view === "polls" && (
-          <PollsView
-            session={session}
-            reloadToken={pollReloadToken}
-            onCreatePoll={openPollCreateModal}
-            onEditPoll={openPollEditModal}
-            onLogin={() => setView("login")}
-          />
-        )}
-
-        {view === "quotes" && (
-          <QuotesView session={session} onBackHome={() => setView("home")} />
-        )}
-
-        {(view === "login" || view === "signup") && (
-          <AuthForms
-            view={view}
-            onSwitchView={setView}
-            onLoginSuccess={handleLoginSuccess}
-          />
-        )}
-
-        {view === "admin" && (
-          <AdminView session={session} onBackHome={() => setView("home")} />
-        )}
-
-        {view === "account" &&
-          (session ? (
-            <AccountView
-              onBackHome={() => setView("home")}
-              onSessionRefresh={(s) => setSession(s)}
-            />
-          ) : (
-            <ForbiddenView
-              title="Connexion requise"
-              message="Vous devez être connecté pour accéder à votre compte."
-              onBackHome={() => setView("login")}
-            />
-          ))}
-      </main>
+      <main className="main">{renderView()}</main>
 
       <Footer onChangeView={(v) => setView(v)} />
 
-      {rpgModalMode !== null &&
-        createPortal(
-          <div
-            className="appModal"
-            role="dialog"
-            aria-modal="true"
-            data-testid="rpg-modal-overlay"
-            onClick={closeRpgModal}
-          >
-            <div
-              className="appModal__dialog appModal__dialog--wide"
-              data-testid="rpg-modal-content"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <UpsertRpgTableView
-                session={session}
-                eventID={rpgModalMode === "edit" ? editingEventID : null}
-                onBack={closeRpgModal}
-                onDone={handleRpgSaved}
-              />
-            </div>
-          </div>,
-          document.body,
-        )}
+      <AppModal
+        isOpen={rpgModal.isOpen}
+        onRequestClose={rpgModal.close}
+        overlayClassName="appModal"
+        contentClassName="appModal__dialog appModal__dialog--wide"
+        overlayTestId="rpg-modal-overlay"
+        contentTestId="rpg-modal-content"
+      >
+        <UpsertRpgTableView
+          session={session}
+          eventID={
+            rpgModal.state.mode === "edit" ? rpgModal.state.editingId : null
+          }
+          onBack={rpgModal.close}
+          onDone={rpgModal.handleSaved}
+        />
+      </AppModal>
 
-      {pollModalMode !== null &&
-        createPortal(
-          <div
-            className="appModal"
-            role="dialog"
-            aria-modal="true"
-            data-testid="poll-modal-overlay"
-            onClick={closePollModal}
-          >
-            <div
-              className="appModal__dialog appModal__dialog--wide"
-              data-testid="poll-modal-content"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <UpsertPollView
-                session={session}
-                pollID={pollModalMode === "edit" ? editingPollID : null}
-                onBack={closePollModal}
-                onDone={handlePollSaved}
-              />
-            </div>
-          </div>,
-          document.body,
-        )}
+      <AppModal
+        isOpen={pollModal.isOpen}
+        onRequestClose={pollModal.close}
+        overlayClassName="appModal"
+        contentClassName="appModal__dialog appModal__dialog--wide"
+        overlayTestId="poll-modal-overlay"
+        contentTestId="poll-modal-content"
+      >
+        <UpsertPollView
+          session={session}
+          pollID={
+            pollModal.state.mode === "edit" ? pollModal.state.editingId : null
+          }
+          onBack={pollModal.close}
+          onDone={pollModal.handleSaved}
+        />
+      </AppModal>
     </div>
   );
 }

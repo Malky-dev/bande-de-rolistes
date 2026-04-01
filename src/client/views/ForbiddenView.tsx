@@ -1,12 +1,12 @@
 type ForbiddenViewProps = {
-  title?: string
-  message?: string
-  onBackHome: () => void
-}
+  title?: string;
+  message?: string;
+  onBackHome: () => void;
+};
 
 function ForbiddenView({
-  title = 'Accès refusé',
-  message = 'Vous devez être administrateur pour accéder à cette page.',
+  title = "Accès refusé",
+  message = "Vous devez être administrateur pour accéder à cette page.",
   onBackHome,
 }: ForbiddenViewProps) {
   return (
@@ -19,7 +19,7 @@ function ForbiddenView({
         </button>
       </div>
     </section>
-  )
+  );
 }
 
-export default ForbiddenView
+export default ForbiddenView;

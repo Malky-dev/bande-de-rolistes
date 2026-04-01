@@ -1,8 +1,6 @@
 import path from "node:path";
 import react from "@vitejs/plugin-react";
-import { defineConfig, mergeConfig } from "vitest/config";
-
-import baseConfig from "./vitest.config";
+import { defineConfig } from "vitest/config";
 
 const staticViewsExcludedFromCoverage = [
   "src/client/views/AboutView.tsx",
@@ -28,45 +26,42 @@ const domCoverageExclude = [
   ...staticViewsExcludedFromCoverage,
 ];
 
-export default mergeConfig(
-  baseConfig,
-  defineConfig({
-    plugins: [react()],
-    resolve: {
-      alias: {
-        "@": path.resolve(__dirname, "src"),
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "src"),
+    },
+  },
+  test: {
+    name: "dom",
+    environment: "jsdom",
+    globals: true,
+    passWithNoTests: true,
+    setupFiles: [path.resolve(__dirname, "tests/setup/dom.setup.ts")],
+    css: false,
+    include: [
+      "tests/unit/dom/**/*.{test,spec}.{ts,tsx}",
+      "tests/unit/dom/**/*.{test,spec}.{js,jsx}",
+    ],
+    exclude: [
+      "tests/helpers/**",
+      "tests/setup/**",
+      "tests/unit/node/**",
+      "node_modules/**",
+    ],
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "html"],
+      reportsDirectory: "./coverage/dom",
+      include: ["src/client/**/*.{ts,tsx}"],
+      exclude: domCoverageExclude,
+      thresholds: {
+        lines: 95,
+        functions: 95,
+        branches: 95,
+        statements: 95,
       },
     },
-    test: {
-      name: "dom",
-      environment: "jsdom",
-      globals: true,
-      passWithNoTests: true,
-      setupFiles: ["./tests/setup/dom.setup.ts"],
-      css: false,
-      include: [
-        "tests/**/*.{test,spec}.{ts,tsx}",
-        "tests/**/*.{test,spec}.{js,jsx}",
-      ],
-      exclude: [
-        "tests/helpers/**",
-        "tests/setup/**",
-        "tests/unit/node/**",
-        "node_modules/**",
-      ],
-      coverage: {
-        provider: "v8",
-        reporter: ["text", "html"],
-        reportsDirectory: "./coverage/dom",
-        include: ["src/client/**/*.{ts,tsx}"],
-        exclude: domCoverageExclude,
-        thresholds: {
-          lines: 95,
-          functions: 95,
-          branches: 95,
-          statements: 95,
-        },
-      },
-    },
-  }),
-);
+  },
+});

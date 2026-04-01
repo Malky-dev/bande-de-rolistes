@@ -1,8 +1,7 @@
-import type { PollDetails } from "../../../types/api/polls";
-import type { SessionInfo } from "../../../types/api/session";
+import type { PollDetails } from "@/types/api/polls";
+import type { SessionInfo } from "@/types/api/session";
 import PollResults from "./PollResults";
 import PollVoteForm from "./PollVoteForm";
-import PollOptionsAdmin from "./PollOptionsAdmin";
 
 type PollVoteModalProps = {
   session: SessionInfo | null;
@@ -16,7 +15,6 @@ type PollVoteModalProps = {
   onDeletePoll: () => Promise<void> | void;
   onEditPoll: (pollID: number) => void;
   onLogin: () => void;
-  onOptionsChanged: (message: string) => Promise<void> | void;
 };
 
 function formatDateTime(value: string): string {
@@ -41,7 +39,6 @@ export default function PollVoteModal({
   onDeletePoll,
   onEditPoll,
   onLogin,
-  onOptionsChanged,
 }: PollVoteModalProps) {
   return (
     <div className="appModal" onClick={onClose}>

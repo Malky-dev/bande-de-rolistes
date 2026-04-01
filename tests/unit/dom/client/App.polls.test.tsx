@@ -2,14 +2,14 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import App from "@/client/App";
-import { apiSession } from "@/api/authApi";
+import { apiSession } from "@/api/auth";
 
-vi.mock("@/api/authApi", () => ({
+vi.mock("@/api/auth", () => ({
   apiSession: vi.fn(),
 }));
 
-vi.mock("@/api/securityApi", () => ({
-  fetchCsrfToken: vi.fn(),
+vi.mock("@/api/csrf", () => ({
+  getCsrfToken: vi.fn(),
 }));
 
 vi.mock("@/client/components/Navbar", () => ({

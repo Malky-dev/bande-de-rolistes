@@ -1,8 +1,4 @@
-type WhatIsRpgViewProps = {
-  onJoinTable: () => void;
-};
-
-function WhatIsRpgView({ onJoinTable }: WhatIsRpgViewProps) {
+function WhatIsRpgView() {
   return (
     <div className="what-is-rpg-wrap">
       <section className="hero what-is-rpg-hero">

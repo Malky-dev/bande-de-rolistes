@@ -5,9 +5,6 @@ const reactRefresh = require("eslint-plugin-react-refresh");
 const tseslint = require("typescript-eslint");
 
 module.exports = tseslint.config(
-  // ------------------------------------------------------------
-  // GLOBAL IGNORES
-  // ------------------------------------------------------------
   {
     ignores: [
       "dist/**",
@@ -20,14 +17,15 @@ module.exports = tseslint.config(
     ],
   },
 
-  // ------------------------------------------------------------
-  // BASE JS RULES
-  // ------------------------------------------------------------
+  {
+    files: ["eslint.config.cjs"],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
+
   js.configs.recommended,
 
-  // ------------------------------------------------------------
-  // FRONTEND — React / Vite
-  // ------------------------------------------------------------
   {
     files: ["src/**/*.{ts,tsx}"],
     ignores: ["src/server/**"],
@@ -39,22 +37,19 @@ module.exports = tseslint.config(
     languageOptions: {
       parserOptions: {
         project: ["./tsconfig.json"],
-        tsconfigRootDir: __dirname,
+        tsconfigRootDir: process.cwd(),
       },
       globals: globals.browser,
     },
   },
 
-  // ------------------------------------------------------------
-  // BACKEND — Node / Express / Sequelize
-  // ------------------------------------------------------------
   {
     files: ["src/server/**/*.ts"],
     extends: [...tseslint.configs.recommendedTypeChecked],
     languageOptions: {
       parserOptions: {
         project: ["./tsconfig.server.json"],
-        tsconfigRootDir: __dirname,
+        tsconfigRootDir: process.cwd(),
       },
       globals: globals.node,
     },

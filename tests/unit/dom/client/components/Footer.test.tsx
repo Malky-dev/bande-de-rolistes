@@ -2,9 +2,9 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import Footer from "@/client/components/Footer";
-import { apiQuote } from "@/api/authApi";
+import { apiQuote } from "@/api/auth";
 
-vi.mock("@/api/authApi", () => ({
+vi.mock("@/api/auth", () => ({
   apiQuote: vi.fn(),
 }));
 

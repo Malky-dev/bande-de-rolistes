@@ -9,12 +9,12 @@ import {
   apiGetPoll,
   apiUpdatePoll,
   apiUpdatePollOption,
-} from "@/api/pollsApi";
+} from "@/api/polls";
 import type { PollDetails } from "@/types/api/polls";
 import type { SessionInfo } from "@/types/api/session";
 import UpsertPollView from "@/client/views/polls/UpsertPollView";
 
-vi.mock("@/api/pollsApi", () => ({
+vi.mock("@/api/polls", () => ({
   apiCreatePoll: vi.fn(),
   apiGetPoll: vi.fn(),
   apiUpdatePoll: vi.fn(),

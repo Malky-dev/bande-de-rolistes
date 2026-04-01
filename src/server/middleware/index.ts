@@ -9,4 +9,4 @@ export {
 } from "./auth/guards";
 
 export { verifyCsrf, generateCsrfToken } from "./csrf";
-export { requestLimiter, authLimiter } from "./rateLimit";
+export { requestLimiter } from "./rateLimit";

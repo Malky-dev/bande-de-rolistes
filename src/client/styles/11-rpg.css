@@ -2,17 +2,6 @@
    11) RPG - Tables JDR
 ========================================================= */
 
-.rpg-wrap {
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 26px 22px 44px;
-}
-
-.rpg-title {
-  margin: 0 0 14px;
-  font-size: 28px;
-}
-
 .rpg-grid {
   display: grid;
   grid-template-columns: 1fr 2fr;

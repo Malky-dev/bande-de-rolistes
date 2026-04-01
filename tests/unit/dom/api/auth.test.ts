@@ -7,17 +7,15 @@ import {
   apiLogin,
   apiLogout,
   apiQuote,
-  isApiErrorPayload,
-  isPaginatedQuoteAdmin,
   apiQuotesCreate,
   apiQuotesDelete,
   apiQuotesList,
   apiQuotesUpdate,
   apiSession,
   apiSignin,
-  parseJsonObject,
-  readErrorMessage,
-} from "@/api/authApi";
+} from "@/api/auth";
+
+import { readErrorMessage } from "@/api/http";
 
 type FetchResponseShape = {
   ok: boolean;
@@ -40,37 +38,13 @@ function makeResponse(data: {
   };
 }
 
-describe("authApi", () => {
+describe("auth", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
 
-  it("valide les helpers authApi et utilise le message de secours pour les erreurs mal formées", async () => {
-    expect(isApiErrorPayload({})).toBe(true);
-    expect(isApiErrorPayload({ message: 1 })).toBe(false);
-
-    expect(() => parseJsonObject("null")).toThrow("Invalid JSON payload");
-
-    expect(
-      isPaginatedQuoteAdmin({
-        items: [{ quoteID: 1, content: "Hello", author: "Morpheus" }],
-        page: 1,
-        limit: 10,
-        totalItems: 1,
-        totalPages: 1,
-      }),
-    ).toBe(true);
-    expect(
-      isPaginatedQuoteAdmin({
-        items: [{ quoteID: 1, content: "Hello" }],
-        page: 1,
-        limit: 10,
-        totalItems: 1,
-        totalPages: 1,
-      }),
-    ).toBe(false);
-
+  it("utilise le message de secours pour les erreurs mal formées", async () => {
     await expect(
       readErrorMessage(
         makeResponse({ ok: false, text: "not-json" }) as unknown as Response,

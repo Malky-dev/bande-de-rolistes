@@ -1,14 +1,14 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/api/authApi", () => ({
+vi.mock("@/api/auth", () => ({
   apiLogin: vi.fn(),
   apiSession: vi.fn(),
   apiSignin: vi.fn(),
 }));
 
 import AuthForms from "@/client/components/AuthForms";
-import { apiLogin, apiSession, apiSignin } from "@/api/authApi";
+import { apiLogin, apiSession, apiSignin } from "@/api/auth";
 
 describe("AuthForms", () => {
   afterEach(() => {

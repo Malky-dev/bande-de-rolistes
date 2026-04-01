@@ -1,20 +1,17 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   apiDeletePoll,
   apiDeletePollVote,
   apiGetPoll,
   apiListPolls,
   apiReplacePollVote,
-} from "../../api/pollsApi";
-import PollVoteModal from "../components/polls/PollVoteModal";
-import PollList from "../components/polls/PollList";
-import {
-  canCreatePoll,
-  computeNextSelectedOptionIDs,
-  getPollsViewErrorMessage,
-} from "./polls/pollsView.helpers";
-import type { PollDetails, PollListItem } from "../../types/api/polls";
-import type { SessionInfo } from "../../types/api/session";
+} from "@/api/polls";
+import PollVoteModal from "@/client/components/polls/PollVoteModal";
+import PollList from "@/client/components/polls/PollList";
+import { canCreatePoll } from "@/client/utils/permissions";
+import { computeNextSelectedOptionIDs } from "@/client/views/polls/pollsView.helpers";
+import type { PollDetails, PollListItem } from "@/types/api/polls";
+import type { SessionInfo } from "@/types/api/session";
 
 type PollsViewProps = {
   session: SessionInfo | null;
@@ -42,7 +39,9 @@ export default function PollsView({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isVoteModalOpen, setIsVoteModalOpen] = useState(false);
 
-  async function loadPolls(): Promise<void> {
+  const canManagePolls = canCreatePoll(session);
+
+  const loadPolls = useCallback(async (): Promise<void> => {
     setLoadingList(true);
     setErrorMessage(null);
 
@@ -58,13 +57,13 @@ export default function PollsView({
         return;
       }
 
-      const hasSelection =
-        selectedPollID !== null &&
-        nextPolls.some((poll) => poll.pollID === selectedPollID);
+      setSelectedPollID((currentSelectedPollID) => {
+        const hasSelection =
+          currentSelectedPollID !== null &&
+          nextPolls.some((poll) => poll.pollID === currentSelectedPollID);
 
-      if (!hasSelection) {
-        setSelectedPollID(nextPolls[0].pollID);
-      }
+        return hasSelection ? currentSelectedPollID : nextPolls[0].pollID;
+      });
     } catch (cause) {
       setErrorMessage(
         cause instanceof Error
@@ -74,9 +73,9 @@ export default function PollsView({
     } finally {
       setLoadingList(false);
     }
-  }
+  }, []);
 
-  async function loadPollDetails(pollID: number): Promise<void> {
+  const loadPollDetails = useCallback(async (pollID: number): Promise<void> => {
     setLoadingDetails(true);
     setErrorMessage(null);
 
@@ -95,23 +94,26 @@ export default function PollsView({
     } finally {
       setLoadingDetails(false);
     }
-  }
+  }, []);
 
-  async function refreshCurrentPoll(message?: string): Promise<void> {
-    if (selectedPollID !== null) {
-      await loadPollDetails(selectedPollID);
-    }
+  const refreshCurrentPoll = useCallback(
+    async (message?: string): Promise<void> => {
+      if (selectedPollID !== null) {
+        await loadPollDetails(selectedPollID);
+      }
 
-    await loadPolls();
+      await loadPolls();
 
-    if (message !== undefined) {
-      setSuccessMessage(message);
-    }
-  }
+      if (message !== undefined) {
+        setSuccessMessage(message);
+      }
+    },
+    [loadPollDetails, loadPolls, selectedPollID],
+  );
 
   useEffect(() => {
     void loadPolls();
-  }, [reloadToken]);
+  }, [loadPolls, reloadToken]);
 
   useEffect(() => {
     if (selectedPollID === null) {
@@ -121,7 +123,7 @@ export default function PollsView({
     }
 
     void loadPollDetails(selectedPollID);
-  }, [selectedPollID, reloadToken]);
+  }, [selectedPollID, reloadToken, loadPollDetails]);
 
   function handleOpenVoteModal(pollID: number): void {
     setSelectedPollID(pollID);
@@ -161,7 +163,9 @@ export default function PollsView({
       await refreshCurrentPoll(message);
     } catch (cause) {
       setErrorMessage(
-        getPollsViewErrorMessage(cause, "Impossible d'enregistrer le vote."),
+        cause instanceof Error
+          ? cause.message
+          : "Impossible d'enregistrer le vote.",
       );
     } finally {
       setActionLoading(false);
@@ -183,7 +187,9 @@ export default function PollsView({
       await refreshCurrentPoll(message);
     } catch (cause) {
       setErrorMessage(
-        getPollsViewErrorMessage(cause, "Impossible de supprimer le vote."),
+        cause instanceof Error
+          ? cause.message
+          : "Impossible de supprimer le vote.",
       );
     } finally {
       setActionLoading(false);
@@ -217,7 +223,9 @@ export default function PollsView({
       setSuccessMessage(message);
     } catch (cause) {
       setErrorMessage(
-        getPollsViewErrorMessage(cause, "Impossible de supprimer le sondage."),
+        cause instanceof Error
+          ? cause.message
+          : "Impossible de supprimer le sondage.",
       );
     } finally {
       setActionLoading(false);
@@ -235,7 +243,7 @@ export default function PollsView({
           </p>
         </div>
 
-        {canCreatePoll(session) ? (
+        {canManagePolls ? (
           <button type="button" className="btn-primary" onClick={onCreatePoll}>
             Créer un sondage
           </button>
@@ -260,7 +268,7 @@ export default function PollsView({
         loading={loadingList}
         onSelect={handleOpenVoteModal}
         onEdit={onEditPoll}
-        canManagePolls={canCreatePoll(session)}
+        canManagePolls={canManagePolls}
       />
 
       {isVoteModalOpen && loadingDetails ? (
@@ -289,10 +297,6 @@ export default function PollsView({
           onDeletePoll={handleDeletePoll}
           onEditPoll={onEditPoll}
           onLogin={onLogin}
-          onOptionsChanged={async (message) => {
-            setErrorMessage(null);
-            await refreshCurrentPoll(message);
-          }}
         />
       ) : null}
     </section>

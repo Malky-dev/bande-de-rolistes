@@ -1,84 +1,87 @@
-import { useEffect, useMemo, useState } from 'react'
-import type { SessionInfo } from '../../types/api/session'
-import { apiSession } from '../../api/authApi'
-import { apiGetAccount, apiUpdateAccount } from '../../api/accountApi'
+import { useEffect, useMemo, useState } from "react";
+import type { SessionInfo } from "../../types/api/session";
+import { apiSession } from "../../api/auth";
+import { apiGetAccount, apiUpdateAccount } from "../../api/account";
 
 type AccountViewProps = {
-  onBackHome: () => void
-  onSessionRefresh: (s: SessionInfo) => void
-}
+  onBackHome: () => void;
+  onSessionRefresh: (s: SessionInfo) => void;
+};
 
 function AccountView({ onBackHome, onSessionRefresh }: AccountViewProps) {
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
-  const [email, setEmail] = useState('')
-  const [nickname, setNickname] = useState('')
-  const [discordId, setDiscordId] = useState<string | null>(null)
+  const [email, setEmail] = useState("");
+  const [nickname, setNickname] = useState("");
+  const [discordId, setDiscordId] = useState<string | null>(null);
 
   const hasDiscord = useMemo(
-    () => typeof discordId === 'string' && discordId.length > 0,
-    [discordId]
-  )
+    () => typeof discordId === "string" && discordId.length > 0,
+    [discordId],
+  );
 
   useEffect(() => {
-    let cancelled = false
+    let cancelled = false;
 
     const safeSet = (fn: () => void): void => {
-      if (!cancelled) fn()
-    }
+      if (!cancelled) fn();
+    };
 
     async function load(): Promise<void> {
       try {
-        const me = await apiGetAccount()
-  
+        const me = await apiGetAccount();
+
         safeSet(() => {
-          setEmail(me.email)
-          setNickname(me.nickname)
-          setDiscordId(me.discordId)
-        })
+          setEmail(me.email);
+          setNickname(me.nickname);
+          setDiscordId(me.discordId);
+        });
       } catch (err: unknown) {
         const msg =
-          err instanceof Error ? err.message : 'Impossible de charger votre compte'
-  
+          err instanceof Error
+            ? err.message
+            : "Impossible de charger votre compte";
+
         safeSet(() => {
-          setError(msg)
-        })
+          setError(msg);
+        });
       } finally {
         safeSet(() => {
-          setLoading(false)
-        })
+          setLoading(false);
+        });
       }
     }
 
-    void load()
+    void load();
 
     return () => {
-      cancelled = true
-    }
-  }, [])
+      cancelled = true;
+    };
+  }, []);
 
   const handleSave = (e: React.FormEvent<HTMLFormElement>): void => {
-    e.preventDefault()
+    e.preventDefault();
 
-    setSaving(true)
-    setError(null)
-    setSuccess(null)
+    setSaving(true);
+    setError(null);
+    setSuccess(null);
 
     apiUpdateAccount({ nickname })
       .then(async () => {
-        const s = await apiSession()
-        onSessionRefresh(s)
-        setSuccess('Infos mises à jour.')
+        const s = await apiSession();
+        onSessionRefresh(s);
+        setSuccess("Infos mises à jour.");
       })
       .catch((err: unknown) => {
-        const msg = err instanceof Error ? err.message : 'Impossible de sauvegarder'
-        setError(msg)
+        const msg =
+          err instanceof Error ? err.message : "Impossible de sauvegarder";
+        setError(msg);
       })
-      .finally(() => setSaving(false))
-  }
+      .finally(() => setSaving(false));
+  };
 
   if (loading) {
     return (
@@ -86,7 +89,7 @@ function AccountView({ onBackHome, onSessionRefresh }: AccountViewProps) {
         <h2 className="panel__title">Mon compte</h2>
         <p className="panel__subtitle">On charge ta feuille de personnage…</p>
       </section>
-    )
+    );
   }
 
   return (
@@ -94,7 +97,7 @@ function AccountView({ onBackHome, onSessionRefresh }: AccountViewProps) {
       <h2 className="panel__title">Mon compte</h2>
 
       <div className="auth-field">
-        <label>Inscrit via Discord : {hasDiscord ? 'Oui' : 'Non'}</label>
+        <label>Inscrit via Discord : {hasDiscord ? "Oui" : "Non"}</label>
       </div>
 
       <p className="panel__subtitle">
@@ -108,7 +111,8 @@ function AccountView({ onBackHome, onSessionRefresh }: AccountViewProps) {
         </div>
 
         <p className="account-help">
-          Pour changer ton email, demande à un gentil organisateur de l&apos;association.
+          Pour changer ton email, demande à un gentil organisateur de
+          l&apos;association.
         </p>
         <p className="account-help account-help--em">
           (un bon jet de persuasion ou de charisme sera apprécié).
@@ -129,7 +133,7 @@ function AccountView({ onBackHome, onSessionRefresh }: AccountViewProps) {
 
         <div className="hero-actions">
           <button className="btn-primary" type="submit" disabled={saving}>
-            {saving ? 'Sauvegarde…' : 'Enregistrer'}
+            {saving ? "Sauvegarde…" : "Enregistrer"}
           </button>
           <button className="btn-secondary" type="button" onClick={onBackHome}>
             Retour
@@ -137,7 +141,7 @@ function AccountView({ onBackHome, onSessionRefresh }: AccountViewProps) {
         </div>
       </form>
     </section>
-  )
+  );
 }
 
-export default AccountView
+export default AccountView;

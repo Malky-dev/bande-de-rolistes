@@ -3,14 +3,14 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import AccountView from "@/client/views/AccountView";
 
-import { apiSession } from "@/api/authApi";
-import { apiGetAccount, apiUpdateAccount } from "@/api/accountApi";
+import { apiSession } from "@/api/auth";
+import { apiGetAccount, apiUpdateAccount } from "@/api/account";
 
-vi.mock("@/api/authApi", () => ({
+vi.mock("@/api/auth", () => ({
   apiSession: vi.fn(),
 }));
 
-vi.mock("@/api/accountApi", () => ({
+vi.mock("@/api/account", () => ({
   apiGetAccount: vi.fn(),
   apiUpdateAccount: vi.fn(),
 }));

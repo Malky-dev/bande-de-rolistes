@@ -11,7 +11,7 @@ import {
   apiListRpgStatuses,
   apiUpdateRpgTable,
   apiUpdateRpgTableStatus,
-} from "@/api/rpgApi";
+} from "@/api/rpg";
 
 vi.mock("react-datepicker", () => ({
   default: ({
@@ -35,7 +35,7 @@ vi.mock("react-datepicker", () => ({
   ),
 }));
 
-vi.mock("@/api/rpgApi", () => ({
+vi.mock("@/api/rpg", () => ({
   apiCreateRpgTable: vi.fn(),
   apiListRpgStatuses: vi.fn(),
   apiUpdateRpgTable: vi.fn(),

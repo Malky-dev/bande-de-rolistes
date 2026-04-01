@@ -1,6 +1,6 @@
-import { RPG_TABLE_STATUSES } from "../../../shared/constants";
-import type { RpgTableStatus } from "../../../shared/constants";
-import type { RpgTableFormValues } from "./rpgTableFormModel";
+import { RPG_TABLE_STATUSES } from "@/shared/constants";
+import type { RpgTableStatus } from "@/shared/constants";
+import type { RpgTableFormValues } from "@/client/views/rpg/rpgTableFormModel";
 
 export async function loadAvailableRpgStatuses(
   fetchStatuses: () => Promise<RpgTableStatus[]>,

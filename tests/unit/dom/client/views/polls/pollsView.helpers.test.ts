@@ -1,65 +1,7 @@
 import { describe, expect, it } from "vitest";
-import {
-  canCreatePoll,
-  computeNextSelectedOptionIDs,
-  getPollsViewErrorMessage,
-} from "@/client/views/polls/pollsView.helpers";
+import { computeNextSelectedOptionIDs } from "@/client/views/polls/pollsView.helpers";
 
 describe("pollsView.helpers", () => {
-  describe("canCreatePoll", () => {
-    it("refuse une session nulle", () => {
-      expect(canCreatePoll(null)).toBe(false);
-    });
-
-    it("autorise le rôle 1", () => {
-      expect(
-        canCreatePoll({
-          userID: 1,
-          nickname: "Admin",
-          roleID: 1,
-          role: "admin",
-          isVerified: true,
-        }),
-      ).toBe(true);
-    });
-
-    it("autorise le rôle 2", () => {
-      expect(
-        canCreatePoll({
-          userID: 1,
-          nickname: "Modo",
-          roleID: 2,
-          role: "member",
-          isVerified: true,
-        }),
-      ).toBe(true);
-    });
-
-    it("refuse les autres rôles", () => {
-      expect(
-        canCreatePoll({
-          userID: 1,
-          nickname: "Paul",
-          roleID: 5,
-          role: "member",
-          isVerified: true,
-        }),
-      ).toBe(false);
-    });
-  });
-
-  describe("getPollsViewErrorMessage", () => {
-    it("retourne le message de Error", () => {
-      expect(getPollsViewErrorMessage(new Error("boom"), "fallback")).toBe(
-        "boom",
-      );
-    });
-
-    it("retourne le fallback pour une valeur non Error", () => {
-      expect(getPollsViewErrorMessage("boom", "fallback")).toBe("fallback");
-    });
-  });
-
   describe("computeNextSelectedOptionIDs", () => {
     it("ne change rien si details est null", () => {
       expect(

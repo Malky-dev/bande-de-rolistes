@@ -1,8 +1,4 @@
-type LocationViewProps = {
-  onJoinTable: () => void;
-};
-
-function LocationView({ onJoinTable }: LocationViewProps) {
+function LocationView() {
   return (
     <div className="location-wrap">
       <section className="hero location-hero">

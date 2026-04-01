@@ -2,8 +2,6 @@ import { describe, it, expect, vi } from "vitest";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
-type Fn = ReturnType<typeof vi.fn>;
-
 const makeRes = () => {
   const status = vi.fn().mockReturnThis();
   const json = vi.fn().mockReturnThis();

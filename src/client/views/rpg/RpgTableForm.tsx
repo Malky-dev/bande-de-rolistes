@@ -1,36 +1,14 @@
-import type { FormEvent, ReactElement } from "react";
-import { useEffect, useMemo, useState } from "react";
+import type { ReactElement } from "react";
 import DatePicker from "react-datepicker";
 import { fr } from "date-fns/locale";
-import {
-  loadAvailableRpgStatuses,
-  resolveNextRpgTableStatus,
-} from "./RpgTableForm.helpers";
 
 import {
   RPG_LOCATIONS,
   RPG_MAX_PLAYERS_OPTIONS,
-  RPG_TABLE_STATUSES,
   RPG_STATUS_LABELS,
-} from "../../../shared/constants";
-import type { RpgTableStatus } from "../../../shared/constants";
-import type { RpgTableDetails } from "../../../types/api/rpg";
-
-import {
-  defaultCreateValues,
-  toCreateBody,
-  toUpdateBody,
-  validateRpgTable,
-  valuesFromTable,
-  type RpgTableFormValues,
-} from "./rpgTableFormModel";
-
-import {
-  apiCreateRpgTable,
-  apiListRpgStatuses,
-  apiUpdateRpgTable,
-  apiUpdateRpgTableStatus,
-} from "../../../api/rpgApi";
+} from "@/shared/constants";
+import type { RpgTableDetails } from "@/types/api/rpg";
+import { useRpgTableForm } from "@/client/views/rpg/useRpgTableForm";
 
 type Props =
   | {
@@ -48,85 +26,17 @@ type Props =
     };
 
 export default function RpgTableForm(props: Props): ReactElement | null {
-  const initial = useMemo<RpgTableFormValues>(() => {
-    return props.mode === "edit"
-      ? valuesFromTable(props.table)
-      : defaultCreateValues();
-  }, [props]);
-
-  const [values, setValues] = useState<RpgTableFormValues>(initial);
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    setValues(initial);
-  }, [initial]);
-
-  const [availableStatuses, setAvailableStatuses] = useState<RpgTableStatus[]>(
-    [],
-  );
-  const [isLoadingStatuses, setIsLoadingStatuses] = useState(false);
-
-  useEffect(() => {
-    if (props.mode !== "edit") return;
-    let mounted = true;
-
-    const run = async () => {
-      setIsLoadingStatuses(true);
-      try {
-        const statuses = await loadAvailableRpgStatuses(
-          apiListRpgStatuses,
-          RPG_TABLE_STATUSES,
-        );
-        if (mounted) setAvailableStatuses(statuses);
-      } finally {
-        if (mounted) setIsLoadingStatuses(false);
-      }
-    };
-
-    void run();
-    return () => {
-      mounted = false;
-    };
-  }, [props.mode]);
+  const {
+    values,
+    error,
+    isSubmitting,
+    availableStatuses,
+    isLoadingStatuses,
+    updateField,
+    submit,
+  } = useRpgTableForm(props);
 
   if (!props.canSubmit) return null;
-
-  const submit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError(null);
-
-    const msg = validateRpgTable(values);
-    if (msg) {
-      setError(msg);
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      if (props.mode === "create") {
-        const created = await apiCreateRpgTable(toCreateBody(values));
-        props.onDone(created.eventID);
-        setValues(defaultCreateValues());
-      } else {
-        await apiUpdateRpgTable(props.table.eventID, toUpdateBody(values));
-
-        const nextStatus = resolveNextRpgTableStatus(
-          values.status,
-          props.table.status,
-        );
-        if (nextStatus !== props.table.status) {
-          await apiUpdateRpgTableStatus(props.table.eventID, nextStatus);
-        }
-
-        props.onDone();
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   return (
     <section className="rpg-create">
@@ -136,14 +46,20 @@ export default function RpgTableForm(props: Props): ReactElement | null {
 
       {error ? <p className="auth-error">{error}</p> : null}
 
-      <form onSubmit={(e) => void submit(e)} className="form">
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          void submit();
+        }}
+        className="form"
+      >
         <div>
           <label htmlFor="rpg-game">Nom du Jeu</label>
           <input
             id="rpg-game"
             type="text"
             value={values.game}
-            onChange={(e) => setValues((v) => ({ ...v, game: e.target.value }))}
+            onChange={(e) => updateField("game", e.target.value)}
             disabled={isSubmitting}
             required
           />
@@ -156,9 +72,7 @@ export default function RpgTableForm(props: Props): ReactElement | null {
           <DatePicker
             id="rpg-eventDate"
             selected={values.eventDate}
-            onChange={(d: Date | null) =>
-              setValues((v) => ({ ...v, eventDate: d }))
-            }
+            onChange={(d: Date | null) => updateField("eventDate", d)}
             showTimeSelect
             timeFormat="HH:mm"
             timeIntervals={30}
@@ -180,9 +94,7 @@ export default function RpgTableForm(props: Props): ReactElement | null {
           <select
             id="rpg-maxPlayers"
             value={String(values.maxPlayers)}
-            onChange={(e) =>
-              setValues((v) => ({ ...v, maxPlayers: Number(e.target.value) }))
-            }
+            onChange={(e) => updateField("maxPlayers", Number(e.target.value))}
             disabled={isSubmitting}
             required
           >
@@ -201,9 +113,7 @@ export default function RpgTableForm(props: Props): ReactElement | null {
           <select
             id="rpg-location"
             value={values.location}
-            onChange={(e) =>
-              setValues((v) => ({ ...v, location: e.target.value }))
-            }
+            onChange={(e) => updateField("location", e.target.value)}
             disabled={isSubmitting}
             required
           >
@@ -223,9 +133,7 @@ export default function RpgTableForm(props: Props): ReactElement | null {
           <textarea
             id="rpg-comments"
             value={values.comments}
-            onChange={(e) =>
-              setValues((v) => ({ ...v, comments: e.target.value }))
-            }
+            onChange={(e) => updateField("comments", e.target.value)}
             disabled={isSubmitting}
           />
         </div>
@@ -233,17 +141,14 @@ export default function RpgTableForm(props: Props): ReactElement | null {
         <div>
           <label>Statut</label>
           <div className="radio-group">
-            {(availableStatuses.length > 0
-              ? availableStatuses
-              : [...RPG_TABLE_STATUSES]
-            ).map((s) => (
+            {availableStatuses.map((s) => (
               <label key={s} className="radio-row">
                 <input
                   type="radio"
                   name="rpg-status"
                   value={s}
                   checked={(values.status ?? "OPEN") === s}
-                  onChange={() => setValues((v) => ({ ...v, status: s }))}
+                  onChange={() => updateField("status", s)}
                   disabled={isSubmitting || isLoadingStatuses}
                 />
                 <span>{RPG_STATUS_LABELS[s] ?? s}</span>

@@ -1,12 +1,12 @@
-import type { ApiError } from './errors'
+import type { ApiError } from "./errors";
 
 export interface LoginBody {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }
 
 export interface LoginSuccess {
-  token: string
+  token: string;
 }
 
-export type LoginResponse = LoginSuccess | ApiError
+export type LoginResponse = LoginSuccess | ApiError;

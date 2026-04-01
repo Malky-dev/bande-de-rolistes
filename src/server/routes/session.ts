@@ -2,21 +2,17 @@
 // session.ts - Route Session utilisateur
 // ---------------------------
 
-import { Router } from 'express'
+import { Router } from "express";
 
-import sessionController from '../controllers/session'
-import { requestLimiter } from '../middleware/rateLimit'
+import sessionController from "../controllers/session";
+import { requestLimiter } from "../middleware/rateLimit";
 
-const router = Router()
+const router = Router();
 
 // ---------------------------
 // Session
 // ---------------------------
 
-router.get(
-  '/session',
-  requestLimiter,
-  sessionController
-)
+router.get("/session", requestLimiter, sessionController);
 
-export default router
+export default router;

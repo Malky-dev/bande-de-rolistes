@@ -4,7 +4,6 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import RpgTablesView from "@/client/views/RpgTablesView";
 import {
   formatDate,
-  getMySignupBucket,
   getSelectedTableID,
   statusClass,
   statusLabel,
@@ -14,9 +13,9 @@ import {
   apiListRpgTables,
   apiSignupRpg,
   apiUnsignupRpg,
-} from "@/api/rpgApi";
+} from "@/api/rpg";
 
-vi.mock("@/api/rpgApi", () => ({
+vi.mock("@/api/rpg", () => ({
   apiGetRpgTable: vi.fn(),
   apiListRpgTables: vi.fn(),
   apiSignupRpg: vi.fn(),
@@ -53,7 +52,7 @@ describe("RpgTablesView", () => {
     vi.resetAllMocks();
   });
 
-  it("calcule les libellés, les dates, la sélection et les groupes d’inscription de la vue JDR", () => {
+  it("calcule les libellés, les dates et la sélection de la vue JDR", () => {
     expect(formatDate("invalid")).toBe("invalid");
     expect(statusLabel("OPEN")).toBe("Inscription Ouverte");
     expect(statusLabel("CANCELLED")).toBe("Table Annulée");
@@ -61,49 +60,6 @@ describe("RpgTablesView", () => {
     expect(getSelectedTableID(null, [])).toBeNull();
     expect(getSelectedTableID(null, [listItem])).toBe(10);
     expect(getSelectedTableID(42, [listItem])).toBe(42);
-    expect(
-      getMySignupBucket(
-        {
-          ...details,
-          confirmed: [
-            {
-              userID: 5,
-              nickname: "Neo",
-              created_at: "2026-01-01T12:00:00.000Z",
-            },
-          ],
-        },
-        {
-          userID: 5,
-          nickname: "Neo",
-          roleID: 5,
-          role: "member",
-          isVerified: true,
-        },
-      ),
-    ).toBe("CONFIRMED");
-    expect(
-      getMySignupBucket(
-        {
-          ...details,
-          waitlist: [
-            {
-              userID: 5,
-              nickname: "Neo",
-              created_at: "2026-01-01T12:00:00.000Z",
-            },
-          ],
-        },
-        {
-          userID: 5,
-          nickname: "Neo",
-          roleID: 5,
-          role: "member",
-          isVerified: true,
-        },
-      ),
-    ).toBe("WAITLIST");
-    expect(getMySignupBucket(details, null)).toBeNull();
   });
 
   it("affiche l’erreur de chargement quand la requête de liste des tables échoue", async () => {
