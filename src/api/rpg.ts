@@ -19,7 +19,7 @@ function isRpgTableStatus(value: string): value is RpgTableStatus {
   return value === "OPEN" || value === "CLOSED" || value === "CANCELLED";
 }
 
-export function isRpgTableStatusList(value: object): value is RpgTableStatus[] {
+function isRpgTableStatusList(value: object): value is RpgTableStatus[] {
   return (
     Array.isArray(value) &&
     value.every((entry) => typeof entry === "string" && isRpgTableStatus(entry))
@@ -69,7 +69,7 @@ function isRpgTableListItem(value: object): value is RpgTableListItem {
   );
 }
 
-export function hasRpgTableBaseFields(value: object): boolean {
+function hasRpgTableBaseFields(value: object): boolean {
   const record = value as Record<
     string,
     string | number | boolean | object | object[] | null
@@ -109,7 +109,7 @@ function isRpgTableList(value: object): value is RpgTableListItem[] {
   );
 }
 
-export function isSignupItem(value: object): value is RpgSignupItem {
+function isSignupItem(value: object): value is RpgSignupItem {
   return (
     "userID" in value &&
     typeof value.userID === "number" &&
@@ -120,7 +120,7 @@ export function isSignupItem(value: object): value is RpgSignupItem {
   );
 }
 
-export function isRpgTableDetails(value: object): value is RpgTableDetails {
+function isRpgTableDetails(value: object): value is RpgTableDetails {
   if (!hasRpgTableBaseFields(value)) {
     return false;
   }

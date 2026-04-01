@@ -1,8 +1,6 @@
 import { readErrorMessage, readJsonObject } from "./http";
 
-export function isCsrfTokenResponse(
-  value: object,
-): value is { csrfToken: string } {
+function isCsrfTokenResponse(value: object): value is { csrfToken: string } {
   return (
     "csrfToken" in value &&
     typeof value.csrfToken === "string" &&

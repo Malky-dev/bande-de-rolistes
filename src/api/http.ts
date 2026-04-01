@@ -3,14 +3,14 @@ type ApiErrorPayload = {
   code?: string;
 };
 
-export function isApiErrorPayload(value: object): value is ApiErrorPayload {
+function isApiErrorPayload(value: object): value is ApiErrorPayload {
   return (
     (!("message" in value) || typeof value.message === "string") &&
     (!("code" in value) || typeof value.code === "string")
   );
 }
 
-export function parseJsonObject(text: string): object {
+function parseJsonObject(text: string): object {
   const parsed = JSON.parse(text) as object;
 
   if (typeof parsed !== "object" || parsed === null) {

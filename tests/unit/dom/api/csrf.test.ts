@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { getCsrfToken, isCsrfTokenResponse } from "@/api/csrf";
+import { getCsrfToken } from "@/api/csrf";
 
 type FetchResponseShape = {
   ok: boolean;
@@ -18,12 +18,6 @@ describe("csrf", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
-  });
-
-  it("valide le type guard de réponse CSRF", () => {
-    expect(isCsrfTokenResponse({ csrfToken: "abc" })).toBe(true);
-    expect(isCsrfTokenResponse({ csrfToken: "" })).toBe(false);
-    expect(isCsrfTokenResponse({ wrong: "value" })).toBe(false);
   });
 
   it("renvoie le token quand la réponse est valide", async () => {

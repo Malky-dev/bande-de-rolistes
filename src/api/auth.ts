@@ -135,9 +135,7 @@ function isQuoteAdmin(value: object): value is QuoteAdmin {
   );
 }
 
-export function isPaginatedQuoteAdmin(
-  value: object,
-): value is Paginated<QuoteAdmin> {
+function isPaginatedQuoteAdmin(value: object): value is Paginated<QuoteAdmin> {
   const record = value as Record<
     string,
     string | number | boolean | object | object[] | null

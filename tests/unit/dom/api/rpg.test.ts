@@ -14,12 +14,8 @@ import {
   apiUnsignupRpg,
   apiUpdateRpgTable,
   apiUpdateRpgTableStatus,
-  hasRpgTableBaseFields,
-  isRpgTableDetails,
-  isRpgTableStatusList,
-  isSignupItem,
 } from "@/api/rpg";
-import { isApiErrorPayload, readErrorMessage } from "@/api/http";
+import { readErrorMessage } from "@/api/http";
 
 type FetchResponseShape = {
   ok: boolean;
@@ -39,50 +35,7 @@ describe("rpg", () => {
     vi.clearAllMocks();
   });
 
-  it("valide les helpers rpg et les erreurs mal formées", async () => {
-    expect(isApiErrorPayload({ message: "boom" })).toBe(true);
-    expect(isApiErrorPayload({ code: 1 })).toBe(false);
-
-    expect(
-      hasRpgTableBaseFields({
-        eventID: 1,
-        eventDate: "2026-01-01T00:00:00.000Z",
-        dungeonMaster: { userID: 1, nickname: "DM" },
-        location: "Paris",
-        game: "D&D",
-        status: "OPEN",
-        maxPlayers: 6,
-      }),
-    ).toBe(true);
-
-    expect(
-      isSignupItem({
-        userID: 1,
-        nickname: "Neo",
-        created_at: "2026-01-01T00:00:00.000Z",
-      }),
-    ).toBe(true);
-
-    expect(isSignupItem({ userID: 1, nickname: "Neo" })).toBe(false);
-    expect(isRpgTableStatusList(["OPEN", "CLOSED"])).toBe(true);
-    expect(isRpgTableStatusList(["OPEN", "BROKEN"])).toBe(false);
-
-    expect(
-      isRpgTableDetails({
-        eventID: 1,
-        eventDate: "2026-01-01T00:00:00.000Z",
-        dungeonMaster: { userID: 1, nickname: "DM" },
-        location: "Paris",
-        game: "D&D",
-        comments: undefined,
-        status: "OPEN",
-        maxPlayers: 6,
-        confirmedCap: 6,
-        confirmed: [],
-        waitlist: [],
-      }),
-    ).toBe(true);
-
+  it("utilise le message de secours pour les erreurs mal formées", async () => {
     await expect(
       readErrorMessage(
         makeResponse({ ok: false, text: "not-json" }) as Response,
