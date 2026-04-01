@@ -9,12 +9,3 @@ export const requestLimiter: RateLimitRequestHandler = rateLimit({
   legacyHeaders: false,
   skipSuccessfulRequests: true,
 });
-
-export const authLimiter: RateLimitRequestHandler = rateLimit({
-  windowMs: WINDOWMS,
-  max: RATELIMIT,
-  message: "Trop de tentatives de connexion, réessayez plus tard.",
-  standardHeaders: true,
-  legacyHeaders: false,
-  skipSuccessfulRequests: false,
-});

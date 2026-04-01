@@ -12,7 +12,6 @@ async function load() {
   const verifyCsrf = vi.fn();
   const generateCsrfToken = vi.fn();
   const requestLimiter = vi.fn();
-  const authLimiter = vi.fn();
 
   vi.doMock("@/server/middleware/auth/requireAuth", () => ({
     __esModule: true,
@@ -33,7 +32,6 @@ async function load() {
 
   vi.doMock("@/server/middleware/rateLimit", () => ({
     requestLimiter,
-    authLimiter,
   }));
 
   const mod = await import("@/server/middleware/index");
@@ -49,7 +47,6 @@ async function load() {
       verifyCsrf,
       generateCsrfToken,
       requestLimiter,
-      authLimiter,
     },
   };
 }
@@ -66,6 +63,5 @@ describe("middleware barrel", () => {
     expect(mod.verifyCsrf).toBe(expected.verifyCsrf);
     expect(mod.generateCsrfToken).toBe(expected.generateCsrfToken);
     expect(mod.requestLimiter).toBe(expected.requestLimiter);
-    expect(mod.authLimiter).toBe(expected.authLimiter);
   });
 });
