@@ -14,7 +14,7 @@ export type QuoteAdmin = {
   created_at?: string;
 };
 
-export type Paginated<T> = {
+type Paginated<T> = {
   items: T[];
   page: number;
   limit: number;
@@ -22,7 +22,7 @@ export type Paginated<T> = {
   totalPages: number;
 };
 
-export type AdminUser = {
+type AdminUser = {
   userID: number;
   nickname: string;
   email: string;
@@ -31,12 +31,12 @@ export type AdminUser = {
   isVerified: boolean;
 };
 
-export type AdminRole = {
+type AdminRole = {
   roleID: number;
   roleLabel: string;
 };
 
-export function isSessionInfo(value: object): value is SessionInfo {
+function isSessionInfo(value: object): value is SessionInfo {
   return (
     "userID" in value &&
     typeof value.userID === "number" &&
@@ -51,7 +51,7 @@ export function isSessionInfo(value: object): value is SessionInfo {
   );
 }
 
-export function isQuote(value: object): value is Quote {
+function isQuote(value: object): value is Quote {
   return (
     "content" in value &&
     typeof value.content === "string" &&
@@ -60,7 +60,7 @@ export function isQuote(value: object): value is Quote {
   );
 }
 
-export function isAdminRole(value: object): value is AdminRole {
+function isAdminRole(value: object): value is AdminRole {
   return (
     "roleID" in value &&
     typeof value.roleID === "number" &&
@@ -69,7 +69,7 @@ export function isAdminRole(value: object): value is AdminRole {
   );
 }
 
-export function isAdminUser(value: object): value is AdminUser {
+function isAdminUser(value: object): value is AdminUser {
   return (
     "userID" in value &&
     typeof value.userID === "number" &&
@@ -86,7 +86,7 @@ export function isAdminUser(value: object): value is AdminUser {
   );
 }
 
-export function isAdminUserArray(value: object): value is AdminUser[] {
+function isAdminUserArray(value: object): value is AdminUser[] {
   if (!Array.isArray(value)) return false;
   return value.every(
     (item) =>
@@ -94,7 +94,7 @@ export function isAdminUserArray(value: object): value is AdminUser[] {
   );
 }
 
-export function isAdminRoleArray(value: object): value is AdminRole[] {
+function isAdminRoleArray(value: object): value is AdminRole[] {
   if (!Array.isArray(value)) return false;
   return value.every(
     (item) =>
@@ -102,11 +102,11 @@ export function isAdminRoleArray(value: object): value is AdminRole[] {
   );
 }
 
-export function isLogoutResponse(value: object): value is { success: boolean } {
+function isLogoutResponse(value: object): value is { success: boolean } {
   return "success" in value && typeof value.success === "boolean";
 }
 
-export function isQuoteAdminArray(value: object): value is QuoteAdmin[] {
+function isQuoteAdminArray(value: object): value is QuoteAdmin[] {
   if (!Array.isArray(value)) return false;
   return value.every((v) => {
     if (typeof v !== "object" || v === null) return false;
@@ -119,7 +119,7 @@ export function isQuoteAdminArray(value: object): value is QuoteAdmin[] {
   });
 }
 
-export function isQuoteAdmin(value: object): value is QuoteAdmin {
+function isQuoteAdmin(value: object): value is QuoteAdmin {
   const record = value as Record<string, string | number | undefined>;
 
   const createdAt = record.created_at;

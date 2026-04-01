@@ -1,4 +1,4 @@
-export type ApiErrorCode =
+type ApiErrorCode =
   | "BAD_REQUEST"
   | "NOT_FOUND"
   | "ERROR"

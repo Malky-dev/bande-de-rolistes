@@ -3,14 +3,14 @@
 import { getCsrfToken } from "./csrf";
 import { readErrorMessage, readJsonObject } from "./http";
 
-export type AccountMe = {
+type AccountMe = {
   userID: number;
   nickname: string;
   email: string;
   discordId: string | null;
 };
 
-export type UpdateAccountBody = {
+type UpdateAccountBody = {
   nickname: string;
 };
 

@@ -15,7 +15,7 @@ type ApiCreateRpgTablePayload = {
   message: string;
 };
 
-export function isRpgTableStatus(value: string): value is RpgTableStatus {
+function isRpgTableStatus(value: string): value is RpgTableStatus {
   return value === "OPEN" || value === "CLOSED" || value === "CANCELLED";
 }
 
@@ -37,7 +37,7 @@ function isDungeonMaster(
   );
 }
 
-export function isRpgTableListItem(value: object): value is RpgTableListItem {
+function isRpgTableListItem(value: object): value is RpgTableListItem {
   const record = value as Record<
     string,
     string | number | boolean | object | object[] | null
@@ -97,7 +97,7 @@ export function hasRpgTableBaseFields(value: object): boolean {
   );
 }
 
-export function isRpgTableList(value: object): value is RpgTableListItem[] {
+function isRpgTableList(value: object): value is RpgTableListItem[] {
   return (
     Array.isArray(value) &&
     value.every(

@@ -10,7 +10,7 @@ import {
 import sequelize from "../db";
 import type User from "./User";
 
-export type TableRPGStatus = "OPEN" | "CLOSED" | "CANCELLED";
+type TableRPGStatus = "OPEN" | "CLOSED" | "CANCELLED";
 
 class TableRPG extends Model<
   InferAttributes<
